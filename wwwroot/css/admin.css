@@ -1,0 +1,377 @@
+/* ================================================================
+   admin.css — HutechStore Admin Panel
+   Để đổi theme admin: chỉ cần sửa --admin-* variables bên dưới
+   ================================================================ */
+
+:root {
+  --admin-sidebar-bg: #1a1a2e;
+  --admin-sidebar-width: 240px;
+  --admin-topbar-h: 56px;
+  --admin-accent: #dc3545;
+  --admin-accent-light: rgba(220, 53, 69, 0.12);
+  --admin-text-muted: rgba(255, 255, 255, 0.5);
+  --admin-link: rgba(255, 255, 255, 0.78);
+  --admin-link-hover: #ffffff;
+  --admin-section-label: rgba(255, 255, 255, 0.35);
+}
+
+/* ── LAYOUT ──────────────────────────────────────────────────── */
+html,
+body.admin-body {
+  height: 100%;
+  margin: 0;
+}
+body.admin-body {
+  background: #f0f2f5;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  overflow: hidden; /* Khóa cuộn toàn trang để nhường quyền cuộn cho vùng nội dung chính */
+}
+
+.admin-wrapper {
+  display: flex;
+  height: 100vh; /* Cố định chiều cao toàn khung bằng màn hình */
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────────────── */
+.admin-sidebar {
+  width: var(--admin-sidebar-width);
+  background: var(--admin-sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  transition: width 0.25s ease;
+  z-index: 100;
+}
+.admin-sidebar.collapsed {
+  width: 64px;
+}
+.admin-sidebar.collapsed .sidebar-brand span,
+.admin-sidebar.collapsed .sidebar-section-label,
+.admin-sidebar.collapsed .sidebar-link span {
+  display: none;
+}
+.admin-sidebar.collapsed .sidebar-link {
+  justify-content: center;
+  padding: 0.65rem;
+}
+.admin-sidebar.collapsed .sidebar-link i {
+  margin: 0;
+}
+
+/* Brand */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.25rem 1.25rem 1rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+.sidebar-brand i {
+  color: var(--admin-accent);
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.sidebar-brand span span {
+  color: #ffc107;
+}
+
+/* Nav */
+.sidebar-nav {
+  padding: 0.75rem 0.75rem 2rem;
+  flex: 1;
+}
+.sidebar-section-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--admin-section-label);
+  padding: 0.5rem 0.5rem 0.25rem;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  color: var(--admin-link);
+  text-decoration: none;
+  font-size: 0.88rem;
+  transition: all 0.18s;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.sidebar-link i {
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--admin-link-hover);
+}
+.sidebar-link.active {
+  background: var(--admin-accent-light);
+  color: #fff;
+  border-left: 3px solid var(--admin-accent);
+}
+.text-danger-soft {
+  color: rgba(220, 53, 69, 0.75) !important;
+}
+.text-danger-soft:hover {
+  color: #dc3545 !important;
+  background: rgba(220, 53, 69, 0.08) !important;
+}
+
+/* ── MAIN AREA ───────────────────────────────────────────────── */
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh; /* Đã sửa: Giới hạn chiều cao vùng chính bằng màn hình */
+  overflow-y: auto; /* Đã sửa: Kích hoạt cuộn dọc mượt mà khi danh sách sản phẩm dài ra */
+  overflow-x: hidden;
+}
+
+/* Top bar */
+.admin-topbar {
+  height: var(--admin-topbar-h);
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  flex-shrink: 0;
+}
+.sidebar-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: #555;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.sidebar-toggle-btn:hover {
+  background: #f0f2f5;
+}
+.admin-topbar-title {
+  font-weight: 700;
+  font-size: 1rem;
+  flex: 1;
+}
+.admin-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Content */
+.admin-content {
+  padding: 1.5rem 1.5rem 3rem; /* Đã sửa: Tăng padding-bottom lên 3rem để tạo khoảng trống thoáng dưới chân trang */
+  flex: 1;
+}
+
+/* ── STAT CARDS ──────────────────────────────────────────────── */
+.stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: box-shadow 0.2s;
+}
+.stat-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+.stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.stat-icon.red {
+  background: rgba(220, 53, 69, 0.12);
+  color: #dc3545;
+}
+.stat-icon.blue {
+  background: rgba(13, 110, 253, 0.12);
+  color: #0d6efd;
+}
+.stat-icon.green {
+  background: rgba(25, 135, 84, 0.12);
+  color: #198754;
+}
+.stat-icon.yellow {
+  background: rgba(255, 193, 7, 0.15);
+  color: #d4a000;
+}
+.stat-icon.purple {
+  background: rgba(111, 66, 193, 0.12);
+  color: #6f42c1;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.stat-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+/* ── ADMIN CARD ──────────────────────────────────────────────── */
+.admin-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+}
+.admin-card-header {
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.admin-card-body {
+  padding: 1.25rem;
+}
+
+/* ── ADMIN TABLE ─────────────────────────────────────────────── */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.admin-table th {
+  background: #f8f9fa;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #6c757d;
+  border-bottom: 2px solid #e9ecef;
+  white-space: nowrap;
+}
+.admin-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f5f5f5;
+  vertical-align: middle;
+}
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+.admin-table tr:hover td {
+  background: #fafafa;
+}
+
+/* Product thumb in table */
+.product-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #f8f9fa;
+  padding: 3px;
+  border: 1px solid #eee;
+}
+
+/* Status badges */
+.status-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  display: inline-block;
+}
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+.status-confirmed {
+  background: #cff4fc;
+  color: #0c5460;
+}
+.status-shipping {
+  background: #cce5ff;
+  color: #004085;
+}
+.status-delivered {
+  background: #d4edda;
+  color: #155724;
+}
+.status-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* ── CHARTS ──────────────────────────────────────────────────── */
+.chart-wrap {
+  position: relative;
+  height: 260px;
+}
+
+/* ── ADMIN FORM ──────────────────────────────────────────────── */
+.admin-form-section {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.admin-form-section-title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6c757d;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    position: fixed;
+    left: -var(--admin-sidebar-width);
+    top: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.25s;
+  }
+  .admin-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  .admin-main {
+    margin-left: 0 !important;
+  }
+}

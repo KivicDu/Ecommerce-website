@@ -1,0 +1,254 @@
+@model List<HutechStore.Models.CartItem>
+@{
+  ViewData["Title"] = "Giỏ hàng";
+  var total = Model.Sum(i => i.Quantity * i.Price);
+}
+
+<div class="container py-4">
+  <h2 class="section-title mb-4"><i class="fas fa-shopping-cart me-2"></i>Giỏ hàng của bạn</h2>
+
+  @if (!Model.Any())
+  {
+    <div class="empty-cart text-center py-5">
+      <i class="fas fa-shopping-cart fa-5x text-muted mb-3 d-block"></i>
+      <h4 class="text-muted">Giỏ hàng trống</h4>
+      <p class="text-muted">Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
+      <a asp-controller="Product" asp-action="Index" class="btn btn-danger mt-2">
+        <i class="fas fa-store me-2"></i>Tiếp tục mua sắm
+      </a>
+    </div>
+  }
+  else
+  {
+    <div class="row g-4">
+
+      @* ── CART ITEMS ── *@
+      <div class="col-lg-8">
+        <div class="cart-card">
+          <div class="cart-header">
+            <span>Sản phẩm (@Model.Count)</span>
+            <form asp-action="Clear" method="post">
+              @Html.AntiForgeryToken()
+              <button type="submit" class="btn btn-link text-danger btn-sm p-0"
+                      onclick="return confirm('Xóa toàn bộ giỏ hàng?')">
+                <i class="fas fa-trash me-1"></i>Xóa tất cả
+              </button>
+            </form>
+          </div>
+
+          @foreach (var item in Model)
+          {
+            <div class="cart-item" id="cartItem_@item.Id">
+              @* Ảnh *@
+              <a href="/Product/Detail/@(item.Product?.Slug ?? item.ProductId.ToString())"
+                 class="cart-item-img-wrap">
+                <img src="@(item.Product?.Image ?? "/images/no-image.png")"
+                     alt="@item.Product?.Name"
+                     onerror="this.onerror=null;this.src='/images/no-image.png'"/>
+              </a>
+
+              @* Info *@
+              <div class="cart-item-info">
+                <a href="/Product/Detail/@(item.Product?.Slug ?? item.ProductId.ToString())"
+                   class="cart-item-name">
+                  @item.Product?.Name
+                </a>
+                @if (item.Variant != null)
+                {
+                  <div class="cart-item-variant">
+                    @if (item.Variant.StorageGb > 0) { <span>@item.Variant.StorageGb GB</span> }
+                    @if (!string.IsNullOrEmpty(item.Variant.Color)) { <span>@item.Variant.Color</span> }
+                  </div>
+                }
+                <div class="cart-item-price">@item.Price.ToString("N0")₫ / máy</div>
+              </div>
+
+              @* Qty + Actions *@
+              <div class="cart-item-actions">
+                <div class="qty-wrap-sm">
+                  <button class="qty-btn-sm" onclick="updateQty(@item.Id, -1)">−</button>
+                  <input type="number" class="qty-input-sm" id="qty_@item.Id"
+                         value="@item.Quantity" min="1" max="99"
+                         onchange="updateQtyDirect(@item.Id, this.value)"/>
+                  <button class="qty-btn-sm" onclick="updateQty(@item.Id, 1)">+</button>
+                </div>
+                <div class="cart-item-subtotal" id="subtotal_@item.Id">
+                  @((item.Quantity * item.Price).ToString("N0"))₫
+                </div>
+                <button class="cart-remove-btn" onclick="removeItem(@item.Id)"
+                        title="Xóa">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <a asp-controller="Product" asp-action="Index" class="btn btn-outline-secondary mt-3">
+          <i class="fas fa-arrow-left me-2"></i>Tiếp tục mua sắm
+        </a>
+      </div>
+
+      @* ── ORDER SUMMARY ── *@
+      <div class="col-lg-4">
+        <div class="order-summary">
+          <h5 class="fw-bold mb-3">Tóm tắt đơn hàng</h5>
+
+          <div class="summary-row">
+            <span>Tạm tính</span>
+            <span id="cartTotal">@total.ToString("N0")₫</span>
+          </div>
+          <div class="summary-row" id="discountRow" style="display:none">
+            <span class="text-success">Giảm giá</span>
+            <span class="text-success" id="discountAmount">-0₫</span>
+          </div>
+          <hr/>
+          <div class="summary-row summary-total">
+            <span>Tổng cộng</span>
+            <span id="finalTotal">@total.ToString("N0")₫</span>
+          </div>
+
+          @* Coupon input *@
+          <div class="coupon-wrap mt-3 mb-3">
+            <div class="input-group input-group-sm">
+              <input type="text" id="couponInput" class="form-control"
+                     placeholder="Mã giảm giá..."
+                     value="@ViewBag.CouponCode"/>
+              <button class="btn btn-outline-danger" onclick="applyCoupon()">
+                Áp dụng
+              </button>
+            </div>
+            <div id="couponMsg" class="small mt-1"></div>
+          </div>
+
+          <a asp-action="Checkout" class="btn btn-danger w-100 btn-lg fw-bold">
+            <i class="fas fa-lock me-2"></i>Tiến hành đặt hàng
+          </a>
+
+          @* Payment icons *@
+          <div class="payment-icons mt-3 text-center">
+            <small class="text-muted d-block mb-2">Phương thức thanh toán</small>
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+              <span class="pay-icon">COD</span>
+              <span class="pay-icon">VNPay</span>
+              <span class="pay-icon">MoMo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+</div>
+
+@section Styles {
+<style>
+  .cart-card { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; }
+  .cart-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; background: #f8f9fa; font-weight: 700; border-bottom: 1px solid var(--border-color); }
+  .cart-item { display: flex; gap: 1rem; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid #f0f0f0; transition: background .15s; }
+  .cart-item:last-child { border-bottom: none; }
+  .cart-item:hover { background: #fafafa; }
+  .cart-item-img-wrap { width: 80px; height: 80px; flex-shrink: 0; border-radius: 8px; background: #f8f9fa; border: 1px solid #eee; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .cart-item-img-wrap img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+  .cart-item-info { flex: 1; min-width: 0; }
+  .cart-item-name { font-weight: 600; font-size: .9rem; color: var(--text-main); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-decoration: none; }
+  .cart-item-name:hover { color: var(--primary); }
+  .cart-item-variant { font-size: .78rem; color: var(--text-muted); margin-top: 3px; display: flex; gap: 6px; }
+  .cart-item-variant span { background: #f0f0f0; padding: 1px 8px; border-radius: 10px; }
+  .cart-item-price { font-size: .82rem; color: var(--text-muted); margin-top: 4px; }
+  .cart-item-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+  .qty-wrap-sm { display: flex; align-items: center; border: 1.5px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+  .qty-btn-sm { width: 28px; height: 28px; border: none; background: #f8f9fa; font-size: 1rem; cursor: pointer; transition: background .15s; }
+  .qty-btn-sm:hover { background: #e9ecef; }
+  .qty-input-sm { width: 40px; height: 28px; border: none; text-align: center; font-weight: 600; font-size: .85rem; }
+  .cart-item-subtotal { font-weight: 700; color: var(--primary); font-size: .95rem; }
+  .cart-remove-btn { background: none; border: none; color: #ccc; cursor: pointer; padding: 2px 4px; transition: color .15s; }
+  .cart-remove-btn:hover { color: var(--primary); }
+
+  /* Order summary */
+  .order-summary { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 1.5rem; position: sticky; top: 80px; }
+  .summary-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: .9rem; }
+  .summary-total { font-size: 1.1rem; font-weight: 800; }
+  .summary-total span:last-child { color: var(--primary); }
+  .coupon-wrap {}
+  .pay-icon { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 3px 10px; font-size: .75rem; font-weight: 600; }
+</style>
+}
+
+@section Scripts {
+<script>
+  async function updateQty(itemId, delta) {
+    const input = document.getElementById(`qty_${itemId}`);
+    const newQty = Math.max(1, Math.min(99, parseInt(input.value) + delta));
+    input.value = newQty;
+    await doUpdate(itemId, newQty);
+  }
+
+  async function updateQtyDirect(itemId, val) {
+    const qty = Math.max(1, Math.min(99, parseInt(val) || 1));
+    await doUpdate(itemId, qty);
+  }
+
+  async function doUpdate(itemId, quantity) {
+    try {
+      const res  = await fetch('/Cart/Update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': getAntiForgeryToken() },
+        body: JSON.stringify({ itemId, quantity })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById(`subtotal_${itemId}`).textContent = data.item_total;
+        document.getElementById('cartTotal').textContent  = data.total;
+        document.getElementById('finalTotal').textContent = data.total;
+        updateCartBadge(data.cart_count);
+      }
+    } catch {}
+  }
+
+  async function removeItem(itemId) {
+    try {
+      const res  = await fetch('/Cart/Remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': getAntiForgeryToken() },
+        body: JSON.stringify({ itemId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        const el = document.getElementById(`cartItem_${itemId}`);
+        el.style.opacity = '0';
+        el.style.transition = 'opacity .3s';
+        setTimeout(() => { el.remove(); }, 300);
+        document.getElementById('cartTotal').textContent  = data.total;
+        document.getElementById('finalTotal').textContent = data.total;
+        updateCartBadge(data.cart_count);
+        if (data.cart_count === 0) location.reload();
+      }
+    } catch {}
+  }
+
+  async function applyCoupon() {
+    const code = document.getElementById('couponInput').value.trim();
+    const msg  = document.getElementById('couponMsg');
+    if (!code) { msg.textContent = 'Vui lòng nhập mã coupon'; msg.className = 'small mt-1 text-danger'; return; }
+    try {
+      const res  = await fetch('/Cart/ApplyCoupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': getAntiForgeryToken() },
+        body: JSON.stringify({ code })
+      });
+      const data = await res.json();
+      if (data.success) {
+        msg.textContent = data.message;
+        msg.className   = 'small mt-1 text-success';
+        document.getElementById('discountRow').style.display   = '';
+        document.getElementById('discountAmount').textContent  = '-' + data.discount;
+        document.getElementById('finalTotal').textContent      = data.final_total;
+      } else {
+        msg.textContent = data.message;
+        msg.className   = 'small mt-1 text-danger';
+      }
+    } catch {}
+  }
+</script>
+}

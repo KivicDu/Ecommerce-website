@@ -1,0 +1,154 @@
+@model HutechStore.ViewModels.ProfileViewModel
+@{ ViewData["Title"] = "Tài khoản của tôi"; }
+
+<div class="container py-4">
+  <div class="row g-4">
+
+    @* ── SIDEBAR ── *@
+    <div class="col-md-3">
+      <div class="profile-sidebar">
+        <div class="profile-avatar-wrap text-center mb-3">
+          @if (!string.IsNullOrEmpty(Model.Avatar))
+          {
+            <img src="@Model.Avatar" alt="Avatar" class="profile-avatar"/>
+          }
+          else
+          {
+            <div class="profile-avatar-placeholder">
+              @Model.Name.Substring(0,1).ToUpper()
+            </div>
+          }
+          <div class="fw-bold mt-2">@Model.Name</div>
+          @if (Model.AuthProvider == "google")
+          {
+            <span class="badge bg-light text-muted border mt-1">
+              <svg width="12" height="12" viewBox="0 0 48 48" class="me-1">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              </svg>Google
+            </span>
+          }
+        </div>
+        <nav class="profile-nav">
+          <a href="#info"     class="profile-nav-link active" onclick="showTab('info',this)">
+            <i class="fas fa-user me-2"></i>Thông tin cá nhân
+          </a>
+          <a asp-controller="Order" asp-action="History" class="profile-nav-link">
+            <i class="fas fa-box me-2"></i>Lịch sử đơn hàng
+          </a>
+          <a asp-controller="Wishlist" asp-action="Index" class="profile-nav-link">
+            <i class="fas fa-heart me-2"></i>Sản phẩm yêu thích
+          </a>
+          @if (Model.AuthProvider != "google")
+          {
+            <a href="#password" class="profile-nav-link" onclick="showTab('password',this)">
+              <i class="fas fa-lock me-2"></i>Đổi mật khẩu
+            </a>
+          }
+          <hr/>
+          <a asp-controller="Auth" asp-action="Logout" class="profile-nav-link text-danger">
+            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    @* ── MAIN ── *@
+    <div class="col-md-9">
+
+      @* Tab: Thông tin *@
+      <div id="tab-info">
+        <div class="profile-card">
+          <h5 class="fw-bold mb-4">Thông tin cá nhân</h5>
+          <form asp-action="Index" method="post">
+            @Html.AntiForgeryToken()
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label asp-for="Name" class="form-label fw-semibold">Họ và tên</label>
+                <input asp-for="Name" class="form-control"/>
+                <span asp-validation-for="Name" class="text-danger small"></span>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Email</label>
+                <input type="text" class="form-control"
+                       value="@Context.Session.GetString("UserEmail")"
+                       readonly style="background:#f8f9fa"/>
+                <div class="small text-muted mt-1">Email không thể thay đổi</div>
+              </div>
+              <div class="col-md-6">
+                <label asp-for="Phone" class="form-label fw-semibold">Số điện thoại</label>
+                <input asp-for="Phone" class="form-control" placeholder="0901234567"/>
+              </div>
+              <div class="col-12">
+                <label asp-for="Address" class="form-label fw-semibold">Địa chỉ</label>
+                <input asp-for="Address" class="form-control" placeholder="Địa chỉ giao hàng mặc định"/>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-danger mt-4">
+              <i class="fas fa-save me-2"></i>Lưu thay đổi
+            </button>
+          </form>
+        </div>
+      </div>
+
+      @* Tab: Đổi mật khẩu *@
+      @if (Model.AuthProvider != "google")
+      {
+        <div id="tab-password" class="d-none">
+          <div class="profile-card">
+            <h5 class="fw-bold mb-4">Đổi mật khẩu</h5>
+            <form asp-action="ChangePassword" method="post">
+              @Html.AntiForgeryToken()
+              <div class="col-md-7 d-flex flex-column gap-3">
+                <div>
+                  <label class="form-label fw-semibold">Mật khẩu hiện tại</label>
+                  <input type="password" name="OldPassword" class="form-control" placeholder="••••••••"/>
+                </div>
+                <div>
+                  <label class="form-label fw-semibold">Mật khẩu mới</label>
+                  <input type="password" name="NewPassword" class="form-control" placeholder="Tối thiểu 6 ký tự"/>
+                </div>
+                <div>
+                  <label class="form-label fw-semibold">Nhập lại mật khẩu mới</label>
+                  <input type="password" name="ConfirmPassword" class="form-control" placeholder="••••••••"/>
+                </div>
+                <div>
+                  <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-key me-2"></i>Đổi mật khẩu
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>
+
+@section Styles {
+<style>
+  .profile-sidebar { background:#fff; border-radius:12px; border:1px solid var(--border-color); padding:1.5rem; position:sticky; top:80px; }
+  .profile-avatar { width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid var(--border-color); }
+  .profile-avatar-placeholder { width:80px; height:80px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:800; margin:0 auto; }
+  .profile-nav { display:flex; flex-direction:column; gap:2px; margin-top:.5rem; }
+  .profile-nav-link { padding:.6rem .75rem; border-radius:8px; color:var(--text-main); font-size:.9rem; transition:all .2s; text-decoration:none; display:flex; align-items:center; }
+  .profile-nav-link:hover, .profile-nav-link.active { background:var(--primary-light); color:var(--primary); }
+  .profile-card { background:#fff; border-radius:12px; border:1px solid var(--border-color); padding:1.75rem; }
+</style>
+}
+
+@section Scripts {
+<script>
+  function showTab(name, link) {
+    document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.add('d-none'));
+    document.getElementById('tab-' + name)?.classList.remove('d-none');
+    document.querySelectorAll('.profile-nav-link').forEach(l => l.classList.remove('active'));
+    link?.classList.add('active');
+    return false;
+  }
+</script>
+}

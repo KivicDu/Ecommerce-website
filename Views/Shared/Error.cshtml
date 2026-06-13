@@ -1,0 +1,24 @@
+@model HutechStore.Models.ErrorViewModel
+@{ ViewData["Title"] = "Lỗi"; }
+
+<div class="container py-5 text-center">
+  <div class="error-page">
+    <div class="error-code">500</div>
+    <h3 class="fw-bold mt-3">Đã xảy ra lỗi</h3>
+    <p class="text-muted">Xin lỗi vì sự cố này. Vui lòng thử lại hoặc liên hệ hỗ trợ.</p>
+    @if (Model.ShowRequestId)
+    {
+      <p class="text-muted small"><code>Request ID: @Model.RequestId</code></p>
+    }
+    <a asp-controller="Home" asp-action="Index" class="btn btn-danger mt-2">
+      <i class="fas fa-home me-2"></i>Về trang chủ
+    </a>
+  </div>
+</div>
+
+@section Styles {
+<style>
+  .error-page { max-width:400px; margin:0 auto; }
+  .error-code { font-size:6rem; font-weight:900; color:var(--primary); opacity:.15; line-height:1; }
+</style>
+}

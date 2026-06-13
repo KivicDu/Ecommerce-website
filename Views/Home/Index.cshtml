@@ -1,0 +1,221 @@
+@{
+  ViewData["Title"] = "Trang chủ";
+  var featured  = ViewBag.Featured  as List<HutechStore.Models.Product> ?? new();
+  var iphones   = ViewBag.IPhones   as List<HutechStore.Models.Product> ?? new();
+  var samsungs  = ViewBag.Samsungs  as List<HutechStore.Models.Product> ?? new();
+}
+
+@* ── HERO BANNER ── *@
+<section class="hero-banner">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <div class="hero-content">
+          <span class="hero-eyebrow">Mới nhất 2025 – 2026</span>
+          <h1 class="hero-title">
+            iPhone & Samsung<br/>
+            <span class="text-warning">Chính hãng · Giá tốt</span>
+          </h1>
+          <p class="hero-subtitle">
+            Khám phá bộ sưu tập điện thoại mới nhất. Tư vấn AI 24/7 giúp bạn
+            chọn máy phù hợp nhất với nhu cầu và ngân sách.
+          </p>
+          <div class="hero-actions">
+            <a asp-controller="Product" asp-action="Index" class="btn btn-light btn-lg fw-bold me-3">
+              <i class="fas fa-store me-2"></i>Mua ngay
+            </a>
+            <button class="btn btn-outline-light btn-lg" onclick="toggleChat()">
+              <i class="fas fa-robot me-2"></i>Tư vấn AI
+            </button>
+          </div>
+          <div class="hero-stats mt-4">
+            <div class="hero-stat"><span class="stat-num">17+</span><span class="stat-label">Dòng máy</span></div>
+            <div class="hero-stat"><span class="stat-num">100%</span><span class="stat-label">Chính hãng</span></div>
+            <div class="hero-stat"><span class="stat-num">12T</span><span class="stat-label">Bảo hành</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center d-none d-lg-block">
+        <div class="hero-phone-stack">
+          <i class="fab fa-apple hero-brand-icon" style="font-size:8rem;color:rgba(255,255,255,.15)"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+@* ── FEATURE HIGHLIGHTS ── *@
+<section class="py-3 bg-white border-bottom">
+  <div class="container">
+    <div class="row g-2 text-center">
+      <div class="col-6 col-md-3">
+        <div class="highlight-item">
+          <i class="fas fa-truck text-success"></i>
+          <span>Ship miễn phí từ 5tr</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="highlight-item">
+          <i class="fas fa-shield-alt text-primary"></i>
+          <span>BH chính hãng 12T</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="highlight-item">
+          <i class="fas fa-undo text-warning"></i>
+          <span>Đổi trả 30 ngày</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="highlight-item">
+          <i class="fas fa-robot text-danger"></i>
+          <span>AI tư vấn 24/7</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+@* ── FEATURED PRODUCTS ── *@
+@if (featured.Any())
+{
+  <section class="py-5">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title mb-0">Sản phẩm nổi bật</h2>
+        <a asp-controller="Product" asp-action="Index" class="btn btn-outline-danger btn-sm">
+          Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
+        </a>
+      </div>
+      <div class="row g-3">
+        @foreach (var p in featured)
+        {
+          <div class="col-6 col-md-4 col-lg-3">
+            @await Html.PartialAsync("_ProductCard", p)
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+@* ── AI ADVISOR BANNER ── *@
+<section class="ai-banner py-5">
+  <div class="container">
+    <div class="ai-banner-card">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="ai-banner-icon"><i class="fas fa-robot"></i></div>
+            <div>
+              <h3 class="mb-0 fw-bold">AI Tư vấn điện thoại</h3>
+              <p class="mb-0 text-muted small">Powered by Gemini AI · Dữ liệu thực từ cửa hàng</p>
+            </div>
+          </div>
+          <p class="mb-3">
+            Chưa biết chọn máy nào? AI của chúng tôi hiểu <strong>dữ liệu thực</strong>
+            của từng sản phẩm — từ cấu hình chip, camera, pin đến giá tiền —
+            để tư vấn chiếc điện thoại phù hợp <strong>nhất với bạn</strong>.
+          </p>
+          <div class="ai-chips">
+            <span class="ai-chip" onclick="openChatWith(this)">🎮 Chơi game dưới 15tr</span>
+            <span class="ai-chip" onclick="openChatWith(this)">📸 Chụp ảnh đẹp nhất</span>
+            <span class="ai-chip" onclick="openChatWith(this)">💰 Tầm 20-25 triệu</span>
+            <span class="ai-chip" onclick="openChatWith(this)">⚖️ So sánh iPhone vs Samsung</span>
+          </div>
+        </div>
+        <div class="col-lg-4 text-center mt-3 mt-lg-0">
+          <button class="btn btn-danger btn-lg fw-bold px-4" onclick="toggleChat()">
+            <i class="fas fa-comments me-2"></i>Chat ngay với AI
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+@* ── IPHONE SECTION ── *@
+@if (iphones.Any())
+{
+  <section class="py-5 bg-white">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title mb-0"><i class="fab fa-apple me-2"></i>iPhone</h2>
+        <a asp-controller="Product" asp-action="Index" asp-route-Brand="Apple"
+           class="btn btn-outline-secondary btn-sm">
+          Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
+        </a>
+      </div>
+      <div class="row g-3">
+        @foreach (var p in iphones)
+        {
+          <div class="col-6 col-md-4 col-lg-3">
+            @await Html.PartialAsync("_ProductCard", p)
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+@* ── SAMSUNG SECTION ── *@
+@if (samsungs.Any())
+{
+  <section class="py-5">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title mb-0"><i class="fas fa-mobile-alt me-2"></i>Samsung Galaxy</h2>
+        <a asp-controller="Product" asp-action="Index" asp-route-Brand="Samsung"
+           class="btn btn-outline-secondary btn-sm">
+          Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
+        </a>
+      </div>
+      <div class="row g-3">
+        @foreach (var p in samsungs)
+        {
+          <div class="col-6 col-md-4 col-lg-3">
+            @await Html.PartialAsync("_ProductCard", p)
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+@section Styles {
+<style>
+  /* Hero */
+  .hero-eyebrow { background: rgba(255,255,255,.15); color: #fff; padding: 4px 14px; border-radius: 20px; font-size: .8rem; font-weight: 600; letter-spacing: .5px; display: inline-block; margin-bottom: .75rem; }
+  .hero-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.2; margin-bottom: 1rem; }
+  .hero-subtitle { font-size: 1rem; opacity: .85; max-width: 500px; margin-bottom: 1.5rem; }
+  .hero-stats { display: flex; gap: 2rem; }
+  .hero-stat { text-align: center; }
+  .stat-num { display: block; font-size: 1.5rem; font-weight: 800; color: #fff; }
+  .stat-label { font-size: .75rem; opacity: .75; }
+
+  /* Highlight row */
+  .highlight-item { display: flex; align-items: center; justify-content: center; gap: .5rem; font-size: .85rem; font-weight: 500; padding: .5rem; }
+  .highlight-item i { font-size: 1.1rem; }
+
+  /* AI Banner */
+  .ai-banner { background: linear-gradient(135deg, #fff5f5 0%, #fff 100%); }
+  .ai-banner-card { background: #fff; border-radius: 16px; padding: 2rem; border: 1px solid var(--primary-light); box-shadow: 0 4px 20px rgba(220,53,69,.08); }
+  .ai-banner-icon { width: 56px; height: 56px; border-radius: 14px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+  .ai-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .ai-chip { background: var(--primary-light); color: var(--primary); padding: 6px 14px; border-radius: 20px; font-size: .83rem; font-weight: 600; cursor: pointer; transition: all .2s; border: 1.5px solid transparent; }
+  .ai-chip:hover { background: var(--primary); color: #fff; }
+</style>
+}
+
+@section Scripts {
+<script>
+  function openChatWith(chip) {
+    const text = chip.textContent.trim();
+    if (!chatOpen) toggleChat();
+    setTimeout(() => {
+      const input = document.getElementById('chatInput');
+      if (input) { input.value = text; sendMessage(); }
+    }, 300);
+  }
+</script>
+}

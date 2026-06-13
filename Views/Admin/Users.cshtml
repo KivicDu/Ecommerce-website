@@ -1,0 +1,97 @@
+@* ================================================================
+   Views/Admin/Users.cshtml
+   ================================================================ *@
+@model List<HutechStore.Models.User>
+@{
+  ViewData["Title"] = "Khách hàng";
+  Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div class="text-muted small">Tổng: <strong>@ViewBag.Total</strong> khách hàng</div>
+  <form method="get" class="d-flex gap-2">
+    <input type="text" name="search" class="form-control form-control-sm"
+           placeholder="Tìm tên / email..." value="@ViewBag.Search" style="max-width:240px"/>
+    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-search"></i></button>
+  </form>
+</div>
+
+<div class="admin-card">
+  <div class="table-responsive">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Avatar</th>
+          <th>Họ tên</th>
+          <th>Email</th>
+          <th>SĐT</th>
+          <th>Đăng nhập qua</th>
+          <th>Vai trò</th>
+          <th>Ngày đăng ký</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach (var u in Model)
+        {
+          <tr>
+            <td class="text-muted small">@u.Id</td>
+            <td>
+              @if (!string.IsNullOrEmpty(u.Avatar))
+              {
+                <img src="@u.Avatar" style="width:32px;height:32px;border-radius:50%;object-fit:cover"/>
+              }
+              else
+              {
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--admin-accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700">
+                  @u.Name.Substring(0,1).ToUpper()
+                </div>
+              }
+            </td>
+            <td class="fw-semibold">@u.Name</td>
+            <td class="text-muted small">@u.Email</td>
+            <td class="small">@(u.Phone ?? "-")</td>
+            <td>
+              @if (u.AuthProvider == "google")
+              {
+                <span class="badge bg-light text-dark border"><i class="fab fa-google text-danger me-1"></i>Google</span>
+              }
+              else
+              {
+                <span class="badge bg-secondary">Email</span>
+              }
+            </td>
+            <td>
+              @if (u.Role == "admin")
+              {
+                <span class="badge bg-danger">Admin</span>
+              }
+              else
+              {
+                <span class="badge bg-success">User</span>
+              }
+            </td>
+            <td class="text-muted small">@u.CreatedAt.ToString("dd/MM/yyyy")</td>
+          </tr>
+        }
+        @if (!Model.Any())
+        {
+          <tr><td colspan="8" class="text-center text-muted py-4">Không tìm thấy</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if ((int)ViewBag.TotalPages > 1)
+  {
+    <div class="p-3 border-top">
+      <nav><ul class="pagination pagination-sm justify-content-center mb-0">
+        @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
+        {
+          <li class="page-item @(i == (int)ViewBag.Page ? "active" : "")">
+            <a class="page-link" href="?page=@i&search=@ViewBag.Search">@i</a>
+          </li>
+        }
+      </ul></nav>
+    </div>
+  }
+</div>

@@ -1,0 +1,97 @@
+@{ ViewData["Title"] = "Liên hệ"; }
+
+<div class="container py-5">
+  <div class="row g-5">
+    <div class="col-lg-5">
+      <h2 class="section-title">Liên hệ với chúng tôi</h2>
+      <p class="text-muted mb-4">Đội ngũ của chúng tôi luôn sẵn sàng hỗ trợ bạn. Hoặc chat trực tiếp với AI tư vấn!</p>
+      <div class="contact-info-list">
+        <div class="contact-info-item">
+          <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <div>
+            <div class="fw-semibold">Địa chỉ</div>
+            <div class="text-muted small">475A Điện Biên Phủ, P.25, Q.Bình Thạnh, TP.HCM</div>
+          </div>
+        </div>
+        <div class="contact-info-item">
+          <div class="contact-icon"><i class="fas fa-phone"></i></div>
+          <div>
+            <div class="fw-semibold">Hotline</div>
+            <div class="text-muted small"><a href="tel:19001234">1900 1234</a> — 7:30 đến 22:00 hàng ngày</div>
+          </div>
+        </div>
+        <div class="contact-info-item">
+          <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+          <div>
+            <div class="fw-semibold">Email</div>
+            <div class="text-muted small"><a href="mailto:info@hutechstore.com">info@hutechstore.com</a></div>
+          </div>
+        </div>
+        <div class="contact-info-item">
+          <div class="contact-icon"><i class="fas fa-robot"></i></div>
+          <div>
+            <div class="fw-semibold">AI Tư vấn</div>
+            <div class="text-muted small">
+              Chat ngay với AI —
+              <button onclick="toggleChat()" class="btn btn-link btn-sm p-0 text-danger fw-semibold">
+                Mở chat
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="contact-form-card">
+        <h5 class="fw-bold mb-4">Gửi tin nhắn</h5>
+        <div id="contactSuccess" class="alert alert-success d-none">
+          <i class="fas fa-check-circle me-2"></i>Cảm ơn! Chúng tôi sẽ liên hệ lại sớm nhất.
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Họ tên</label>
+            <input type="text" class="form-control" id="cName" placeholder="Nguyễn Văn A"/>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Email</label>
+            <input type="email" class="form-control" id="cEmail" placeholder="your@email.com"/>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Tiêu đề</label>
+            <input type="text" class="form-control" id="cSubject" placeholder="Tôi muốn hỏi về..."/>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Nội dung</label>
+            <textarea class="form-control" id="cMessage" rows="4" placeholder="Nội dung tin nhắn..."></textarea>
+          </div>
+          <div class="col-12">
+            <button class="btn btn-danger px-4 fw-bold" onclick="submitContact()">
+              <i class="fas fa-paper-plane me-2"></i>Gửi tin nhắn
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Styles {
+<style>
+  .contact-info-list { display:flex; flex-direction:column; gap:1rem; }
+  .contact-info-item { display:flex; align-items:flex-start; gap:1rem; }
+  .contact-icon { width:44px; height:44px; border-radius:10px; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1rem; }
+  .contact-form-card { background:#fff; border-radius:16px; border:1px solid var(--border-color); padding:2rem; box-shadow:0 4px 20px rgba(0,0,0,.06); }
+</style>
+}
+
+@section Scripts {
+<script>
+  function submitContact() {
+    const name = document.getElementById('cName').value.trim();
+    const msg  = document.getElementById('cMessage').value.trim();
+    if (!name || !msg) { showToast('Vui lòng điền đầy đủ thông tin', 'error'); return; }
+    document.getElementById('contactSuccess').classList.remove('d-none');
+    ['cName','cEmail','cSubject','cMessage'].forEach(id => document.getElementById(id).value = '');
+  }
+</script>
+}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>@ViewData["Title"] - Admin | HutechStore</title>
+  <link rel="stylesheet" href="~/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="~/css/fontawesome.min.css"/>
+  <link rel="stylesheet" href="~/css/site.css"/>
+  <link rel="stylesheet" href="~/css/admin.css"/>
+  @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="admin-body">
+
+<div class="admin-wrapper">
+
+  @* ── SIDEBAR ── *@
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-brand">
+      <i class="fas fa-mobile-alt"></i>
+      <span>Hutech<span>Store</span></span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Tổng quan</div>
+      <a asp-controller="Admin" asp-action="Index"
+         class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString()=="Index"?"active":"")">
+        <i class="fas fa-chart-line"></i> Dashboard
+      </a>
+
+      <div class="sidebar-section-label mt-3">Quản lý</div>
+      <a asp-controller="Admin" asp-action="Products"
+         class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString()?.StartsWith("Product")??false?"active":"")">
+        <i class="fas fa-mobile-alt"></i> Sản phẩm
+      </a>
+      <a asp-controller="Admin" asp-action="Orders"
+         class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString()=="Orders"?"active":"")">
+        <i class="fas fa-box"></i> Đơn hàng
+      </a>
+      <a asp-controller="Admin" asp-action="Users"
+         class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString()=="Users"?"active":"")">
+        <i class="fas fa-users"></i> Khách hàng
+      </a>
+      <a asp-controller="Admin" asp-action="Categories"
+         class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString()=="Categories"?"active":"")">
+        <i class="fas fa-tags"></i> Danh mục
+      </a>
+      <a asp-controller="Admin" asp-action="Coupons"
+         class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString()=="Coupons"?"active":"")">
+        <i class="fas fa-ticket-alt"></i> Coupon
+      </a>
+      <a asp-controller="Admin" asp-action="Reviews"
+         class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString()=="Reviews"?"active":"")">
+        <i class="fas fa-star"></i> Đánh giá
+      </a>
+
+      <div class="sidebar-section-label mt-3">Hệ thống</div>
+      <a asp-controller="Home" asp-action="Index" class="sidebar-link" target="_blank">
+        <i class="fas fa-store"></i> Xem cửa hàng
+      </a>
+      <a asp-controller="Auth" asp-action="Logout" class="sidebar-link text-danger-soft">
+        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+      </a>
+    </nav>
+  </aside>
+
+  @* ── MAIN ── *@
+  <div class="admin-main">
+
+    @* Top bar *@
+    <header class="admin-topbar">
+      <button class="sidebar-toggle-btn" onclick="toggleAdminSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="admin-topbar-title">@ViewData["Title"]</div>
+      <div class="admin-topbar-right">
+        <span class="text-muted small me-2">
+          <i class="fas fa-user-shield me-1"></i>
+          @Context.Session.GetString("UserName")
+        </span>
+      </div>
+    </header>
+
+    @* Flash messages *@
+    @if (TempData["Success"] != null || TempData["Error"] != null)
+    {
+      <div class="px-4 pt-3">
+        @if (TempData["Success"] != null)
+        {
+          <div class="alert alert-success alert-dismissible fade show py-2">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+          <div class="alert alert-danger alert-dismissible fade show py-2">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        }
+      </div>
+    }
+
+    @* Content *@
+    <div class="admin-content">@RenderBody()</div>
+  </div>
+</div>
+
+<script src="~/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js"></script>
+<script>
+  function toggleAdminSidebar() {
+    document.getElementById('adminSidebar').classList.toggle('collapsed');
+  }
+</script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,210 @@
+@* ════════════════════════════════════════════════════════════════
+   _Header.cshtml  — Thanh điều hướng chính
+   Để thay đổi màu sắc: sửa class "navbar-custom" trong site.css
+   Để thêm menu item: thêm <li> vào #mainNav
+   ════════════════════════════════════════════════════════════════ *@
+
+@{
+  var userId   = Context.Session.GetInt32("UserId");
+  var userName = Context.Session.GetString("UserName") ?? "";
+  var userRole = Context.Session.GetString("UserRole") ?? "";
+  var avatar   = Context.Session.GetString("UserAvatar") ?? "";
+  var cartCount = Context.Session.GetInt32("CartCount") ?? 0;
+  var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+}
+
+<header class="site-header sticky-top shadow-sm">
+  <nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container">
+
+      @* ── LOGO ── *@
+      <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+        <div class="brand-logo">
+          <i class="fas fa-mobile-alt brand-icon"></i>
+          <span class="brand-text">Hutech<span class="brand-accent">Store</span></span>
+        </div>
+      </a>
+
+      @* ── MOBILE TOGGLE ── *@
+      <button class="navbar-toggler" type="button"
+              data-bs-toggle="collapse" data-bs-target="#navMenu"
+              aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMenu">
+
+        @* ── MAIN NAV LINKS ── *@
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="mainNav">
+          <li class="nav-item">
+            <a class="nav-link @(currentController=="Home"?"active":"")"
+               asp-controller="Home" asp-action="Index">
+              <i class="fas fa-home me-1"></i>Trang chủ
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle @(currentController=="Product"?"active":"")"
+               href="#" data-bs-toggle="dropdown">
+              <i class="fas fa-mobile-alt me-1"></i>Sản phẩm
+            </a>
+            <ul class="dropdown-menu dropdown-menu-product">
+              <li>
+                <a class="dropdown-item" asp-controller="Product" asp-action="Index">
+                  <i class="fas fa-th me-2 text-danger"></i>Tất cả điện thoại
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"/></li>
+              <li class="dropdown-header"><i class="fab fa-apple me-1"></i>Apple iPhone</li>
+              <li>
+                <a class="dropdown-item" asp-controller="Product" asp-action="Index"
+                   asp-route-brand="Apple">
+                  Xem tất cả iPhone →
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"/></li>
+              <li class="dropdown-header"><i class="fas fa-tablet-alt me-1"></i>Samsung Galaxy</li>
+              <li>
+                <a class="dropdown-item" asp-controller="Product" asp-action="Index"
+                   asp-route-brand="Samsung">
+                  Xem tất cả Samsung →
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" asp-controller="Home" asp-action="About">
+              <i class="fas fa-store me-1"></i>Về chúng tôi
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" asp-controller="Home" asp-action="Contact">
+              <i class="fas fa-envelope me-1"></i>Liên hệ
+            </a>
+          </li>
+        </ul>
+
+        @* ── SEARCH BAR ── *@
+        <form class="d-flex me-3 search-form" asp-controller="Product" asp-action="Index" method="get">
+          <div class="input-group input-group-sm search-group">
+            <input type="text" name="search" class="form-control search-input"
+                   placeholder="Tìm iPhone, Samsung..."
+                   value="@Context.Request.Query["search"]"/>
+            <button class="btn btn-search" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </form>
+
+        @* ── USER ACTIONS ── *@
+        <ul class="navbar-nav align-items-center gap-1">
+
+          @* Wishlist *@
+          @if (userId.HasValue)
+          {
+            <li class="nav-item">
+              <a class="nav-link icon-btn" asp-controller="Wishlist" asp-action="Index"
+                 data-bs-toggle="tooltip" title="Yêu thích">
+                <i class="fas fa-heart"></i>
+              </a>
+            </li>
+          }
+
+          @* Cart *@
+          <li class="nav-item">
+            <a class="nav-link icon-btn position-relative" asp-controller="Cart" asp-action="Index">
+              <i class="fas fa-shopping-cart"></i>
+              @if (cartCount > 0)
+              {
+                <span class="cart-badge">@cartCount</span>
+              }
+            </a>
+          </li>
+
+          @* User menu *@
+          @if (userId.HasValue)
+          {
+            <li class="nav-item dropdown">
+              <a class="nav-link user-menu-toggle dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                @if (!string.IsNullOrEmpty(avatar))
+                {
+                  <img src="@avatar" alt="@userName" class="user-avatar-sm"/>
+                }
+                else
+                {
+                  <span class="user-avatar-placeholder">
+                    @userName.Substring(0, 1).ToUpper()
+                  </span>
+                }
+                <span class="d-none d-lg-inline ms-1 user-name-truncate">@userName</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-user">
+                <li class="dropdown-header user-info-header">
+                  <div class="fw-bold">@userName</div>
+                  <div class="small text-muted">@Context.Session.GetString("UserEmail")</div>
+                </li>
+                <li><hr class="dropdown-divider"/></li>
+                <li>
+                  <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
+                    <i class="fas fa-user me-2"></i>Tài khoản của tôi
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" asp-controller="Order" asp-action="History">
+                    <i class="fas fa-box me-2"></i>Lịch sử đơn hàng
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" asp-controller="Wishlist" asp-action="Index">
+                    <i class="fas fa-heart me-2"></i>Sản phẩm yêu thích
+                  </a>
+                </li>
+                @if (userRole == "admin")
+                {
+                  <li><hr class="dropdown-divider"/></li>
+                  <li>
+                    <a class="dropdown-item text-danger fw-bold" asp-controller="Admin" asp-action="Index">
+                      <i class="fas fa-cog me-2"></i>Quản trị hệ thống
+                    </a>
+                  </li>
+                }
+                <li><hr class="dropdown-divider"/></li>
+                <li>
+                  <a class="dropdown-item text-muted" asp-controller="Auth" asp-action="Logout">
+                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                  </a>
+                </li>
+              </ul>
+            </li>
+          }
+          else
+          {
+            <li class="nav-item">
+              <a class="nav-link" asp-controller="Auth" asp-action="Login">
+                <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="btn btn-register btn-sm"
+                 asp-controller="Auth" asp-action="Register">
+                Đăng ký
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  @* ── PROMO BAR ── nếu muốn ẩn, xóa block này *@
+  <div class="promo-bar">
+    <div class="container text-center">
+      <small>
+        <i class="fas fa-truck me-1"></i>Miễn phí vận chuyển đơn từ 5 triệu
+        <span class="mx-3">|</span>
+        <i class="fas fa-shield-alt me-1"></i>Bảo hành chính hãng 12 tháng
+        <span class="mx-3">|</span>
+        <i class="fas fa-undo me-1"></i>Đổi trả 30 ngày
+      </small>
+    </div>
+  </div>
+</header>

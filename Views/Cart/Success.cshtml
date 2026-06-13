@@ -1,0 +1,403 @@
+@model HutechStore.Models.Order
+@{
+  ViewData["Title"] = "Đặt hàng thành công";
+  var isBankTransfer = Model.PaymentMethod == "bank_transfer";
+  var bankCode      = (string)(ViewBag.BankCode      ?? "MB");
+  var accountNumber = (string)(ViewBag.AccountNumber ?? "0123456789");
+  var accountName   = (string)(ViewBag.AccountName   ?? "HUTECH STORE");
+  var bankTemplate  = (string)(ViewBag.BankTemplate  ?? "compact");
+  var amountInt     = (long)Model.TotalAmount;
+  var addInfo       = Uri.EscapeDataString("Thanh toan don hang " + Model.OrderNumber);
+  var qrUrl = $"https://img.vietqr.io/image/{bankCode}-{accountNumber}-{bankTemplate}.png?amount={amountInt}&addInfo={addInfo}&accountName={Uri.EscapeDataString(accountName)}";
+}
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-@(isBankTransfer ? "10" : "7")">
+
+      @if (isBankTransfer)
+      {
+        @* ── LAYOUT 2 CỘT CHO CHUYỂN KHOẢN ── *@
+        <div class="row g-4">
+
+          @* Cột trái: Chi tiết đơn hàng *@
+          <div class="col-lg-6">
+            <div class="success-card">
+              <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+              <h2 class="fw-bold mt-3 mb-1">Đặt hàng thành công!</h2>
+              <p class="text-muted mb-4">Vui lòng chuyển khoản để hoàn tất đơn hàng.</p>
+
+              <div class="order-info-box mb-4">
+                <div class="order-info-row">
+                  <span>Mã đơn hàng</span>
+                  <span class="fw-bold text-danger">#@Model.OrderNumber</span>
+                </div>
+                <div class="order-info-row">
+                  <span>Ngày đặt</span>
+                  <span>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+                <div class="order-info-row">
+                  <span>Người nhận</span>
+                  <span>@Model.ShippingName</span>
+                </div>
+                <div class="order-info-row">
+                  <span>Điện thoại</span>
+                  <span>@Model.ShippingPhone</span>
+                </div>
+                <div class="order-info-row">
+                  <span>Địa chỉ</span>
+                  <span>@Model.ShippingAddress</span>
+                </div>
+                <div class="order-info-row">
+                  <span>Thanh toán</span>
+                  <span class="text-warning fw-semibold"><i class="fas fa-clock me-1"></i>Chờ chuyển khoản</span>
+                </div>
+              </div>
+
+              @* Items *@
+              <div class="order-items-list mb-3">
+                <div class="fw-bold mb-2 text-start small text-uppercase text-muted">Chi tiết đơn hàng</div>
+                @foreach (var item in Model.OrderItems)
+                {
+                  <div class="success-item">
+                    <img src="@(item.Product?.Image ?? "/images/no-image.png")"
+                         alt="@item.ProductName"
+                         onerror="this.onerror=null;this.src='/images/no-image.png'"/>
+                    <div class="success-item-info">
+                      <div class="fw-semibold small">@item.ProductName</div>
+                      <div class="text-muted" style="font-size:.78rem">x@item.Quantity · @item.Price.ToString("N0")₫/máy</div>
+                    </div>
+                    <div class="fw-bold text-danger small">@item.Total.ToString("N0")₫</div>
+                  </div>
+                }
+                <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2">
+                  <span>Tổng cộng</span>
+                  <span class="text-danger">@Model.TotalAmount.ToString("N0")₫</span>
+                </div>
+              </div>
+
+              <div class="d-grid gap-2">
+                <a asp-controller="Order" asp-action="History" class="btn btn-outline-danger btn-sm">
+                  <i class="fas fa-list me-2"></i>Lịch sử đơn hàng
+                </a>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                  <i class="fas fa-store me-2"></i>Tiếp tục mua sắm
+                </a>
+              </div>
+            </div>
+          </div>
+
+          @* Cột phải: QR Code thanh toán *@
+          <div class="col-lg-6">
+            <div class="qr-payment-card">
+              <div class="qr-card-header">
+                <i class="fas fa-mobile-alt me-2"></i>Quét QR để thanh toán
+              </div>
+
+              <div class="qr-amount-display">
+                <div class="small text-muted mb-1">Số tiền cần chuyển</div>
+                <div class="qr-amount">@Model.TotalAmount.ToString("N0")₫</div>
+              </div>
+
+              <div class="qr-image-wrap">
+                <img src="@qrUrl"
+                     alt="QR Code thanh toán"
+                     class="qr-image"
+                     onerror="this.onerror=null;this.src='';this.parentElement.innerHTML='<div class=\'qr-error\'><i class=\'fas fa-exclamation-triangle fa-2x text-warning mb-2\'></i><div class=\'small\'>Không tải được QR. Vui lòng dùng thông tin chuyển khoản bên dưới.</div></div>'"/>
+                <div class="qr-scan-hint"><i class="fas fa-camera me-1"></i>Dùng app ngân hàng để quét</div>
+              </div>
+
+              <div class="qr-bank-info">
+                <div class="bank-info-row">
+                  <span class="bank-info-label"><i class="fas fa-university me-1"></i>Ngân hàng</span>
+                  <span class="bank-info-val fw-bold">@bankCode</span>
+                </div>
+                <div class="bank-info-row">
+                  <span class="bank-info-label"><i class="fas fa-hashtag me-1"></i>Số tài khoản</span>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="bank-info-val fw-bold font-monospace" id="accNum">@accountNumber</span>
+                    <button type="button" class="btn btn-outline-secondary btn-xs copy-btn" onclick="copyText('@accountNumber', this)" title="Sao chép">
+                      <i class="fas fa-copy fa-xs"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="bank-info-row">
+                  <span class="bank-info-label"><i class="fas fa-user me-1"></i>Chủ tài khoản</span>
+                  <span class="bank-info-val fw-bold text-uppercase">@accountName</span>
+                </div>
+                <div class="bank-info-row">
+                  <span class="bank-info-label"><i class="fas fa-money-bill me-1"></i>Số tiền</span>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="bank-info-val fw-bold text-danger">@Model.TotalAmount.ToString("N0")₫</span>
+                    <button type="button" class="btn btn-outline-secondary btn-xs copy-btn" onclick="copyText('@amountInt', this)" title="Sao chép">
+                      <i class="fas fa-copy fa-xs"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="bank-info-row">
+                  <span class="bank-info-label"><i class="fas fa-comment me-1"></i>Nội dung CK</span>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="bank-info-val fw-semibold text-primary font-monospace" id="transferContent">@Model.OrderNumber</span>
+                    <button type="button" class="btn btn-outline-secondary btn-xs copy-btn" onclick="copyText('@Model.OrderNumber', this)" title="Sao chép">
+                      <i class="fas fa-copy fa-xs"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="qr-notice">
+                <i class="fas fa-info-circle text-primary me-2"></i>
+                <div class="small">
+                  Nhập <strong>đúng nội dung chuyển khoản</strong> để đơn hàng được xác nhận tự động.
+                  Sau khi chuyển, đơn sẽ được xác nhận trong vòng <strong>15 phút</strong>.
+                </div>
+              </div>
+
+              @* ── Trạng thái thanh toán realtime ── *@
+              <div id="paymentStatusBox" class="payment-status-box mt-3">
+                <div id="statusWaiting" class="status-waiting">
+                  <span class="spinner-border spinner-border-sm text-warning me-2" role="status"></span>
+                  <span>Đang chờ xác nhận chuyển khoản...</span>
+                </div>
+                <div id="statusTimeout" class="status-timeout d-none">
+                  <i class="fas fa-clock me-2"></i>
+                  <span>Chưa nhận được xác nhận. Admin sẽ kiểm tra và xác nhận thủ công.</span>
+                </div>
+                <div id="statusSuccess" class="status-success d-none">
+                  <i class="fas fa-check-circle me-2"></i>
+                  <span>Thanh toán thành công! Đơn hàng đã được xác nhận.</span>
+                </div>
+              </div>
+
+              @* Nút test thủ công – chỉ hiện khi môi trường Development *@
+              @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+              {
+                <div class="mt-2 text-center">
+                  <button type="button" class="btn btn-outline-success btn-sm"
+                          onclick="simulatePaid(@Model.Id)">
+                    🧪 [Dev] Giả lập thanh toán thành công
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+
+        </div>
+      }
+      else
+      {
+        @* ── LAYOUT THƯỜNG CHO COD / VNPAY / MOMO ── *@
+        <div class="success-card text-center">
+          <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+          <h2 class="fw-bold mt-3 mb-1">Đặt hàng thành công!</h2>
+          <p class="text-muted mb-4">
+            Cảm ơn bạn đã mua hàng. Chúng tôi sẽ liên hệ xác nhận và giao hàng sớm nhất.
+          </p>
+
+          <div class="order-info-box mb-4">
+            <div class="order-info-row">
+              <span>Mã đơn hàng</span>
+              <span class="fw-bold text-danger">#@Model.OrderNumber</span>
+            </div>
+            <div class="order-info-row">
+              <span>Ngày đặt</span>
+              <span>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+            </div>
+            <div class="order-info-row">
+              <span>Người nhận</span>
+              <span>@Model.ShippingName</span>
+            </div>
+            <div class="order-info-row">
+              <span>Điện thoại</span>
+              <span>@Model.ShippingPhone</span>
+            </div>
+            <div class="order-info-row">
+              <span>Địa chỉ</span>
+              <span>@Model.ShippingAddress</span>
+            </div>
+            <div class="order-info-row">
+              <span>Thanh toán</span>
+              <span>
+                @if (Model.PaymentMethod == "cod") { <text>💵 Thanh toán khi nhận hàng (COD)</text> }
+                else if (Model.PaymentMethod == "vnpay") { <text>🏦 VNPay</text> }
+                else if (Model.PaymentMethod == "momo") { <text>💜 MoMo</text> }
+                else { @Model.PaymentMethod.ToUpper() }
+              </span>
+            </div>
+          </div>
+
+          @* Items *@
+          <div class="order-items-list mb-4">
+            <div class="fw-bold mb-2 text-start">Chi tiết đơn hàng</div>
+            @foreach (var item in Model.OrderItems)
+            {
+              <div class="success-item">
+                <img src="@(item.Product?.Image ?? "/images/no-image.png")"
+                     alt="@item.ProductName"
+                     onerror="this.onerror=null;this.src='/images/no-image.png'"/>
+                <div class="success-item-info">
+                  <div class="fw-semibold">@item.ProductName</div>
+                  <div class="text-muted small">x@item.Quantity · @item.Price.ToString("N0")₫/máy</div>
+                </div>
+                <div class="fw-bold text-danger">@item.Total.ToString("N0")₫</div>
+              </div>
+            }
+            <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2">
+              <span>Tổng cộng</span>
+              <span class="text-danger fs-5">@Model.TotalAmount.ToString("N0")₫</span>
+            </div>
+          </div>
+
+          @* Trạng thái timeline *@
+          <div class="order-timeline mb-4">
+            <div class="timeline-step active">
+              <div class="timeline-dot"><i class="fas fa-check"></i></div>
+              <div class="timeline-label">Đã đặt hàng</div>
+            </div>
+            <div class="timeline-line"></div>
+            <div class="timeline-step">
+              <div class="timeline-dot"><i class="fas fa-box"></i></div>
+              <div class="timeline-label">Xác nhận</div>
+            </div>
+            <div class="timeline-line"></div>
+            <div class="timeline-step">
+              <div class="timeline-dot"><i class="fas fa-truck"></i></div>
+              <div class="timeline-label">Đang giao</div>
+            </div>
+            <div class="timeline-line"></div>
+            <div class="timeline-step">
+              <div class="timeline-dot"><i class="fas fa-home"></i></div>
+              <div class="timeline-label">Đã nhận</div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a asp-controller="Order" asp-action="History" class="btn btn-outline-danger">
+              <i class="fas fa-list me-2"></i>Lịch sử đơn hàng
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-danger">
+              <i class="fas fa-store me-2"></i>Tiếp tục mua sắm
+            </a>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>
+
+@section Styles {
+<style>
+  /* ── Common ── */
+  .success-card { background:#fff; border-radius:16px; border:1px solid var(--border-color); padding:2.5rem; box-shadow:0 4px 24px rgba(0,0,0,.08); }
+  .success-icon { width:80px; height:80px; background:#d4edda; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:2.5rem; color:#28a745; }
+  .order-info-box { background:#f8f9fa; border-radius:10px; padding:1rem 1.25rem; text-align:left; }
+  .order-info-row { display:flex; justify-content:space-between; padding:.4rem 0; font-size:.9rem; border-bottom:1px solid #f0f0f0; }
+  .order-info-row:last-child { border-bottom:none; }
+  .order-items-list { text-align:left; }
+  .success-item { display:flex; align-items:center; gap:.75rem; padding:.5rem 0; border-bottom:1px solid #f5f5f5; }
+  .success-item img { width:48px; height:48px; border-radius:8px; object-fit:contain; background:#f8f9fa; padding:4px; border:1px solid #eee; }
+  .success-item-info { flex:1; }
+  .order-timeline { display:flex; align-items:center; justify-content:center; }
+  .timeline-step { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .timeline-dot { width:36px; height:36px; border-radius:50%; background:#dee2e6; color:#fff; display:flex; align-items:center; justify-content:center; font-size:.85rem; }
+  .timeline-step.active .timeline-dot { background:var(--primary); }
+  .timeline-label { font-size:.7rem; color:var(--text-muted); white-space:nowrap; }
+  .timeline-line { flex:1; height:2px; background:#dee2e6; max-width:60px; }
+
+  /* ── QR Payment Card ── */
+  .qr-payment-card { background:#fff; border-radius:16px; border:2px solid #e8f0fe; padding:1.75rem; box-shadow:0 4px 24px rgba(66,133,244,.12); height:100%; }
+  .qr-card-header { font-weight:700; font-size:1rem; color:#1a3c8b; padding-bottom:.75rem; border-bottom:1px solid #e8f0fe; margin-bottom:1rem; }
+  .qr-amount-display { text-align:center; margin-bottom:1.25rem; }
+  .qr-amount { font-size:2rem; font-weight:800; color:#dc3545; letter-spacing:-.5px; }
+  .qr-image-wrap { display:flex; flex-direction:column; align-items:center; margin-bottom:1.25rem; }
+  .qr-image { width:220px; height:220px; object-fit:contain; border-radius:12px; border:3px solid #e8f0fe; padding:6px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,.08); }
+  .qr-scan-hint { font-size:.75rem; color:#6c757d; margin-top:.5rem; }
+  .qr-error { text-align:center; padding:2rem; color:#6c757d; }
+  .qr-bank-info { background:#f8faff; border-radius:10px; padding:.875rem 1rem; margin-bottom:1rem; }
+  .bank-info-row { display:flex; justify-content:space-between; align-items:center; padding:.35rem 0; border-bottom:1px solid #e8f0fe; font-size:.88rem; }
+  .bank-info-row:last-child { border-bottom:none; }
+  .bank-info-label { color:#6c757d; }
+  .bank-info-val { }
+  .btn-xs { padding:2px 7px; font-size:.72rem; }
+  .copy-btn { border-color:#dee2e6; color:#6c757d; transition:all .15s; }
+  .copy-btn:hover { background:#198754; color:#fff; border-color:#198754; }
+  .copy-btn.copied { background:#198754; color:#fff; border-color:#198754; }
+  .qr-notice { display:flex; align-items:flex-start; gap:.5rem; background:#e8f4fd; border-radius:8px; padding:.75rem 1rem; font-size:.83rem; }
+  /* Payment status box */
+  .payment-status-box { border-radius:10px; padding:.85rem 1rem; font-size:.88rem; font-weight:500; }
+  .status-waiting { display:flex; align-items:center; background:#fff8e1; border:1px solid #ffe082; border-radius:10px; padding:.85rem 1rem; color:#7a6000; }
+  .status-timeout { display:flex; align-items:center; background:#fff3e0; border:1px solid #ffcc80; border-radius:10px; padding:.85rem 1rem; color:#7a3b00; }
+  .status-success { display:flex; align-items:center; background:#e8f5e9; border:1px solid #a5d6a7; border-radius:10px; padding:.85rem 1rem; color:#1b5e20; font-size:.95rem; animation: fadeInGreen .5s ease; }
+  @@keyframes fadeInGreen { from { opacity:0; transform:scale(.97); } to { opacity:1; transform:scale(1); } }
+</style>
+}
+
+@section Scripts {
+<script>
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.classList.add('copied');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check fa-xs"></i>';
+      setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = orig; }, 1800);
+    });
+  }
+
+  @if (isBankTransfer)
+  {
+    <text>
+  // ── Polling: kiểm tra trạng thái đơn hàng mỗi 10 giây ──
+  (function () {
+    const orderId   = @Model.Id;
+    const MAX_TRIES = 90;   // 90 × 10s = 15 phút
+    let   tries     = 0;
+    let   timer     = null;
+
+    function showSuccess() {
+      clearInterval(timer);
+      document.getElementById('statusWaiting').classList.add('d-none');
+      document.getElementById('statusTimeout').classList.add('d-none');
+      document.getElementById('statusSuccess').classList.remove('d-none');
+      // Cập nhật dòng "Thanh toán" trên bảng thông tin đơn hàng
+      const paymentRow = document.querySelector('.order-info-row .text-warning');
+      if (paymentRow) {
+        paymentRow.className = 'text-success fw-semibold';
+        paymentRow.innerHTML = '<i class="fas fa-check-circle me-1"></i>Đã thanh toán';
+      }
+    }
+
+    function checkStatus() {
+      fetch('/api/payment/status/' + orderId)
+        .then(r => r.json())
+        .then(data => {
+          if (data.isPaid) {
+            showSuccess();
+          } else {
+            tries++;
+            if (tries >= MAX_TRIES) {
+              clearInterval(timer);
+              document.getElementById('statusWaiting').classList.add('d-none');
+              document.getElementById('statusTimeout').classList.remove('d-none');
+            }
+          }
+        })
+        .catch(() => { /* bỏ qua lỗi mạng tạm thời */ });
+    }
+
+    // Kiểm tra ngay, rồi mỗi 10 giây
+    checkStatus();
+    timer = setInterval(checkStatus, 10000);
+
+    // Hàm dev: giả lập thanh toán thành công (gọi API confirm thủ công)
+    window.simulatePaid = function(id) {
+      fetch('/api/payment/dev-confirm/' + id, { method: 'POST' })
+        .then(r => r.json())
+        .then(d => { if (d.success) showSuccess(); else alert('Lỗi: ' + d.message); })
+        .catch(() => alert('Không gọi được API'));
+    };
+  })();
+    </text>
+  }
+</script>
+}

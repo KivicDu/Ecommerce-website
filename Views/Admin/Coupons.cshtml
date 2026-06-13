@@ -1,0 +1,129 @@
+@model List<HutechStore.Models.Coupon>
+@{
+  ViewData["Title"] = "Quản lý Coupon";
+  Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="admin-card">
+      <div class="admin-card-header"><span id="cpFormTitle">Thêm coupon</span></div>
+      <div class="admin-card-body">
+        <form asp-action="CouponSave" method="post">
+          @Html.AntiForgeryToken()
+          <input type="hidden" name="Id" id="cpId" value="0"/>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Mã coupon <span class="text-danger">*</span></label>
+              <input type="text" name="Code" id="cpCode" class="form-control" required
+                     placeholder="WELCOME10" style="text-transform:uppercase"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Loại giảm giá</label>
+              <select name="Type" id="cpType" class="form-select">
+                <option value="percent">Phần trăm (%)</option>
+                <option value="fixed">Số tiền cố định (₫)</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Giá trị</label>
+              <input type="number" name="Value" id="cpValue" class="form-control" min="0" step="0.01"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Đơn tối thiểu (₫)</label>
+              <input type="number" name="MinOrder" id="cpMinOrder" class="form-control" min="0"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Giảm tối đa (₫)</label>
+              <input type="number" name="MaxDiscount" id="cpMaxDiscount" class="form-control" min="0"/>
+              <div class="small text-muted">0 = không giới hạn</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Số lần dùng tối đa</label>
+              <input type="number" name="MaxUsage" id="cpMaxUsage" class="form-control" min="0"/>
+              <div class="small text-muted">0 = không giới hạn</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Hết hạn</label>
+              <input type="datetime-local" name="ExpiresAt" id="cpExpires" class="form-control"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Trạng thái</label>
+              <select name="Status" id="cpStatus" class="form-select">
+                <option value="1">Đang hoạt động</option>
+                <option value="0">Tắt</option>
+              </select>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn btn-danger"><i class="fas fa-save me-2"></i>Lưu</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="resetCpForm()">Đặt lại</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="admin-card">
+      <div class="admin-card-header">Danh sách coupon (@Model.Count)</div>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Mã</th><th>Loại</th><th>Giá trị</th><th>Đã dùng</th><th>Hết hạn</th><th>Trạng thái</th><th></th></tr>
+          </thead>
+          <tbody>
+            @foreach (var c in Model)
+            {
+              <tr>
+                <td><span class="fw-bold text-danger">@c.Code</span></td>
+                <td class="small">@(c.Type == "percent" ? "%" : "₫ cố định")</td>
+                <td class="fw-bold">@(c.Type == "percent" ? c.Value + "%" : c.Value.ToString("N0") + "₫")</td>
+                <td class="small">@c.UsedCount / @(c.MaxUsage == 0 ? "∞" : c.MaxUsage.ToString())</td>
+                <td class="small text-muted">
+                  @(c.ExpiresAt.HasValue ? c.ExpiresAt.Value.ToString("dd/MM/yyyy") : "Không hạn")
+                </td>
+                <td>
+                  <span class="status-badge @(c.Status==1?"status-delivered":"status-cancelled")">
+                    @(c.Status==1?"Hoạt động":"Tắt")
+                  </span>
+                </td>
+                <td>
+                  <button class="btn btn-outline-primary btn-sm"
+                          onclick="editCp(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(c)))">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+  function editCp(c) {
+    document.getElementById('cpId').value        = c.id;
+    document.getElementById('cpCode').value      = c.code;
+    document.getElementById('cpType').value      = c.type;
+    document.getElementById('cpValue').value     = c.value;
+    document.getElementById('cpMinOrder').value  = c.minOrder;
+    document.getElementById('cpMaxDiscount').value = c.maxDiscount;
+    document.getElementById('cpMaxUsage').value  = c.maxUsage;
+    document.getElementById('cpStatus').value    = c.status;
+    if (c.expiresAt) document.getElementById('cpExpires').value = c.expiresAt.substring(0, 16);
+    document.getElementById('cpFormTitle').textContent = 'Sửa coupon: ' + c.code;
+    document.getElementById('cpFormTitle').closest('.admin-card').scrollIntoView({ behavior:'smooth' });
+  }
+  function resetCpForm() {
+    ['cpId','cpCode','cpValue','cpMinOrder','cpMaxDiscount','cpMaxUsage','cpExpires']
+      .forEach(id => document.getElementById(id).value = id === 'cpId' ? '0' : '');
+    document.getElementById('cpType').value   = 'percent';
+    document.getElementById('cpStatus').value = '1';
+    document.getElementById('cpFormTitle').textContent = 'Thêm coupon';
+  }
+</script>
+}

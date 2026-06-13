@@ -1,0 +1,446 @@
+@model HutechStore.ViewModels.ProductFormViewModel
+@{
+  var isEdit = Model.Id > 0;
+  ViewData["Title"] = isEdit ? "Sửa sản phẩm" : "Thêm sản phẩm";
+  Layout = "~/Views/Shared/_AdminLayout.cshtml";
+  var categories = ViewBag.Categories as List<HutechStore.Models.Category> ?? new();
+  var useCaseOptions = new[] {"gaming","camera","business","student","battery_life","value"};
+  var selectedTags = (Model.UseCaseTags ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).ToList();
+}
+
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a asp-action="Products" class="btn btn-outline-secondary btn-sm">
+    <i class="fas fa-arrow-left"></i>
+  </a>
+  <h5 class="fw-bold mb-0">@(isEdit ? "Sửa: " + Model.Name : "Thêm sản phẩm mới")</h5>
+</div>
+
+<form asp-action="@(isEdit ? "ProductEdit" : "ProductCreate")"
+      asp-route-id="@(isEdit ? Model.Id : null)"
+      method="post" enctype="multipart/form-data">
+  @Html.AntiForgeryToken()
+  <div class="row g-3">
+
+    @* ── LEFT COLUMN ── *@
+    <div class="col-lg-8">
+
+      @* Thông tin cơ bản *@
+      <div class="admin-form-section">
+        <div class="admin-form-section-title">Thông tin cơ bản</div>
+        <div class="row g-3">
+          <div class="col-12">
+            <label asp-for="Name" class="form-label fw-semibold">Tên sản phẩm <span class="text-danger">*</span></label>
+            <input asp-for="Name" class="form-control" placeholder="Ví dụ: iPhone 16 Pro Max 256GB"/>
+            <span asp-validation-for="Name" class="text-danger small"></span>
+          </div>
+          <div class="col-md-6">
+            <label asp-for="Brand" class="form-label fw-semibold">Hãng <span class="text-danger">*</span></label>
+            <select asp-for="Brand" class="form-select">
+              <option value="Apple">Apple</option>
+              <option value="Samsung">Samsung</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label asp-for="CategoryId" class="form-label fw-semibold">Danh mục <span class="text-danger">*</span></label>
+            <select asp-for="CategoryId" class="form-select">
+              <option value="">-- Chọn danh mục --</option>
+              @foreach (var c in categories)
+              {
+                @if (Model.CategoryId == c.Id) { <option value="@c.Id" selected>@c.Name</option> } else { <option value="@c.Id">@c.Name</option> }
+              }
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label asp-for="Price" class="form-label fw-semibold">Giá cơ bản (₫) <span class="text-danger">*</span></label>
+            <input asp-for="Price" class="form-control" type="number" placeholder="22990000"/>
+            <span asp-validation-for="Price" class="text-danger small"></span>
+          </div>
+          <div class="col-md-3">
+            <label asp-for="Stock" class="form-label fw-semibold">Tồn kho</label>
+            <input asp-for="Stock" class="form-control" type="number" min="0"/>
+          </div>
+          <div class="col-md-3">
+            <label asp-for="Slug" class="form-label fw-semibold">Slug URL</label>
+            <input asp-for="Slug" class="form-control" placeholder="iphone-16-pro-max"/>
+            <div class="small text-muted mt-1">Tự sinh nếu để trống</div>
+          </div>
+          <div class="col-12">
+            <label asp-for="Description" class="form-label fw-semibold">Mô tả sản phẩm</label>
+            <textarea asp-for="Description" class="form-control" rows="4"
+                      placeholder="Mô tả chi tiết về sản phẩm..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      @* Phone Specs *@
+      <div class="admin-form-section">
+        <div class="admin-form-section-title">Thông số kỹ thuật</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label asp-for="Chipset" class="form-label fw-semibold">Chip xử lý</label>
+            <input asp-for="Chipset" class="form-control" placeholder="Apple A18 Pro"/>
+          </div>
+          <div class="col-md-3">
+            <label asp-for="RamGb" class="form-label fw-semibold">RAM (GB)</label>
+            <input asp-for="RamGb" class="form-control" type="number" min="0"/>
+          </div>
+          <div class="col-md-3">
+            <label asp-for="StorageGb" class="form-label fw-semibold">Lưu trữ (GB)</label>
+            <input asp-for="StorageGb" class="form-control" type="number" min="0"/>
+          </div>
+          <div class="col-md-4">
+            <label asp-for="DisplaySize" class="form-label fw-semibold">Kích thước màn hình</label>
+            <input asp-for="DisplaySize" class="form-control" placeholder="6.1 inch"/>
+          </div>
+          <div class="col-md-5">
+            <label asp-for="DisplayType" class="form-label fw-semibold">Loại màn hình</label>
+            <input asp-for="DisplayType" class="form-control" placeholder="Super Retina XDR OLED"/>
+          </div>
+          <div class="col-md-3">
+            <label asp-for="RefreshRate" class="form-label fw-semibold">Tần số quét (Hz)</label>
+            <select asp-for="RefreshRate" class="form-select">
+              <option value="60">60 Hz</option>
+              <option value="90">90 Hz</option>
+              <option value="120">120 Hz</option>
+              <option value="144">144 Hz</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label asp-for="MainCamera" class="form-label fw-semibold">Camera sau</label>
+            <input asp-for="MainCamera" class="form-control" placeholder="48MP f/1.78 + 12MP ultrawide"/>
+          </div>
+          <div class="col-md-6">
+            <label asp-for="FrontCamera" class="form-label fw-semibold">Camera trước</label>
+            <input asp-for="FrontCamera" class="form-control" placeholder="12MP TrueDepth"/>
+          </div>
+          <div class="col-md-4">
+            <label asp-for="BatteryMah" class="form-label fw-semibold">Pin (mAh)</label>
+            <input asp-for="BatteryMah" class="form-control" type="number" min="0"/>
+          </div>
+          <div class="col-md-4">
+            <label asp-for="Os" class="form-label fw-semibold">Hệ điều hành</label>
+            <input asp-for="Os" class="form-control" placeholder="iOS 18"/>
+          </div>
+          <div class="col-md-4">
+            <label asp-for="ReleaseYear" class="form-label fw-semibold">Năm ra mắt</label>
+            <input asp-for="ReleaseYear" class="form-control" type="number" min="2020" max="2030"/>
+          </div>
+          <div class="col-md-6">
+            <label asp-for="Dimensions" class="form-label fw-semibold">Kích thước (mm)</label>
+            <input asp-for="Dimensions" class="form-control" placeholder="147.6 x 71.5 x 7.8 mm"/>
+          </div>
+          <div class="col-md-3">
+            <label asp-for="WeightGrams" class="form-label fw-semibold">Trọng lượng (g)</label>
+            <input asp-for="WeightGrams" class="form-control" type="number" min="0"/>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Kết nối</label>
+            <div class="d-flex flex-column gap-1 mt-1">
+              <div class="form-check">
+                <input asp-for="Has5G" class="form-check-input" type="checkbox"/>
+                <label class="form-check-label" asp-for="Has5G">Hỗ trợ 5G</label>
+              </div>
+              <div class="form-check">
+                <input asp-for="HasNfc" class="form-check-input" type="checkbox"/>
+                <label class="form-check-label" asp-for="HasNfc">Hỗ trợ NFC</label>
+              </div>
+              <div class="form-check">
+                <input asp-for="FastCharge" class="form-check-input" type="checkbox"/>
+                <label class="form-check-label" asp-for="FastCharge">Sạc nhanh</label>
+              </div>
+              <div class="form-check">
+                <input asp-for="WirelessCharge" class="form-check-input" type="checkbox"/>
+                <label class="form-check-label" asp-for="WirelessCharge">Sạc không dây</label>
+              </div>
+            </div>
+          </div>
+
+          @* ── MÀU SẮC: Visual Tag Input ── *@
+          <div class="col-12">
+            <label class="form-label fw-semibold"><i class="fas fa-palette me-1 text-muted"></i>Màu sắc (PhoneSpecs)</label>
+            <div class="color-tags-wrap" id="colorTagsWrap"></div>
+            <div class="d-flex gap-2 mt-2">
+              <input type="text" id="colorInput" class="form-control form-control-sm"
+                     placeholder="Nhập tên màu, ví dụ: Đen Titan..." style="max-width:240px"/>
+              <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="addColor()">
+                <i class="fas fa-plus me-1"></i>Thêm
+              </button>
+            </div>
+            <input type="hidden" asp-for="Colors" id="colorsHidden"/>
+            <div class="small text-muted mt-1">Đây là màu liệt kê trong thông số — biến thể màu cụ thể thêm ở mục Biến thể bên dưới</div>
+          </div>
+        </div>
+      </div>
+
+      @* ── BIẾN THỂ SẢN PHẨM ── *@
+      <div class="admin-form-section">
+        <div class="admin-form-section-title"><i class="fas fa-layer-group me-2"></i>Biến thể sản phẩm</div>
+        <p class="text-muted small mb-2">Thêm các phiên bản màu sắc / dung lượng với giá và tồn kho riêng.</p>
+        <div class="table-responsive mb-2">
+          <table class="table table-sm table-bordered align-middle" id="variantsTable">
+            <thead class="table-light">
+              <tr>
+                <th style="min-width:130px">Màu sắc</th>
+                <th style="min-width:100px">Dung lượng (GB)</th>
+                <th style="min-width:80px">RAM (GB)</th>
+                <th style="min-width:130px">Giá (₫)</th>
+                <th style="min-width:80px">Tồn kho</th>
+                <th style="width:48px"></th>
+              </tr>
+            </thead>
+            <tbody id="variantsBody">
+              <tr id="variantsEmpty">
+                <td colspan="6" class="text-center text-muted py-3">
+                  <i class="fas fa-info-circle me-1"></i>Chưa có biến thể. Nhấn "Thêm biến thể" để bắt đầu.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addVariantRow()">
+          <i class="fas fa-plus me-1"></i>Thêm biến thể
+        </button>
+        <input type="hidden" name="VariantsJson" id="variantsJsonInput"/>
+        <input type="hidden" id="existingVariantsData" value="@Html.Encode(Model.VariantsJson ?? "[]")"/>
+      </div>
+
+      @* Use case tags (AI) *@
+      <div class="admin-form-section">
+        <div class="admin-form-section-title">Tags sử dụng (cho AI tư vấn)</div>
+        <div class="d-flex flex-wrap gap-2 mb-2">
+          @foreach (var tag in useCaseOptions)
+          {
+            var isSelected = selectedTags.Contains(tag);
+            <label class="tag-toggle @(isSelected ? "active" : "")" data-tag="@tag">
+              @tag
+            </label>
+          }
+        </div>
+        <input type="hidden" asp-for="UseCaseTags" id="useCaseTagsInput"/>
+        <div class="small text-muted">Chọn các trường hợp sử dụng phù hợp — AI sẽ dùng để tư vấn</div>
+      </div>
+
+    </div>
+
+    @* ── RIGHT COLUMN ── *@
+    <div class="col-lg-4">
+
+      @* Ảnh *@
+      <div class="admin-form-section">
+        <div class="admin-form-section-title">Ảnh sản phẩm</div>
+        <div class="img-preview-wrap mb-3" id="imgPreviewWrap">
+          @if (!string.IsNullOrEmpty(Model.ExistingImage))
+          {
+            <img src="@Model.ExistingImage" id="imgPreview" class="img-preview"
+                 onerror="this.onerror=null;this.src='/images/no-image.png'"/>
+          }
+          else
+          {
+            <div class="img-preview-placeholder" id="imgPlaceholder">
+              <i class="fas fa-camera fa-2x text-muted"></i>
+              <div class="small text-muted mt-2">Chọn ảnh</div>
+            </div>
+          }
+        </div>
+        <input type="file" name="Image" class="form-control form-control-sm mb-2"
+               accept="image/*" onchange="previewImg(this)"/>
+        @if (!string.IsNullOrEmpty(Model.ExistingImage))
+        {
+          <div class="form-check">
+            <input asp-for="RemoveImage" class="form-check-input" type="checkbox"/>
+            <label asp-for="RemoveImage" class="form-check-label small text-danger">Xóa ảnh hiện tại</label>
+          </div>
+          <input type="hidden" asp-for="ExistingImage"/>
+        }
+      </div>
+
+      @* Trạng thái *@
+      <div class="admin-form-section">
+        <div class="admin-form-section-title">Cài đặt hiển thị</div>
+        <div class="mb-3">
+          <label asp-for="Status" class="form-label fw-semibold">Trạng thái</label>
+          <select asp-for="Status" class="form-select">
+            <option value="1">Đang bán</option>
+            <option value="0">Ẩn</option>
+          </select>
+        </div>
+        @* FIX: Featured is int — use name attribute, NOT asp-for on checkbox *@
+        <div class="form-check form-switch">
+          <input type="checkbox" name="Featured" id="Featured" class="form-check-input"
+                 value="1" @(Model.Featured == 1 ? "checked" : "")/>
+          <label class="form-check-label fw-semibold" for="Featured">Sản phẩm nổi bật</label>
+          <div class="small text-muted">Hiển thị trên trang chủ</div>
+        </div>
+      </div>
+
+      @* Save buttons *@
+      <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-danger btn-lg fw-bold">
+          <i class="fas fa-save me-2"></i>@(isEdit ? "Lưu thay đổi" : "Thêm sản phẩm")
+        </button>
+        <a asp-action="Products" class="btn btn-outline-secondary">Huỷ</a>
+      </div>
+
+    </div>
+  </div>
+</form>
+
+@section Styles {
+<style>
+  .img-preview-wrap { border:2px dashed #dee2e6; border-radius:10px; overflow:hidden; background:#f8f9fa; aspect-ratio:1; display:flex; align-items:center; justify-content:center; }
+  .img-preview { width:100%; height:100%; object-fit:contain; padding:12px; }
+  .img-preview-placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .tag-toggle { padding:5px 14px; border-radius:20px; border:1.5px solid #dee2e6; background:#fff; cursor:pointer; font-size:.82rem; transition:all .18s; user-select:none; }
+  .tag-toggle:hover { border-color:var(--admin-accent); color:var(--admin-accent); }
+  .tag-toggle.active { background:var(--admin-accent); color:#fff; border-color:var(--admin-accent); }
+
+  /* Color tags */
+  .color-tags-wrap { display:flex; flex-wrap:wrap; gap:6px; min-height:40px; padding:8px; border:1.5px solid #dee2e6; border-radius:8px; background:#fff; transition:border-color .2s; }
+  .color-tags-wrap:focus-within { border-color:#86b7fe; }
+  .color-tag { display:inline-flex; align-items:center; gap:4px; padding:3px 10px 3px 12px; background:linear-gradient(135deg,#f0f4ff,#e8f0fe); border:1px solid #c3d3fd; border-radius:20px; font-size:.82rem; font-weight:500; color:#2c4bcc; }
+  .color-tag-remove { background:none; border:none; color:#8899cc; cursor:pointer; font-size:1.1rem; line-height:1; padding:0 2px; transition:color .15s; }
+  .color-tag-remove:hover { color:#dc3545; }
+
+  /* Variants table */
+  #variantsTable th { font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
+  #variantsTable td input.form-control { font-size:.85rem; }
+  .variant-del-btn { width:32px; height:32px; display:flex; align-items:center; justify-content:center; }
+</style>
+}
+
+@section Scripts {
+<script>
+  // ── Image preview ─────────────────────────────────────────────
+  function previewImg(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      let img = document.getElementById('imgPreview');
+      const ph = document.getElementById('imgPlaceholder');
+      if (ph) ph.style.display = 'none';
+      if (!img) {
+        img = document.createElement('img');
+        img.id = 'imgPreview';
+        img.className = 'img-preview';
+        document.getElementById('imgPreviewWrap').appendChild(img);
+      }
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  // ── Use-case Tag toggle ───────────────────────────────────────
+  const tagInput = document.getElementById('useCaseTagsInput');
+  function syncTags() {
+    const active = [...document.querySelectorAll('.tag-toggle.active')].map(t => t.dataset.tag);
+    tagInput.value = active.join(',');
+  }
+  document.querySelectorAll('.tag-toggle').forEach(el => {
+    el.addEventListener('click', () => { el.classList.toggle('active'); syncTags(); });
+  });
+  syncTags();
+
+  // ── Color Tags ────────────────────────────────────────────────
+  const colorsHidden = document.getElementById('colorsHidden');
+  const colorTagsWrap = document.getElementById('colorTagsWrap');
+  let colorList = (colorsHidden.value || '').split(',').map(c => c.trim()).filter(c => c.length > 0);
+
+  renderColorTags();
+
+  function addColor() {
+    const input = document.getElementById('colorInput');
+    const val = input.value.trim();
+    if (val && !colorList.includes(val)) {
+      colorList.push(val);
+      renderColorTags();
+      syncColors();
+    }
+    input.value = '';
+    input.focus();
+  }
+
+  function removeColor(color) {
+    colorList = colorList.filter(c => c !== color);
+    renderColorTags();
+    syncColors();
+  }
+
+  function renderColorTags() {
+    colorTagsWrap.innerHTML = colorList.map(c => `
+      <span class="color-tag">
+        <i class="fas fa-circle me-1" style="font-size:.6rem;opacity:.6"></i>${escHtml(c)}
+        <button type="button" class="color-tag-remove" onclick="removeColor(${JSON.stringify(c)})" title="Xóa màu này">×</button>
+      </span>
+    `).join('');
+  }
+
+  function syncColors() {
+    colorsHidden.value = colorList.join(',');
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.getElementById('colorInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addColor(); }
+  });
+
+  // ── Product Variants ──────────────────────────────────────────
+  let variants = [];
+  try {
+    const raw = document.getElementById('existingVariantsData').value;
+    variants = JSON.parse(raw) || [];
+  } catch(e) { variants = []; }
+
+  renderVariants();
+
+  function addVariantRow() {
+    variants.push({ Id: 0, Color: '', StorageGb: 256, RamGb: 0, Price: 0, Stock: 0 });
+    renderVariants();
+    // focus first input of last row
+    const rows = document.querySelectorAll('#variantsBody tr[data-idx]');
+    if (rows.length > 0) rows[rows.length - 1].querySelector('input')?.focus();
+  }
+
+  function removeVariantRow(idx) {
+    variants.splice(idx, 1);
+    renderVariants();
+  }
+
+  function renderVariants() {
+    const tbody = document.getElementById('variantsBody');
+    const empty = document.getElementById('variantsEmpty');
+    if (variants.length === 0) {
+      tbody.innerHTML = `<tr id="variantsEmpty"><td colspan="6" class="text-center text-muted py-3"><i class="fas fa-info-circle me-1"></i>Chưa có biến thể. Nhấn "Thêm biến thể" để bắt đầu.</td></tr>`;
+      syncVariants();
+      return;
+    }
+    tbody.innerHTML = variants.map((v, i) => `
+      <tr data-idx="${i}">
+        <td><input type="text" class="form-control form-control-sm" value="${escHtml(v.Color||'')}"
+             placeholder="VD: Đen Titan"
+             onchange="variants[${i}].Color=this.value;syncVariants()"/></td>
+        <td><input type="number" class="form-control form-control-sm" value="${v.StorageGb||0}" min="0" step="64"
+             onchange="variants[${i}].StorageGb=Number(this.value);syncVariants()"/></td>
+        <td><input type="number" class="form-control form-control-sm" value="${v.RamGb||0}" min="0" step="4"
+             onchange="variants[${i}].RamGb=Number(this.value);syncVariants()"/></td>
+        <td><input type="number" class="form-control form-control-sm" value="${v.Price||0}" min="0" step="100000"
+             onchange="variants[${i}].Price=Number(this.value);syncVariants()"/></td>
+        <td><input type="number" class="form-control form-control-sm" value="${v.Stock||0}" min="0"
+             onchange="variants[${i}].Stock=Number(this.value);syncVariants()"/></td>
+        <td>
+          <button type="button" class="btn btn-outline-danger btn-sm variant-del-btn" onclick="removeVariantRow(${i})" title="Xóa biến thể này">
+            <i class="fas fa-trash fa-xs"></i>
+          </button>
+        </td>
+      </tr>
+    `).join('');
+    syncVariants();
+  }
+
+  function syncVariants() {
+    document.getElementById('variantsJsonInput').value = JSON.stringify(variants);
+  }
+</script>
+}

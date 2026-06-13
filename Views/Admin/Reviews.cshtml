@@ -1,0 +1,135 @@
+@model List<HutechStore.Models.Review>
+@{
+  ViewData["Title"] = "Quản lý đánh giá";
+  Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@* Filter bar *@
+<div class="d-flex gap-2 flex-wrap align-items-center mb-4">
+  <form method="get" class="d-flex gap-2 flex-wrap flex-grow-1">
+    <input name="search" value="@ViewBag.Search" class="form-control form-control-sm" style="max-width:240px" placeholder="Tìm sản phẩm, khách hàng..."/>
+    <select name="rating" class="form-select form-select-sm" style="max-width:150px">
+      <option value="">Tất cả sao</option>
+      @for (int i = 5; i >= 1; i--)
+      {
+        if (ViewBag.Rating == i) {
+          <option value="@i" selected>@i ★</option>
+        } else {
+          <option value="@i">@i ★</option>
+        }
+      }
+    </select>
+    <button class="btn btn-sm btn-danger">Lọc</button>
+    @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()) || ViewBag.Rating != null)
+    {
+      <a href="/Admin/Reviews" class="btn btn-sm btn-outline-secondary">Xóa lọc</a>
+    }
+  </form>
+  <span class="text-muted small">Tổng: <strong>@ViewBag.Total</strong> đánh giá</span>
+</div>
+
+<div class="admin-card">
+  <div class="table-responsive">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Sản phẩm</th>
+          <th>Khách hàng</th>
+          <th class="text-center">Sao</th>
+          <th>Nội dung</th>
+          <th>Ngày đánh giá</th>
+          <th class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (!Model.Any())
+        {
+          <tr><td colspan="6" class="text-center text-muted py-4">Không có đánh giá nào</td></tr>
+        }
+        @foreach (var r in Model)
+        {
+          <tr id="review-row-@r.Id">
+            <td>
+              <a href="/Product/Detail/@(r.Product?.Slug ?? r.ProductId.ToString())"
+                 class="text-decoration-none fw-semibold text-dark" target="_blank">
+                @r.Product?.Name
+              </a>
+            </td>
+            <td>
+              <span>@r.User?.Name</span><br/>
+              <small class="text-muted">@r.User?.Email</small>
+            </td>
+            <td class="text-center">
+              <span class="text-warning fw-bold">
+                @for (int i = 1; i <= 5; i++)
+                {
+                  <i class="@(i <= r.Rating ? "fas" : "far") fa-star" style="font-size:.8rem"></i>
+                }
+              </span>
+              <div class="small text-muted">@r.Rating/5</div>
+            </td>
+            <td style="max-width:280px">
+              <span class="text-wrap">@(string.IsNullOrEmpty(r.Comment) ? "-" : r.Comment)</span>
+            </td>
+            <td class="text-nowrap text-muted small">@r.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-danger"
+                      onclick="deleteReview(@r.Id, this)"
+                      title="Xóa đánh giá">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @* Pagination *@
+  @if (ViewBag.TotalPages > 1)
+  {
+    <nav class="mt-3 d-flex justify-content-center">
+      <ul class="pagination pagination-sm mb-0">
+        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+        {
+          <li class="page-item @(i == ViewBag.Page ? "active" : "")">
+            <a class="page-link" href="?page=@i&search=@ViewBag.Search&rating=@ViewBag.Rating">@i</a>
+          </li>
+        }
+      </ul>
+    </nav>
+  }
+</div>
+
+@section Scripts {
+<script>
+async function deleteReview(id, btn) {
+  if (!confirm('Xóa đánh giá này?')) return;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  try {
+    const res  = await fetch('/Admin/DeleteReview', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '' },
+      body:    JSON.stringify({ id })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const row = document.getElementById('review-row-' + id);
+      row.style.transition = 'opacity .3s';
+      row.style.opacity = '0';
+      setTimeout(() => row.remove(), 300);
+      showToast('Đã xóa đánh giá', 'success');
+    } else {
+      showToast('Xóa thất bại', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+    }
+  } catch {
+    showToast('Lỗi kết nối', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+  }
+}
+</script>
+}

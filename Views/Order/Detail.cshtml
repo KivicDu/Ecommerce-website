@@ -1,0 +1,160 @@
+@model HutechStore.Models.Order
+@{
+  ViewData["Title"] = "Chi tiết đơn hàng #" + Model.OrderNumber;
+  var statusMap = new Dictionary<string,(string,string)>{
+    ["pending"]   =("Chờ xác nhận","warning"),
+    ["confirmed"] =("Đã xác nhận","info"),
+    ["shipping"]  =("Đang giao","primary"),
+    ["delivered"] =("Đã nhận","success"),
+    ["cancelled"] =("Đã hủy","danger"),
+  };
+  var (statusLabel, statusCls) = statusMap.GetValueOrDefault(Model.Status, ("Không rõ","secondary"));
+}
+
+<div class="container py-4">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-action="History" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-arrow-left"></i>
+    </a>
+    <h4 class="fw-bold mb-0">Đơn hàng <span class="text-danger">#@Model.OrderNumber</span></h4>
+    <span class="badge bg-@statusCls fs-6">@statusLabel</span>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+
+      @* Timeline *@
+      <div class="order-detail-card mb-4">
+        <div class="odc-title"><i class="fas fa-truck me-2 text-primary"></i>Tiến trình đơn hàng</div>
+        <div class="order-timeline-h">
+          @{
+            var steps = new[] { ("pending","Đặt hàng","fas fa-shopping-cart"), ("confirmed","Xác nhận","fas fa-check"), ("shipping","Đang giao","fas fa-truck"), ("delivered","Đã nhận","fas fa-home") };
+            var statusOrder = new[] { "pending","confirmed","shipping","delivered" };
+            var currentIdx  = Array.IndexOf(statusOrder, Model.Status);
+          }
+          @foreach (var (sv, sl, icon) in steps)
+          {
+            var idx    = Array.IndexOf(statusOrder, sv);
+            var done   = Model.Status != "cancelled" && idx <= currentIdx;
+            var active = sv == Model.Status;
+            <div class="tl-step @(done?"done":"") @(active?"active":"")">
+              <div class="tl-dot"><i class="@icon"></i></div>
+              <div class="tl-label">@sl</div>
+            </div>
+            @if (sv != "delivered")
+            {
+              <div class="tl-line @(done && !active ? "done" : "")"></div>
+            }
+          }
+        </div>
+      </div>
+
+      @* Products *@
+      <div class="order-detail-card mb-4">
+        <div class="odc-title"><i class="fas fa-box me-2 text-danger"></i>Sản phẩm đã đặt</div>
+        @foreach (var item in Model.OrderItems)
+        {
+          <div class="od-item">
+            <img src="@(item.Product?.Image ?? "/images/no-image.png")"
+                 alt="@item.ProductName"
+                 onerror="this.onerror=null;this.src='/images/no-image.png'"/>
+            <div class="od-item-info">
+              <div class="fw-semibold">@item.ProductName</div>
+              @if (item.Variant != null)
+              {
+                <div class="text-muted small">
+                  @item.Variant.StorageGb GB
+                  @(!string.IsNullOrEmpty(item.Variant.Color) ? "· " + item.Variant.Color : "")
+                </div>
+              }
+              <div class="text-muted small">Đơn giá: @item.Price.ToString("N0")₫</div>
+            </div>
+            <div class="text-center">
+              <div class="text-muted small">x@item.Quantity</div>
+              <div class="fw-bold text-danger">@item.Total.ToString("N0")₫</div>
+            </div>
+          </div>
+        }
+        <div class="od-totals">
+          <div class="d-flex justify-content-between"><span class="text-muted">Tạm tính</span><span>@Model.OrderItems.Sum(i => i.Total).ToString("N0")₫</span></div>
+          @if (Model.DiscountAmount > 0)
+          {
+            <div class="d-flex justify-content-between text-success">
+              <span>Giảm giá (@Model.CouponCode)</span>
+              <span>-@Model.DiscountAmount.ToString("N0")₫</span>
+            </div>
+          }
+          <div class="d-flex justify-content-between fw-bold fs-5 mt-2">
+            <span>Tổng thanh toán</span>
+            <span class="text-danger">@Model.TotalAmount.ToString("N0")₫</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-lg-4">
+
+      @* Shipping info *@
+      <div class="order-detail-card mb-3">
+        <div class="odc-title"><i class="fas fa-map-marker-alt me-2 text-danger"></i>Thông tin giao hàng</div>
+        <div class="od-info-row"><i class="fas fa-user"></i><span>@Model.ShippingName</span></div>
+        <div class="od-info-row"><i class="fas fa-phone"></i><span>@Model.ShippingPhone</span></div>
+        <div class="od-info-row"><i class="fas fa-home"></i><span>@Model.ShippingAddress</span></div>
+        @if (!string.IsNullOrEmpty(Model.Note))
+        {
+          <div class="od-info-row"><i class="fas fa-sticky-note"></i><span>@Model.Note</span></div>
+        }
+      </div>
+
+      @* Payment + date *@
+      <div class="order-detail-card mb-3">
+        <div class="odc-title"><i class="fas fa-credit-card me-2 text-primary"></i>Thanh toán</div>
+        <div class="od-info-row"><i class="fas fa-wallet"></i><span>@Model.PaymentMethod.ToUpper()</span></div>
+        <div class="od-info-row"><i class="fas fa-calendar"></i><span>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span></div>
+      </div>
+
+      @* Actions *@
+      <div class="d-grid gap-2">
+        @if (Model.Status == "pending")
+        {
+          <form asp-controller="Order" asp-action="Cancel" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id"/>
+            <button type="submit" class="btn btn-outline-danger w-100"
+                    onclick="return confirm('Xác nhận hủy đơn hàng này?')">
+              <i class="fas fa-times me-2"></i>Hủy đơn hàng
+            </button>
+          </form>
+        }
+        <a asp-controller="Product" asp-action="Index" class="btn btn-danger">
+          <i class="fas fa-store me-2"></i>Tiếp tục mua sắm
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Styles {
+<style>
+  .order-detail-card { background:#fff; border-radius:12px; border:1px solid var(--border-color); overflow:hidden; }
+  .odc-title { font-weight:700; padding:.875rem 1.25rem; background:#f8f9fa; border-bottom:1px solid #f0f0f0; font-size:.95rem; }
+  .order-timeline-h { display:flex; align-items:center; padding:1.25rem 1.5rem; }
+  .tl-step { display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .tl-dot { width:40px; height:40px; border-radius:50%; background:#e9ecef; color:#aaa; display:flex; align-items:center; justify-content:center; font-size:.9rem; transition:all .3s; }
+  .tl-label { font-size:.72rem; color:var(--text-muted); white-space:nowrap; }
+  .tl-step.done .tl-dot  { background:#e8f5e9; color:#28a745; }
+  .tl-step.active .tl-dot { background:var(--primary); color:#fff; box-shadow:0 0 0 4px rgba(220,53,69,.2); }
+  .tl-step.active .tl-label { color:var(--primary); font-weight:700; }
+  .tl-line { flex:1; height:3px; background:#e9ecef; margin:0 4px; margin-bottom:18px; transition:background .3s; }
+  .tl-line.done { background:#28a745; }
+  .od-item { display:flex; align-items:center; gap:.875rem; padding:.875rem 1.25rem; border-bottom:1px solid #f5f5f5; }
+  .od-item:last-of-type { border-bottom:none; }
+  .od-item img { width:60px; height:60px; border-radius:8px; object-fit:contain; background:#f8f9fa; padding:5px; border:1px solid #eee; flex-shrink:0; }
+  .od-item-info { flex:1; min-width:0; }
+  .od-totals { padding:1rem 1.25rem; background:#f8f9fa; border-top:1px solid #f0f0f0; }
+  .od-info-row { display:flex; align-items:flex-start; gap:.75rem; padding:.5rem 1.25rem; font-size:.88rem; border-bottom:1px solid #f8f8f8; }
+  .od-info-row:last-child { border:none; }
+  .od-info-row i { width:16px; color:var(--primary); margin-top:2px; flex-shrink:0; }
+</style>
+}

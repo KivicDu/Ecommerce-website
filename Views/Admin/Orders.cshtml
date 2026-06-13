@@ -1,0 +1,162 @@
+@model List<HutechStore.Models.Order>
+@{
+  ViewData["Title"] = "Quản lý đơn hàng";
+  Layout = "~/Views/Shared/_AdminLayout.cshtml";
+  var statuses = new[] {
+    ("", "Tất cả"), ("pending","Chờ xác nhận"), ("confirmed","Đã xác nhận"),
+    ("shipping","Đang giao"), ("delivered","Đã nhận"), ("cancelled","Đã hủy")
+  };
+}
+
+@* Status filter tabs *@
+<div class="d-flex gap-2 flex-wrap mb-4">
+  @foreach (var (val, lbl) in statuses)
+  {
+    <a href="?status=@val"
+       class="btn btn-sm @(ViewBag.Status?.ToString() == val ? "btn-danger" : "btn-outline-secondary")">
+      @lbl
+    </a>
+  }
+  <span class="ms-auto text-muted small align-self-center">
+    Tổng: <strong>@ViewBag.Total</strong> đơn
+  </span>
+</div>
+
+<div class="admin-card">
+  <div class="table-responsive">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Mã đơn</th>
+          <th>Khách hàng</th>
+          <th>Sản phẩm</th>
+          <th>Tổng tiền</th>
+          <th>Thanh toán</th>
+          <th>Ngày đặt</th>
+          <th>Trạng thái</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach (var o in Model)
+        {
+          <tr>
+            <td><span class="fw-bold text-danger">#@o.OrderNumber</span></td>
+            <td>
+              <div class="fw-semibold small">@(o.User?.Name ?? "-")</div>
+              <div class="text-muted" style="font-size:.73rem">@o.ShippingPhone</div>
+            </td>
+            <td>
+              <div class="small">@o.OrderItems.Count sản phẩm</div>
+              <div class="text-muted" style="font-size:.73rem">
+                @string.Join(", ", o.OrderItems.Take(2).Select(i => i.ProductName))@(o.OrderItems.Count > 2 ? "..." : "")
+              </div>
+            </td>
+            <td class="fw-bold text-danger">@o.TotalAmount.ToString("N0")₫</td>
+            <td><span class="badge bg-secondary">@o.PaymentMethod.ToUpper()</span></td>
+            <td class="text-muted small">@o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+            <td>
+              <select class="form-select form-select-sm status-select"
+                      data-order-id="@o.Id"
+                      style="min-width:140px"
+                      onchange="updateStatus(this)">
+                @foreach (var (sv, sl) in statuses.Skip(1))
+                {
+                  @if (o.Status == sv) { <option value="@sv" selected>@sl</option> } else { <option value="@sv">@sl</option> }
+                }
+              </select>
+            </td>
+            <td>
+              <button class="btn btn-outline-secondary btn-sm"
+                      data-bs-toggle="modal"
+                      data-bs-target="#orderModal"
+                      data-order='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+                        id        = o.Id,
+                        number    = o.OrderNumber,
+                        name      = o.ShippingName,
+                        phone     = o.ShippingPhone,
+                        address   = o.ShippingAddress,
+                        note      = o.Note,
+                        payment   = o.PaymentMethod,
+                        total     = o.TotalAmount.ToString("N0") + "₫",
+                        status    = o.Status,
+                        items     = o.OrderItems.Select(i => i.ProductName + " x" + i.Quantity).ToList()
+                      }))'>
+                <i class="fas fa-eye"></i>
+              </button>
+            </td>
+          </tr>
+        }
+        @if (!Model.Any())
+        {
+          <tr><td colspan="8" class="text-center text-muted py-4">Không có đơn hàng nào</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if ((int)ViewBag.TotalPages > 1)
+  {
+    <div class="p-3 border-top">
+      <nav><ul class="pagination pagination-sm justify-content-center mb-0">
+        @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
+        {
+          <li class="page-item @(i == (int)ViewBag.Page ? "active" : "")">
+            <a class="page-link" href="?page=@i&status=@ViewBag.Status">@i</a>
+          </li>
+        }
+      </ul></nav>
+    </div>
+  }
+</div>
+
+@* Order detail modal *@
+<div class="modal fade" id="orderModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Chi tiết đơn hàng</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="orderModalBody"></div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+async function updateStatus(sel) {
+  const orderId = sel.dataset.orderId;
+  const status  = sel.value;
+  try {
+    const res  = await fetch('/Admin/UpdateOrderStatus', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': getAntiForgeryToken() },
+      body:    JSON.stringify({ id: parseInt(orderId), status })
+    });
+    const data = await res.json();
+    if (data.success) showToast('Cập nhật trạng thái thành công!', 'success');
+    else showToast('Cập nhật thất bại', 'error');
+  } catch { showToast('Lỗi kết nối', 'error'); }
+}
+
+document.getElementById('orderModal').addEventListener('show.bs.modal', e => {
+  const btn   = e.relatedTarget;
+  const order = JSON.parse(btn.dataset.order);
+  document.getElementById('orderModalBody').innerHTML = `
+    <table class="table table-sm">
+      <tr><td class="text-muted">Mã đơn</td>      <td class="fw-bold text-danger">#${order.number}</td></tr>
+      <tr><td class="text-muted">Khách hàng</td>   <td>${order.name}</td></tr>
+      <tr><td class="text-muted">Điện thoại</td>   <td>${order.phone}</td></tr>
+      <tr><td class="text-muted">Địa chỉ</td>      <td>${order.address}</td></tr>
+      <tr><td class="text-muted">Ghi chú</td>       <td>${order.note || '-'}</td></tr>
+      <tr><td class="text-muted">Thanh toán</td>   <td>${order.payment.toUpperCase()}</td></tr>
+      <tr><td class="text-muted">Tổng tiền</td>    <td class="fw-bold text-danger">${order.total}</td></tr>
+    </table>
+    <div class="fw-semibold mt-2 mb-1">Sản phẩm:</div>
+    <ul class="list-unstyled mb-0">
+      ${order.items.map(i => `<li class="small py-1 border-bottom">• ${i}</li>`).join('')}
+    </ul>`;
+});
+</script>
+}
