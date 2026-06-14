@@ -1,0 +1,64 @@
+@* ── About.cshtml ─────────────────────────────────────────────── *@
+@{ ViewData["Title"] = "Về chúng tôi"; }
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 text-center mb-5">
+      <h1 class="section-title text-center">Về <span class="text-danger">HutechStore</span></h1>
+      <p class="lead text-muted">
+        Chuyên cung cấp iPhone & Samsung chính hãng tại TP.HCM.
+        Tư vấn tận tâm, giá minh bạch, bảo hành uy tín.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <div class="col-md-3 col-6 text-center">
+      <div class="about-stat"><div class="about-stat-num">17+</div><div>Dòng máy</div></div>
+    </div>
+    <div class="col-md-3 col-6 text-center">
+      <div class="about-stat"><div class="about-stat-num">100%</div><div>Chính hãng</div></div>
+    </div>
+    <div class="col-md-3 col-6 text-center">
+      <div class="about-stat"><div class="about-stat-num">24/7</div><div>Hỗ trợ AI</div></div>
+    </div>
+    <div class="col-md-3 col-6 text-center">
+      <div class="about-stat"><div class="about-stat-num">12T</div><div>Bảo hành</div></div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="about-card">
+        <div class="about-icon"><i class="fas fa-shield-alt"></i></div>
+        <h5>Chính hãng 100%</h5>
+        <p class="text-muted small">Tất cả sản phẩm đều có hóa đơn VAT, tem chính hãng Apple/Samsung Việt Nam.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="about-card">
+        <div class="about-icon"><i class="fas fa-robot"></i></div>
+        <h5>AI Tư vấn thông minh</h5>
+        <p class="text-muted small">Chatbot AI powered by Gemini, hiểu dữ liệu thực tế của cửa hàng để tư vấn chính xác.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="about-card">
+        <div class="about-icon"><i class="fas fa-truck"></i></div>
+        <h5>Giao hàng nhanh</h5>
+        <p class="text-muted small">Miễn phí vận chuyển đơn từ 5 triệu. Giao hàng trong ngày nội thành TP.HCM.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Styles {
+<style>
+  .about-stat { padding:1.5rem; background:#fff; border-radius:12px; border:1px solid var(--border-color); }
+  .about-stat-num { font-size:2.5rem; font-weight:900; color:var(--primary); line-height:1; }
+  .about-card { background:#fff; border-radius:12px; border:1px solid var(--border-color); padding:2rem; text-align:center; height:100%; transition:box-shadow .2s; }
+  .about-card:hover { box-shadow:0 6px 24px rgba(0,0,0,.1); }
+  .about-icon { width:64px; height:64px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin:0 auto 1rem; }
+  .section-title.text-center::after { left:50%; transform:translateX(-50%); }
+</style>
+}

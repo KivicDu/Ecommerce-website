@@ -1,0 +1,294 @@
+@model HutechStore.ViewModels.ProductIndexViewModel
+@{
+  ViewData["Title"] = "Sản phẩm";
+  var useCases = new[] {
+    ("gaming",      "🎮 Gaming"),
+    ("camera",      "📸 Camera"),
+    ("business",    "💼 Doanh nhân"),
+    ("student",     "🎓 Sinh viên"),
+    ("battery_life","🔋 Pin trâu"),
+    ("value",       "💰 Giá tốt"),
+  };
+}
+
+<div class="container py-4">
+
+  @* ── BREADCRUMB ── *@
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+      <li class="breadcrumb-item active">Sản phẩm</li>
+    </ol>
+  </nav>
+
+  @* ── BRAND TABS ── *@
+  <div class="brand-tabs mb-4">
+    <a href="?@(Model.Category.HasValue ? "category="+Model.Category : "")"
+       class="brand-tab @(string.IsNullOrEmpty(Model.Brand) ? "active" : "")">
+      Tất cả
+    </a>
+    <a href="?brand=Apple@(Model.Category.HasValue ? "&category="+Model.Category : "")"
+       class="brand-tab @(Model.Brand=="Apple" ? "active" : "")">
+      <i class="fab fa-apple me-1"></i>iPhone
+    </a>
+    <a href="?brand=Samsung@(Model.Category.HasValue ? "&category="+Model.Category : "")"
+       class="brand-tab @(Model.Brand=="Samsung" ? "active" : "")">
+      <i class="fas fa-mobile-alt me-1"></i>Samsung
+    </a>
+  </div>
+
+  <div class="row g-4">
+
+    @* ── SIDEBAR FILTER ── *@
+    <div class="col-lg-3 col-md-4">
+      <div class="filter-sidebar">
+        <form method="get" id="filterForm">
+          @if (!string.IsNullOrEmpty(Model.Brand))
+          {
+            <input type="hidden" name="Brand" value="@Model.Brand"/>
+          }
+
+          @* Tìm kiếm *@
+          <div class="mb-4">
+            <div class="filter-title">Tìm kiếm</div>
+            <div class="input-group input-group-sm">
+              <input type="text" name="Search" class="form-control"
+                     placeholder="Nhập tên máy..." value="@Model.Search"/>
+              <button class="btn btn-danger btn-sm" type="submit">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+
+          @* Danh mục *@
+          <div class="mb-4">
+            <div class="filter-title">Danh mục</div>
+            @foreach (var cat in Model.Categories)
+            {
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="Category"
+                       id="cat@cat.Id" value="@cat.Id"
+                       @(Model.Category == cat.Id ? "checked" : "")
+                       onchange="this.form.submit()"/>
+                <label class="form-check-label" for="cat@cat.Id">@cat.Name</label>
+              </div>
+            }
+            @if (Model.Category.HasValue)
+            {
+              <a href="?@(string.IsNullOrEmpty(Model.Brand) ? "" : "brand="+Model.Brand)"
+                 class="small text-muted mt-1 d-block">Xóa lọc danh mục ×</a>
+            }
+          </div>
+
+          @* Khoảng giá *@
+          <div class="mb-4">
+            <div class="filter-title">Khoảng giá</div>
+            <div class="row g-1">
+              <div class="col-6">
+                <input type="number" name="MinPrice" class="form-control form-control-sm"
+                       placeholder="Từ" value="@Model.MinPrice" step="1000000"/>
+              </div>
+              <div class="col-6">
+                <input type="number" name="MaxPrice" class="form-control form-control-sm"
+                       placeholder="Đến" value="@Model.MaxPrice" step="1000000"/>
+              </div>
+            </div>
+            @* Price quick buttons *@
+            <div class="d-flex flex-wrap gap-1 mt-2">
+              <button type="button" class="btn btn-outline-secondary btn-xs price-range-btn"
+                      data-min="0" data-max="10000000">Dưới 10tr</button>
+              <button type="button" class="btn btn-outline-secondary btn-xs price-range-btn"
+                      data-min="10000000" data-max="20000000">10-20tr</button>
+              <button type="button" class="btn btn-outline-secondary btn-xs price-range-btn"
+                      data-min="20000000" data-max="35000000">20-35tr</button>
+              <button type="button" class="btn btn-outline-secondary btn-xs price-range-btn"
+                      data-min="35000000" data-max="">Trên 35tr</button>
+            </div>
+          </div>
+
+          @* Mục đích sử dụng (AI tags) *@
+          <div class="mb-4">
+            <div class="filter-title">Mục đích sử dụng</div>
+            @foreach (var (val, label) in useCases)
+            {
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="UseCase"
+                       id="uc_@val" value="@val"
+                       @(Model.UseCase == val ? "checked" : "")
+                       onchange="this.form.submit()"/>
+                <label class="form-check-label small" for="uc_@val">@label</label>
+              </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.UseCase))
+            {
+              <a href="?@(string.IsNullOrEmpty(Model.Brand) ? "" : "brand="+Model.Brand)"
+                 class="small text-muted mt-1 d-block">Xóa lọc ×</a>
+            }
+          </div>
+
+          @* RAM *@
+          <div class="mb-4">
+            <div class="filter-title">RAM tối thiểu</div>
+            <select name="MinRam" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="">Tất cả</option>
+              @if(Model.MinRam==6){<option value="6" selected>6 GB+</option>}else{<option value="6">6 GB+</option>}
+              @if(Model.MinRam==8){<option value="8" selected>8 GB+</option>}else{<option value="8">8 GB+</option>}
+              @if(Model.MinRam==12){<option value="12" selected>12 GB+</option>}else{<option value="12">12 GB+</option>}
+            </select>
+          </div>
+
+          @* 5G *@
+          <div class="mb-4">
+            <div class="form-check form-switch">
+              @if(Model.Has5G==true){
+                <input class="form-check-input" type="checkbox" name="Has5G" value="true" id="chk5g" checked onchange="this.form.submit()"/>
+              }else{
+                <input class="form-check-input" type="checkbox" name="Has5G" value="true" id="chk5g" onchange="this.form.submit()"/>
+              }
+              <label class="form-check-label" for="chk5g">Chỉ xem máy 5G</label>
+            </div>
+          </div>
+
+          @* Sort *@
+          <div class="mb-3">
+            <div class="filter-title">Sắp xếp</div>
+            <select name="Sort" class="form-select form-select-sm" onchange="this.form.submit()">
+              @if(Model.Sort=="latest"){<option value="latest" selected>Mới nhất</option>}else{<option value="latest">Mới nhất</option>}
+              @if(Model.Sort=="price_asc"){<option value="price_asc" selected>Giá thấp → cao</option>}else{<option value="price_asc">Giá thấp → cao</option>}
+              @if(Model.Sort=="price_desc"){<option value="price_desc" selected>Giá cao → thấp</option>}else{<option value="price_desc">Giá cao → thấp</option>}
+              @if(Model.Sort=="rating"){<option value="rating" selected>Đánh giá cao</option>}else{<option value="rating">Đánh giá cao</option>}
+              @if(Model.Sort=="name"){<option value="name" selected>Tên A-Z</option>}else{<option value="name">Tên A-Z</option>}
+            </select>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-danger btn-sm">
+              <i class="fas fa-filter me-1"></i>Áp dụng
+            </button>
+            <a href="/Product" class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-times me-1"></i>Xóa tất cả
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    @* ── PRODUCT GRID ── *@
+    <div class="col-lg-9 col-md-8">
+
+      @* Kết quả *@
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div class="text-muted small">
+          Tìm thấy <strong class="text-dark">@Model.TotalItems</strong> sản phẩm
+          @if (!string.IsNullOrEmpty(Model.Search))
+          { <span> cho "<em>@Model.Search</em>"</span> }
+          @if (!string.IsNullOrEmpty(Model.UseCase))
+          { <span class="badge bg-danger ms-1">@useCases.FirstOrDefault(u=>u.Item1==Model.UseCase).Item2</span> }
+        </div>
+        <div class="text-muted small">
+          Trang @Model.CurrentPage / @Model.TotalPages
+        </div>
+      </div>
+
+      @if (!Model.Products.Any())
+      {
+        <div class="text-center py-5">
+          <i class="fas fa-search fa-4x text-muted mb-3 d-block"></i>
+          <h5 class="text-muted">Không tìm thấy sản phẩm phù hợp</h5>
+          <p class="text-muted small">Hãy thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
+          <a href="/Product" class="btn btn-danger mt-2">Xem tất cả sản phẩm</a>
+        </div>
+      }
+      else
+      {
+        <div class="row g-3">
+          @foreach (var product in Model.Products)
+          {
+            <div class="col-6 col-xl-4">
+              @await Html.PartialAsync("_ProductCard", product)
+            </div>
+          }
+        </div>
+
+        @* Pagination *@
+        @if (Model.TotalPages > 1)
+        {
+          <nav class="mt-4" aria-label="Phân trang">
+            <ul class="pagination justify-content-center flex-wrap">
+              @if (Model.CurrentPage > 1)
+              {
+                <li class="page-item">
+                  <a class="page-link" href="?@GetQueryString(Model.CurrentPage - 1)">
+                    <i class="fas fa-chevron-left"></i>
+                  </a>
+                </li>
+              }
+              @for (int i = Math.Max(1, Model.CurrentPage - 2);
+                    i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+              {
+                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                  <a class="page-link" href="?@GetQueryString(i)">@i</a>
+                </li>
+              }
+              @if (Model.CurrentPage < Model.TotalPages)
+              {
+                <li class="page-item">
+                  <a class="page-link" href="?@GetQueryString(Model.CurrentPage + 1)">
+                    <i class="fas fa-chevron-right"></i>
+                  </a>
+                </li>
+              }
+            </ul>
+          </nav>
+        }
+      }
+    </div>
+  </div>
+</div>
+
+@functions {
+  string GetQueryString(int page)
+  {
+    var q = new System.Text.StringBuilder();
+    void Add(string k, string? v) { if (!string.IsNullOrEmpty(v)) q.Append($"&{k}={Uri.EscapeDataString(v)}"); }
+    q.Append($"CurrentPage={page}");
+    Add("Search",   Model.Search);
+    Add("Brand",    Model.Brand);
+    if (Model.Category.HasValue) q.Append($"&Category={Model.Category}");
+    Add("Sort",     Model.Sort);
+    if (Model.MinPrice.HasValue) q.Append($"&MinPrice={Model.MinPrice}");
+    if (Model.MaxPrice.HasValue) q.Append($"&MaxPrice={Model.MaxPrice}");
+    Add("UseCase",  Model.UseCase);
+    if (Model.MinRam.HasValue)   q.Append($"&MinRam={Model.MinRam}");
+    if (Model.Has5G == true)     q.Append("&Has5G=true");
+    return q.ToString().TrimStart('&');
+  }
+}
+
+@section Styles {
+<style>
+  /* Brand tabs */
+  .brand-tabs { display:flex; gap:.5rem; border-bottom:2px solid #dee2e6; padding-bottom:.5rem; }
+  .brand-tab  { padding:.5rem 1.25rem; border-radius:8px 8px 0 0; color:var(--text-muted);
+                font-weight:600; font-size:.9rem; transition:all .2s; border:1px solid transparent; }
+  .brand-tab:hover, .brand-tab.active {
+    color:var(--primary); background:var(--primary-light);
+    border-color:var(--primary-light); text-decoration:none; }
+  .brand-tab.active { border-bottom-color:var(--primary-light); }
+  /* Price range buttons */
+  .btn-xs { font-size:.72rem; padding:2px 8px; border-radius:10px; }
+</style>
+}
+
+@section Scripts {
+<script>
+  // Price range quick buttons
+  document.querySelectorAll('.price-range-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelector('[name="MinPrice"]').value = btn.dataset.min;
+      document.querySelector('[name="MaxPrice"]').value = btn.dataset.max;
+      document.getElementById('filterForm').submit();
+    });
+  });
+</script>
+}

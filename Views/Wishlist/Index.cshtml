@@ -1,0 +1,38 @@
+@model List<HutechStore.Models.Wishlist>
+@{  ViewData["Title"] = "Sản phẩm yêu thích"; }
+
+<div class="container py-4">
+  <h2 class="section-title mb-4"><i class="fas fa-heart me-2 text-danger"></i>Sản phẩm yêu thích</h2>
+
+  @if (!Model.Any())
+  {
+    <div class="text-center py-5">
+      <i class="far fa-heart fa-5x text-muted mb-3 d-block"></i>
+      <h5 class="text-muted">Chưa có sản phẩm yêu thích</h5>
+      <a asp-controller="Product" asp-action="Index" class="btn btn-danger mt-2">Khám phá sản phẩm</a>
+    </div>
+  }
+  else
+  {
+    <div class="row g-3">
+      @foreach (var w in Model.Where(w => w.Product != null))
+      {
+        <div class="col-6 col-md-4 col-lg-3">
+          <div class="position-relative">
+            @await Html.PartialAsync("_ProductCard", w.Product!)
+            <form asp-action="Remove" method="post" class="position-absolute top-0 end-0 m-2">
+              @Html.AntiForgeryToken()
+              <input type="hidden" name="id" value="@w.Id"/>
+              <button type="submit" class="btn btn-danger btn-sm rounded-circle"
+                      style="width:28px;height:28px;padding:0;font-size:.7rem"
+                      title="Xóa khỏi yêu thích"
+                      onclick="return confirm('Xóa khỏi yêu thích?')">
+                <i class="fas fa-times"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
