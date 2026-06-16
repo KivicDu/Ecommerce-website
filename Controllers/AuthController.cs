@@ -9,6 +9,7 @@ using HutechStore.Helpers;
 using HutechStore.Models;
 using HutechStore.Services;
 using HutechStore.ViewModels;
+using BCrypt.Net;
 
 namespace HutechStore.Controllers;
 
@@ -34,11 +35,21 @@ public class AuthController : Controller
     {
         if (!ModelState.IsValid) return View(vm);
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == vm.Email);
-        if (user == null || user.Password != vm.Password)
+
+        if (user == null)
         {
-            ModelState.AddModelError("", "Email hoặc mật khẩu không đúng");
+            ModelState.AddModelError("", "Email không tồn tại");
             return View(vm);
         }
+
+        bool isPasswordCorrect = BCrypt.Net.BCrypt.Verify(vm.Password, user.Password);
+        
+        if (!isPasswordCorrect)
+        {
+            ModelState.AddModelError("", "Mật khẩu không chính xác");
+            return View(vm);
+        }
+
         SessionHelper.SetUser(HttpContext.Session, user);
         await _cart.MergeSessionCartAsync(user.Id);
         return RedirectAfterLogin(user);
@@ -106,7 +117,10 @@ public class AuthController : Controller
             ModelState.AddModelError("Email", "Email đã được sử dụng");
             return View(vm);
         }
-        var user = new User { Name = vm.Name, Email = vm.Email, Password = vm.Password, Phone = vm.Phone, Address = vm.Address };
+
+        string hashPassword = BCrypt.Net.BCrypt.HashPassword(vm.Password);
+
+        var user = new User { Name = vm.Name, Email = vm.Email, Password = hashPassword, Phone = vm.Phone, Address = vm.Address };
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
         TempData["Success"] = "Đăng ký thành công! Vui lòng đăng nhập.";
