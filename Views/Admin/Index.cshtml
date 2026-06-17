@@ -189,7 +189,7 @@
   .top-rank-1 { background:#ffd700; color:#000; }
   .top-rank-2 { background:#c0c0c0; color:#000; }
   .top-rank-3 { background:#cd7f32; color:#fff; }
-  .top-rank-other { background:#f0f2f5; color:#666; }
+  .top-rank-other { background:var(--ivory-warm); color:var(--text-secondary); }
 </style>
 }
 
@@ -205,8 +205,8 @@ new Chart(revCtx, {
     datasets: [{
       label: 'Doanh thu (₫)',
       data:  @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartData.Select(d => d.Revenue))),
-      backgroundColor: 'rgba(220,53,69,.75)',
-      borderColor:     'rgba(220,53,69,1)',
+      backgroundColor: 'rgba(15, 42, 68, 0.75)',
+      borderColor:     'rgba(15, 42, 68, 1)',
       borderWidth: 1,
       borderRadius: 6,
     }]
@@ -231,7 +231,7 @@ new Chart(revCtx, {
   var statusColors = new Dictionary<string, string>{
     ["pending"]="rgba(255,193,7,.8)",["confirmed"]="rgba(13,202,240,.8)",
     ["shipping"]="rgba(13,110,253,.8)",["delivered"]="rgba(25,135,84,.8)",
-    ["cancelled"]="rgba(220,53,69,.8)"
+    ["cancelled"]="rgba(15, 42, 68, 0.8)"
   };
 }
 const stCtx = document.getElementById('statusChart').getContext('2d');

@@ -1,7 +1,5 @@
 @* ════════════════════════════════════════════════════════════════
    _ChatWidget.cshtml — AI Chatbot tư vấn điện thoại
-   Widget nổi góc dưới bên phải màn hình
-   Để thay đổi màu: sửa biến --chat-* trong site.css
    ════════════════════════════════════════════════════════════════ *@
 
 <div id="chatWidget" class="chat-widget" role="complementary" aria-label="Tư vấn AI">
@@ -10,8 +8,9 @@
   <button id="chatToggle" class="chat-toggle-btn" onclick="toggleChat()"
           aria-label="Mở chat tư vấn" title="Tư vấn AI">
     <div class="chat-icon-wrap">
-      <i class="fas fa-robot chat-icon-open"></i>
-      <i class="fas fa-times chat-icon-close d-none"></i>
+      @* Sử dụng icon trò chuyện tinh gọn *@
+      <i class="far fa-comment-alt chat-icon-open" style="font-size: 1.3rem;"></i>
+      <i class="fas fa-times chat-icon-close d-none" style="font-size: 1.3rem;"></i>
     </div>
     <span class="chat-badge-dot" id="chatDot"></span>
   </button>
@@ -22,19 +21,17 @@
     @* Header *@
     <div class="chat-header">
       <div class="chat-header-info">
-        <div class="chat-avatar">
-          <i class="fas fa-robot"></i>
-        </div>
+        <div class="chat-avatar-text">AI</div>
         <div>
-          <div class="chat-name">AI Tư vấn</div>
+          <div class="chat-name">Trợ lý Hutech</div>
           <div class="chat-status">
-            <span class="status-dot"></span> Luôn sẵn sàng
+            <span class="status-dot"></span> Trực tuyến
           </div>
         </div>
       </div>
       <div class="chat-header-actions">
         <button class="chat-action-btn" onclick="clearChat()" title="Xóa lịch sử">
-          <i class="fas fa-trash-alt"></i>
+          <i class="far fa-trash-alt"></i>
         </button>
         <button class="chat-action-btn" onclick="toggleChat()" title="Đóng">
           <i class="fas fa-times"></i>
@@ -45,25 +42,24 @@
     @* Messages *@
     <div id="chatMessages" class="chat-messages">
       <div class="chat-msg assistant">
-        <div class="msg-avatar"><i class="fas fa-robot"></i></div>
         <div class="msg-bubble">
-          <p>Xin chào! 👋 Mình là AI tư vấn của <strong>HutechStore</strong>.</p>
-          <p>Mình có thể giúp bạn:</p>
-          <ul class="mb-0">
-            <li>🎮 Tìm điện thoại <strong>chơi game</strong> tốt nhất</li>
-            <li>📸 Gợi ý điện thoại <strong>chụp ảnh</strong> đẹp</li>
-            <li>💰 Tư vấn theo <strong>ngân sách</strong> của bạn</li>
-            <li>⚖️ So sánh <strong>iPhone vs Samsung</strong></li>
+          <p>Xin chào. Tôi là trợ lý AI của <strong>HutechStore</strong>.</p>
+          <p>Tôi có thể giúp bạn tìm kiếm và so sánh các dòng sản phẩm cao cấp:</p>
+          <ul class="mb-0 ps-3">
+            <li>Tìm dòng điện thoại chơi game hiệu năng cao</li>
+            <li>Đề xuất điện thoại chụp ảnh chuyên nghiệp</li>
+            <li>Tư vấn cấu hình theo ngân sách cá nhân</li>
+            <li>So sánh chi tiết iPhone và Samsung Galaxy</li>
           </ul>
         </div>
       </div>
 
       @* Quick replies gợi ý *@
       <div class="quick-replies" id="quickReplies">
-        <button class="quick-reply-btn" onclick="sendQuickReply(this)">🎮 Chơi game dưới 15tr</button>
-        <button class="quick-reply-btn" onclick="sendQuickReply(this)">📸 Chụp ảnh đẹp nhất</button>
-        <button class="quick-reply-btn" onclick="sendQuickReply(this)">💰 Tầm 20-25 triệu</button>
-        <button class="quick-reply-btn" onclick="sendQuickReply(this)">⚖️ iPhone vs Samsung</button>
+        <button class="quick-reply-btn" onclick="sendQuickReply(this)">Chơi game dưới 15tr</button>
+        <button class="quick-reply-btn" onclick="sendQuickReply(this)">Chụp ảnh tốt nhất</button>
+        <button class="quick-reply-btn" onclick="sendQuickReply(this)">Tầm giá 20-25 triệu</button>
+        <button class="quick-reply-btn" onclick="sendQuickReply(this)">So sánh iPhone vs Samsung</button>
       </div>
     </div>
 
@@ -71,15 +67,15 @@
     <div class="chat-input-area">
       <div class="chat-input-wrap">
         <input type="text" id="chatInput" class="chat-input"
-               placeholder="Nhập câu hỏi..."
+               placeholder="Nhập câu hỏi của bạn..."
                maxlength="500"
                onkeydown="if(event.key==='Enter')sendMessage()"/>
         <button class="chat-send-btn" onclick="sendMessage()" id="chatSendBtn">
-          <i class="fas fa-paper-plane"></i>
+          <i class="far fa-paper-plane"></i>
         </button>
       </div>
       <div class="chat-footer-note">
-        <i class="fas fa-magic me-1"></i>Powered by Gemini AI · Dữ liệu thực từ HutechStore
+        Powered by Gemini AI · Dữ liệu thực từ HutechStore
       </div>
     </div>
 

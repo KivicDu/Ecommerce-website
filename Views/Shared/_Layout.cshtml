@@ -1,36 +1,43 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="light">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#0F2A44"/>
   <title>@ViewData["Title"] - HutechStore</title>
+
+  {{!-- Premium fonts: Inter (weight 300-900) --}}
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+
   <link rel="stylesheet" href="~/css/bootstrap.min.css"/>
   <link rel="stylesheet" href="~/css/fontawesome.min.css"/>
   <link rel="stylesheet" href="~/css/site.css"/>
   @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
+<body class="hs-body">
 
-@* Hidden antiforgery token for AJAX requests *@
+@* Hidden antiforgery token for AJAX *@
 <form id="__AjaxAntiForgeryForm" style="display:none">@Html.AntiForgeryToken()</form>
 
-@* ── HEADER ─────────────────────────────────────────────────────────────── *@
+@* ── HEADER ──────────────────────────────────────────────────── *@
 @await Html.PartialAsync("_Header")
 
-@* ── FLASH MESSAGES ──────────────────────────────────────────────────────── *@
+@* ── FLASH MESSAGES ──────────────────────────────────────────── *@
 @if (TempData["Success"] != null || TempData["Error"] != null)
 {
-  <div class="container mt-3">
+  <div class="container flash-container">
     @if (TempData["Success"] != null)
     {
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <div class="alert alert-success alert-dismissible fade show flash-alert" role="alert">
         <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     }
     @if (TempData["Error"] != null)
     {
-      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <div class="alert alert-danger alert-dismissible fade show flash-alert" role="alert">
         <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
@@ -38,13 +45,13 @@
   </div>
 }
 
-@* ── MAIN CONTENT ────────────────────────────────────────────────────────── *@
+@* ── MAIN CONTENT ─────────────────────────────────────────────── *@
 <main class="main-content">@RenderBody()</main>
 
-@* ── FOOTER ──────────────────────────────────────────────────────────────── *@
+@* ── FOOTER ───────────────────────────────────────────────────── *@
 @await Html.PartialAsync("_Footer")
 
-@* ── AI CHAT WIDGET ───────────────────────────────────────────────────────── *@
+@* ── AI CHAT WIDGET ───────────────────────────────────────────── *@
 @await Html.PartialAsync("_ChatWidget")
 
 <script src="~/js/bootstrap.bundle.min.js"></script>

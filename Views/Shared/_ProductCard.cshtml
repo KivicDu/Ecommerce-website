@@ -1,7 +1,5 @@
 @* ════════════════════════════════════════════════════════════════
    _ProductCard.cshtml — Card sản phẩm dùng chung
-   Nhận model: HutechStore.Models.Product
-   Ảnh dùng aspect-ratio 4/3 + object-fit:contain → không bị cắt
    ════════════════════════════════════════════════════════════════ *@
 
 @model HutechStore.Models.Product
@@ -16,28 +14,30 @@
   var inStock     = Model.Stock > 0 || Model.ProductVariants.Any(v => v.Status == 1 && v.Stock > 0);
   var slug        = string.IsNullOrEmpty(Model.Slug) ? Model.Id.ToString() : Model.Slug;
 
-  // Lấy WishlistIds từ ViewBag (set bởi HomeController / ProductController)
+  // Lấy WishlistIds từ ViewBag
   var wishlistIds = ViewBag.WishlistIds as HashSet<int> ?? new HashSet<int>();
   var inWishlist  = wishlistIds.Contains(Model.Id);
 }
 
-<div class="product-card hover-lift h-100">
+<div class="product-card h-100">
   <a href="/Product/Detail/@slug" class="product-card-link" tabindex="-1">
-
+    
     @* Nút tim yêu thích *@
     <button class="product-card-wishlist @(inWishlist ? "active" : "")"
             onclick="toggleWishlist(@Model.Id, this); event.preventDefault(); event.stopPropagation();"
             title="@(inWishlist ? "Bỏ yêu thích" : "Thêm yêu thích")">
       <i class="@(inWishlist ? "fas" : "far") fa-heart"></i>
     </button>
+
+    @* Khung ảnh sản phẩm *@
     <div class="product-img-wrap">
       @if (Model.Featured == 1)
       {
-        <span class="badge-featured">Nổi bật</span>
+        <span class="badge-featured-clean">NỔI BẬT</span>
       }
       @if (!inStock)
       {
-        <div class="out-of-stock-overlay">Hết hàng</div>
+        <div class="out-of-stock-overlay-clean">HẾT HÀNG</div>
       }
       <img src="@(string.IsNullOrEmpty(Model.Image) ? "/images/no-image.png" : Model.Image)"
            alt="@Model.Name"
@@ -50,92 +50,74 @@
   @* ── CARD BODY ── *@
   <div class="product-card-body">
 
-    @* Brand badge *@
-    <div class="product-brand">
+    @* Brand name *@
+    <div class="product-brand mb-1">
       @if (Model.Brand == "Apple")
       {
-        <span class="brand-apple"><i class="fab fa-apple me-1"></i>Apple</span>
+        <span class="brand-text">Apple</span>
       }
       else
       {
-        <span class="brand-samsung"><i class="fas fa-mobile-alt me-1"></i>Samsung</span>
+        <span class="brand-text">Samsung</span>
       }
     </div>
 
-    @* Tên *@
+    @* Tên sản phẩm *@
     <h6 class="product-name">
       <a href="/Product/Detail/@slug">@Model.Name</a>
     </h6>
 
-    @* Specs nhanh (từ PhoneSpecs) *@
+    @* Thông số rút gọn *@
     @if (Model.PhoneSpecs != null)
     {
-      <div class="product-specs-quick">
-        <span><i class="fas fa-microchip"></i> @Model.PhoneSpecs.RamGb GB RAM</span>
-        <span><i class="fas fa-hdd"></i> @Model.PhoneSpecs.StorageGb GB</span>
-        @if (Model.PhoneSpecs.Has5G)
-        {
-          <span class="spec-5g"><i class="fas fa-signal"></i> 5G</span>
-        }
+      <div class="product-specs-clean">
+        <span class="spec-item">@Model.PhoneSpecs.Chipset</span>
+        <span class="spec-divider">·</span>
+        <span class="spec-item">@Model.PhoneSpecs.StorageGb GB</span>
       </div>
     }
 
-    @* Rating *@
+    @* Đánh giá *@
     @if (Model.Reviews.Any())
     {
-      <div class="product-rating">
+      <div class="product-rating mt-2">
         @for (int i = 1; i <= 5; i++)
         {
-          <i class="@(i <= ratingInt ? "fas" : "far") fa-star"></i>
+          <i class="@(i <= ratingInt ? "fas" : "far") fa-star text-warning small"></i>
         }
-        <span class="rating-count">(@Model.Reviews.Count)</span>
+        <span class="rating-count text-muted small ms-1">(@Model.Reviews.Count)</span>
       </div>
     }
 
-    @* Giá *@
-    <div class="product-price-wrap">
+    @* Giá bán *@
+    <div class="product-price-wrap mt-2">
       @if (hasVariants)
       {
-        <span class="price-from">Từ</span>
+        <span class="price-from-text">Từ </span>
       }
       <span class="product-price">@lowestPrice.ToString("N0")₫</span>
     </div>
 
   </div>
 
-  @* ── CARD FOOTER: ACTIONS ── *@
-  <div class="product-card-footer">
-    <a href="/Product/Detail/@slug" class="btn btn-outline-danger btn-sm btn-detail">
-      <i class="fas fa-eye me-1"></i>Xem chi tiết
+  @* ── CARD FOOTER ── *@
+  <div class="product-card-footer-clean">
+    <a href="/Product/Detail/@slug" class="btn btn-detail-clean">
+      Chi tiết
     </a>
     @if (inStock)
     {
-      <button class="btn btn-danger btn-sm btn-add-cart"
+      <button class="btn btn-add-cart-clean"
               onclick="addToCart(@Model.Id, event)"
               data-product-id="@Model.Id">
-        <i class="fas fa-cart-plus"></i>
+        Mua ngay
       </button>
     }
     else
     {
-      <button class="btn btn-secondary btn-sm" disabled>
-        <i class="fas fa-ban"></i>
+      <button class="btn btn-add-cart-clean disabled" disabled>
+        Hết hàng
       </button>
     }
   </div>
 </div>
-
-<style>
-  .product-card { position: relative; }
-  .product-card-wishlist {
-    position: absolute; top: 8px; right: 8px; z-index: 10;
-    width: 32px; height: 32px; border-radius: 50%;
-    border: none; background: rgba(255,255,255,0.9);
-    color: #aaa; font-size: .85rem;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all .2s;
-    box-shadow: 0 1px 4px rgba(0,0,0,.15);
-  }
-  .product-card-wishlist:hover,
-  .product-card-wishlist.active { color: #dc3545; background: #fff; }
-</style>

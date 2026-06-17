@@ -93,6 +93,44 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     try { db.Database.Migrate(); } catch { }
+
+    try
+    {
+        var products = db.Products.ToList();
+        foreach (var p in products)
+        {
+            var targetImage = p.Name switch
+            {
+                "iPhone 16e" => "/images/16e.jpg",
+                "iPhone 15" => "/images/15.jpg",
+                "iPhone 15 Plus" => "/images/15plus.jpg",
+                "iPhone 15 Pro" => "/images/15pro.jpg",
+                "iPhone 15 Pro Max" => "/images/15prmax.jpg",
+                "iPhone 16" => "/images/16.jpg",
+                "iPhone 16 Plus" => "/images/16.plus.webp",
+                "iPhone 16 Pro" => "/images/16pro.jpg",
+                "iPhone 16 Pro Max" => "/images/16prmax.jpg",
+                "Samsung Galaxy A35 5G" => "/images/a35.jpg",
+                "Samsung Galaxy A55 5G" => "/images/a55_5g.jpg",
+                "Samsung Galaxy S24 FE" => "/images/s24fe.jpg",
+                "Samsung Galaxy S25" => "/images/s25.jpg",
+                "Samsung Galaxy S25+" => "/images/s25+.jpg",
+                "Samsung Galaxy S25 Ultra" => "/images/s25ultra.jpg",
+                "Samsung Galaxy Z Flip 6" => "/images/flip6.jpg",
+                "Samsung Galaxy Z Fold 6" => "/images/fold6.jpg",
+                _ => p.Image
+            };
+            if (p.Image != targetImage)
+            {
+                p.Image = targetImage;
+            }
+        }
+        db.SaveChanges();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Error seeding database image paths: " + ex.Message);
+    }
 }
 
 app.Run();

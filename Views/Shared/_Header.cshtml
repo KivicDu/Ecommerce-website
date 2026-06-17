@@ -1,7 +1,5 @@
 @* ════════════════════════════════════════════════════════════════
-   _Header.cshtml  — Thanh điều hướng chính
-   Để thay đổi màu sắc: sửa class "navbar-custom" trong site.css
-   Để thêm menu item: thêm <li> vào #mainNav
+   _Header.cshtml — Thanh điều hướng chính
    ════════════════════════════════════════════════════════════════ *@
 
 @{
@@ -18,11 +16,8 @@
     <div class="container">
 
       @* ── LOGO ── *@
-      <a class="navbar-brand" asp-controller="Home" asp-action="Index">
-        <div class="brand-logo">
-          <i class="fas fa-mobile-alt brand-icon"></i>
-          <span class="brand-text">Hutech<span class="brand-accent">Store</span></span>
-        </div>
+      <a class="navbar-brand luxury-logo" asp-controller="Home" asp-action="Index">
+        HUTECHSTORE
       </a>
 
       @* ── MOBILE TOGGLE ── *@
@@ -39,22 +34,25 @@
           <li class="nav-item">
             <a class="nav-link @(currentController=="Home"?"active":"")"
                asp-controller="Home" asp-action="Index">
-              <i class="fas fa-home me-1"></i>Trang chủ
+              Trang chủ
             </a>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle @(currentController=="Product"?"active":"")"
                href="#" data-bs-toggle="dropdown">
-              <i class="fas fa-mobile-alt me-1"></i>Sản phẩm
+              Sản phẩm
             </a>
             <ul class="dropdown-menu dropdown-menu-product">
               <li>
                 <a class="dropdown-item" asp-controller="Product" asp-action="Index">
-                  <i class="fas fa-th me-2 text-danger"></i>Tất cả điện thoại
+                  Tất cả điện thoại
                 </a>
               </li>
               <li><hr class="dropdown-divider"/></li>
-              <li class="dropdown-header"><i class="fab fa-apple me-1"></i>Apple iPhone</li>
+              <li class="dropdown-header d-flex align-items-center">
+                <svg class="brand-svg-apple me-2" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.82M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.57 2.95-1.39z"/></svg>
+                Apple iPhone
+              </li>
               <li>
                 <a class="dropdown-item" asp-controller="Product" asp-action="Index"
                    asp-route-brand="Apple">
@@ -62,7 +60,10 @@
                 </a>
               </li>
               <li><hr class="dropdown-divider"/></li>
-              <li class="dropdown-header"><i class="fas fa-tablet-alt me-1"></i>Samsung Galaxy</li>
+              <li class="dropdown-header d-flex align-items-center">
+                <svg class="brand-svg-samsung me-2" viewBox="0 0 450 75"><path d="M37.8 21.6c-4.4-3-8.8-4.5-13.8-4.5-5.9 0-9.8 2.5-9.8 6.5 0 4.1 4.1 5.9 11.2 7.7 11.4 2.8 21.7 6.4 21.7 18.2 0 13-10.9 20.3-25.7 20.3-10 0-19.8-3.4-25.2-7.8l5.2-11.2c4.7 3.5(11.8 6.4 18.4 6.4 6.7 0 11-2.7 11-7.1 0-4.8-4.6-6.4-12.8-8.4C11 38.4 2 34.6 2 23.5 2 11 12.8 5 26.6 5c9.2 0 17 2.4 21.7 5.7l-10.5 10.9zM73 68.6L98.5 5.8h12L136 68.6h-13.5l-16-41.5-16 41.5H73zM148 68.6V5.8h13.2l17.4 34.2L196 5.8h13.2v62.8h-11.8V21.4L180 55.6h-5.2l-17.4-34.2v47.2H148zM218.8 51.6c4.4 3 8.8 4.5 13.8 4.5 5.9 0 9.8-2.5 9.8-6.5 0-4.1-4.1-5.9-11.2-7.7-11.4-2.8-21.7-6.4-21.7-18.2 0-13 10.9-20.3 25.7-20.3 10 0 19.8 3.4 25.2 7.8l-5.2 11.2c-4.7-3.5-11.8-6.4-18.4-6.4-6.7 0-11 2.7-11 7.1 0 4.8 4.6 6.4 12.8 8.4 13.2 3.2 22.2 7 22.2 18.1 0 12.5-10.8 18.5-24.6 18.5-9.2 0-17-2.4-21.7-5.7l10.5-10.9zM281 5.8v41.5c0 7.8 4.4 11.2 10.8 11.2 6.4 0 10.8-3.4 10.8-11.2V5.8h12.2v41.5c0 14.8-10 22.3-23 22.3s-23-7.5-23-22.3V5.8H281zM345.8 68.6V5.8h13.2l24.4 43.4V5.8h12.2v62.8h-11.8L358 24.4v44.2h-12.2zM435.6 37.8v22c-5.8 6-13.8 9.8-23.6 9.8-18.4 0-31-13-31-31.4S393.6 7 412 7c9.2 0 17 3.4 22.4 8.8l-8.4 8.8c-3.6-3.8-8.8-6-14-6-11.4 0-19.2 8.4-19.2 19.8s7.8 19.8 19.2 19.8c4.6 0 8.8-1.6 11.8-4V48.6h-12.8v-10.8h24.6z"/></svg>
+                Samsung Galaxy
+              </li>
               <li>
                 <a class="dropdown-item" asp-controller="Product" asp-action="Index"
                    asp-route-brand="Samsung">
@@ -73,12 +74,12 @@
           </li>
           <li class="nav-item">
             <a class="nav-link" asp-controller="Home" asp-action="About">
-              <i class="fas fa-store me-1"></i>Về chúng tôi
+              Về chúng tôi
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" asp-controller="Home" asp-action="Contact">
-              <i class="fas fa-envelope me-1"></i>Liên hệ
+              Liên hệ
             </a>
           </li>
         </ul>
@@ -96,7 +97,7 @@
         </form>
 
         @* ── USER ACTIONS ── *@
-        <ul class="navbar-nav align-items-center gap-1">
+        <ul class="navbar-nav align-items-center gap-2">
 
           @* Wishlist *@
           @if (userId.HasValue)
@@ -104,7 +105,7 @@
             <li class="nav-item">
               <a class="nav-link icon-btn" asp-controller="Wishlist" asp-action="Index"
                  data-bs-toggle="tooltip" title="Yêu thích">
-                <i class="fas fa-heart"></i>
+                <i class="far fa-heart"></i>
               </a>
             </li>
           }
@@ -112,7 +113,7 @@
           @* Cart *@
           <li class="nav-item">
             <a class="nav-link icon-btn position-relative" asp-controller="Cart" asp-action="Index">
-              <i class="fas fa-shopping-cart"></i>
+              <i class="fas fa-shopping-bag"></i>
               @if (cartCount > 0)
               {
                 <span class="cart-badge">@cartCount</span>
@@ -145,17 +146,17 @@
                 <li><hr class="dropdown-divider"/></li>
                 <li>
                   <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
-                    <i class="fas fa-user me-2"></i>Tài khoản của tôi
+                    Tài khoản của tôi
                   </a>
                 </li>
                 <li>
                   <a class="dropdown-item" asp-controller="Order" asp-action="History">
-                    <i class="fas fa-box me-2"></i>Lịch sử đơn hàng
+                    Lịch sử đơn hàng
                   </a>
                 </li>
                 <li>
                   <a class="dropdown-item" asp-controller="Wishlist" asp-action="Index">
-                    <i class="fas fa-heart me-2"></i>Sản phẩm yêu thích
+                    Sản phẩm yêu thích
                   </a>
                 </li>
                 @if (userRole == "admin")
@@ -163,14 +164,14 @@
                   <li><hr class="dropdown-divider"/></li>
                   <li>
                     <a class="dropdown-item text-danger fw-bold" asp-controller="Admin" asp-action="Index">
-                      <i class="fas fa-cog me-2"></i>Quản trị hệ thống
+                      Quản trị hệ thống
                     </a>
                   </li>
                 }
                 <li><hr class="dropdown-divider"/></li>
                 <li>
                   <a class="dropdown-item text-muted" asp-controller="Auth" asp-action="Logout">
-                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                    Đăng xuất
                   </a>
                 </li>
               </ul>
@@ -180,7 +181,7 @@
           {
             <li class="nav-item">
               <a class="nav-link" asp-controller="Auth" asp-action="Login">
-                <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập
+                Đăng nhập
               </a>
             </li>
             <li class="nav-item">
@@ -195,15 +196,15 @@
     </div>
   </nav>
 
-  @* ── PROMO BAR ── nếu muốn ẩn, xóa block này *@
+  @* ── PROMO BAR ── *@
   <div class="promo-bar">
     <div class="container text-center">
       <small>
-        <i class="fas fa-truck me-1"></i>Miễn phí vận chuyển đơn từ 5 triệu
+        <span>Miễn phí vận chuyển đơn từ 5 triệu</span>
         <span class="mx-3">|</span>
-        <i class="fas fa-shield-alt me-1"></i>Bảo hành chính hãng 12 tháng
+        <span>Bảo hành chính hãng 12 tháng</span>
         <span class="mx-3">|</span>
-        <i class="fas fa-undo me-1"></i>Đổi trả 30 ngày
+        <span>Đổi trả 30 ngày</span>
       </small>
     </div>
   </div>

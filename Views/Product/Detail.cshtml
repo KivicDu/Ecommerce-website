@@ -9,13 +9,14 @@
               ?? images.FirstOrDefault()?.ImageUrl
               ?? p.Image
               ?? "/images/no-image.png";
+  var inStock  = p.Stock > 0 || variants.Any(v => v.Stock > 0);
 }
 
 <div class="container py-4">
 
   @* ── BREADCRUMB ── *@
-  <nav aria-label="breadcrumb" class="mb-3">
-    <ol class="breadcrumb">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb luxury-breadcrumb">
       <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
       <li class="breadcrumb-item"><a asp-controller="Product" asp-action="Index">Sản phẩm</a></li>
       @if (p.Category != null)
@@ -33,30 +34,27 @@
   @* ── MAIN DETAIL SECTION ── *@
   <div class="row g-4 mb-5">
 
-    @* ── LEFT: IMAGE GALLERY ── *@
+    @* ── LEFT: IMAGE GALLERY VIEWPORT ── *@
     <div class="col-lg-5">
       <div class="detail-gallery">
-
         @* Main image *@
-        <div class="detail-main-img-wrap mb-2">
-          <img id="mainImage" src="@mainImg" alt="@p.Name" class="detail-main-img"/>
-          @if (!Model.IsLoggedIn || true)
-          {
-            <button class="wishlist-btn @(Model.InWishlist ? "active" : "")"
-                    onclick="toggleWishlist(@p.Id, this)"
-                    title="@(Model.InWishlist ? "Bỏ yêu thích" : "Thêm yêu thích")">
-              <i class="@(Model.InWishlist ? "fas" : "far") fa-heart"></i>
-            </button>
-          }
+        <div class="detail-main-img-wrap-clean mb-3">
+          <img id="mainImage" src="@mainImg" alt="@p.Name" class="detail-main-img-clean"/>
+          
+          <button class="wishlist-btn-clean @(Model.InWishlist ? "active" : "")"
+                  onclick="toggleWishlist(@p.Id, this)"
+                  title="@(Model.InWishlist ? "Bỏ yêu thích" : "Thêm yêu thích")">
+            <i class="@(Model.InWishlist ? "fas" : "far") fa-heart"></i>
+          </button>
         </div>
 
         @* Thumbnail strip *@
         @if (images.Count > 1)
         {
-          <div class="detail-thumbs">
+          <div class="detail-thumbs-clean">
             @foreach (var img in images)
             {
-              <div class="detail-thumb @(img.ImageUrl == mainImg ? "active" : "")"
+              <div class="detail-thumb-clean @(img.ImageUrl == mainImg ? "active" : "")"
                    onclick="switchImage('@img.ImageUrl', this)">
                 <img src="@img.ImageUrl" alt="@p.Name thumbnail"/>
               </div>
@@ -66,179 +64,200 @@
       </div>
     </div>
 
-    @* ── RIGHT: INFO ── *@
+    @* ── RIGHT: INFO & CONTROLS ── *@
     <div class="col-lg-7">
 
-      @* Brand + Name *@
-      <div class="mb-1">
-        @if (p.Brand == "Apple")
-        {
-          <span class="badge-brand-apple"><i class="fab fa-apple me-1"></i>Apple</span>
-        }
-        else
-        {
-          <span class="badge-brand-samsung"><i class="fas fa-mobile-alt me-1"></i>Samsung</span>
-        }
-        @if (p.Featured == 1)
-        {
-          <span class="badge bg-warning text-dark ms-1">Nổi bật</span>
-        }
+      @* Brand & Status *@
+      <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
+        <div class="brand-badge-clean">
+          @if (p.Brand == "Apple")
+          {
+            <span>Sản phẩm Apple</span>
+          }
+          else
+          {
+            <span>Sản phẩm Samsung</span>
+          }
+        </div>
+        
+        <div class="stock-status-clean">
+          @if (inStock)
+          {
+            <span class="text-success fw-medium">Còn hàng</span>
+          }
+          else
+          {
+            <span class="text-muted fw-medium">Hết hàng</span>
+          }
+        </div>
       </div>
 
-      <h1 class="detail-product-name">@p.Name</h1>
+      <h1 class="detail-product-name-clean mb-2">@p.Name</h1>
 
-      @* Rating row *@
-      <div class="detail-rating-row mb-3">
+      @* Rating *@
+      <div class="detail-rating-row-clean mb-4">
         @for (int i = 1; i <= 5; i++)
         {
-          <i class="@(i <= (int)Math.Round(Model.AvgRating) ? "fas" : "far") fa-star text-warning"></i>
+          <i class="@(i <= (int)Math.Round(Model.AvgRating) ? "fas" : "far") fa-star text-warning small"></i>
         }
         <span class="text-muted ms-2 small">
-          @Model.AvgRating.ToString("0.0") (@p.Reviews.Count đánh giá)
+          @Model.AvgRating.ToString("0.0") (@p.Reviews.Count nhận xét)
         </span>
-        @if (p.Stock > 0)
+        @if (p.Featured == 1)
         {
-          <span class="ms-3 text-success small"><i class="fas fa-check-circle me-1"></i>Còn hàng</span>
-        }
-        else
-        {
-          <span class="ms-3 text-danger small"><i class="fas fa-times-circle me-1"></i>Hết hàng</span>
+          <span class="badge-featured-label ms-3">Sản Phẩm Tiêu Biểu</span>
         }
       </div>
 
-      @* Price *@
-      <div class="detail-price-wrap mb-4">
-        <span class="detail-price" id="displayPrice">@p.Price.ToString("N0")₫</span>
-      </div>
-
-      @* Variants (màu + dung lượng) *@
-      @if (variants.Any())
-      {
-        @* Storage selector *@
-        var storages = variants.Select(v => v.StorageGb).Distinct().OrderBy(s => s).ToList();
-        @if (storages.Count > 1)
-        {
-          <div class="mb-3">
-            <div class="variant-label">Dung lượng:</div>
-            <div class="variant-btn-group" id="storageGroup">
-              @foreach (var s in storages)
-              {
-                var first = variants.First(v => v.StorageGb == s);
-                <button type="button"
-                        class="variant-btn @(s == storages.First() ? "active" : "")"
-                        data-storage="@s"
-                        data-price="@first.Price"
-                        data-variant-id="@first.Id"
-                        onclick="selectVariant(this, 'storage')">
-                  @s GB
-                </button>
-              }
-            </div>
-          </div>
-        }
-
-        @* Color selector *@
-        var colors = variants.Select(v => v.Color).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
-        @if (colors.Count > 1)
-        {
-          <div class="mb-3">
-            <div class="variant-label">Màu sắc: <span id="selectedColor" class="fw-semibold"></span></div>
-            <div class="variant-btn-group" id="colorGroup">
-              @foreach (var c in colors)
-              {
-                var v = variants.First(vv => vv.Color == c);
-                <button type="button"
-                        class="variant-btn"
-                        data-color="@c"
-                        data-price="@v.Price"
-                        data-variant-id="@v.Id"
-                        onclick="selectVariant(this, 'color')">
-                  @c
-                </button>
-              }
-            </div>
-          </div>
-        }
-      }
-
-      @* Quantity + Add to cart *@
-      <div class="detail-actions mb-4">
-        <div class="qty-wrap">
-          <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
-          <input type="number" id="qtyInput" value="1" min="1"
-                 max="@(p.Stock > 0 ? p.Stock : 1)" class="qty-input"/>
-          <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+      @* ── CONTROLS PANEL ── *@
+      <div class="detail-control-panel-clean p-4 mb-4">
+        
+        @* Price display *@
+        <div class="detail-price-wrap-clean mb-4 pb-3 border-bottom">
+          <span class="detail-price-clean" id="displayPrice">@p.Price.ToString("N0")₫</span>
         </div>
-        <button class="btn btn-danger btn-lg flex-grow-1 btn-add-detail"
-                @(p.Stock == 0 ? "disabled" : "")
-                onclick="addToCartDetail()">
-          <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ
-        </button>
-        <button type="button"
-                class="btn btn-outline-secondary btn-lg @(Model.InWishlist ? "active text-danger border-danger" : "")"
-                id="detailWishlistBtn"
-                onclick="toggleWishlist(@p.Id, this)"
-                title="@(Model.InWishlist ? "Bỏ yêu thích" : "Thêm yêu thích")">
-          <i class="@(Model.InWishlist ? "fas" : "far") fa-heart"></i>
-        </button>
+
+        @* Variants (màu + dung lượng) *@
+        @if (variants.Any())
+        {
+          @* Storage selector *@
+          var storages = variants.Select(v => v.StorageGb).Distinct().OrderBy(s => s).ToList();
+          @if (storages.Count > 1)
+          {
+            <div class="mb-3">
+              <div class="variant-label-clean">Dung lượng bộ nhớ</div>
+              <div class="variant-btn-group-clean" id="storageGroup">
+                @foreach (var s in storages)
+                {
+                  var first = variants.First(v => v.StorageGb == s);
+                  <button type="button"
+                          class="variant-btn-clean"
+                          data-storage="@s"
+                          data-price="@first.Price"
+                          data-variant-id="@first.Id"
+                          onclick="selectVariant(this, 'storage')">
+                    @s GB
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          @* Color selector *@
+          var colors = variants.Select(v => v.Color).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
+          @if (colors.Count > 1)
+          {
+            <div class="mb-4">
+              <div class="variant-label-clean">Màu sắc: <span id="selectedColor" class="fw-semibold text-camel"></span></div>
+              <div class="variant-btn-group-clean" id="colorGroup">
+                @foreach (var c in colors)
+                {
+                  var v = variants.First(vv => vv.Color == c);
+                  <button type="button"
+                          class="variant-btn-clean"
+                          data-color="@c"
+                          data-price="@v.Price"
+                          data-variant-id="@v.Id"
+                          onclick="selectVariant(this, 'color')">
+                    @c
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        }
+
+        @* Quantity + Add to cart *@
+        <div class="detail-actions-clean mb-2">
+          <div class="qty-wrap-clean">
+            <button type="button" class="qty-btn-clean" onclick="changeQty(-1)">−</button>
+            <input type="number" id="qtyInput" value="1" min="1"
+                   max="@(p.Stock > 0 ? p.Stock : 1)" class="qty-input-clean"/>
+            <button type="button" class="qty-btn-clean" onclick="changeQty(1)">+</button>
+          </div>
+          
+          <button class="btn btn-add-detail-clean flex-grow-1"
+                  @(!inStock ? "disabled" : "")
+                  onclick="addToCartDetail()">
+            Thêm vào giỏ hàng
+          </button>
+          
+          <button type="button"
+                  class="btn btn-wishlist-detail-clean @(Model.InWishlist ? "active text-danger border-danger" : "")"
+                  id="detailWishlistBtn"
+                  onclick="toggleWishlist(@p.Id, this)"
+                  title="@(Model.InWishlist ? "Bỏ yêu thích" : "Thêm yêu thích")">
+            <i class="@(Model.InWishlist ? "fas" : "far") fa-heart"></i>
+          </button>
+        </div>
       </div>
 
-      @* Shipping info *@
-      <div class="detail-badges mb-4">
-        <div class="detail-badge"><i class="fas fa-truck text-success"></i> Miễn ship đơn từ 5tr</div>
-        <div class="detail-badge"><i class="fas fa-shield-alt text-primary"></i> BH chính hãng 12T</div>
-        <div class="detail-badge"><i class="fas fa-undo text-warning"></i> Đổi trả 30 ngày</div>
+      @* Brand Logistics Badges *@
+      <div class="detail-badges-clean mb-4">
+        <div class="detail-badge-clean-item">Miễn phí giao hàng toàn quốc từ 5 triệu</div>
+        <div class="detail-badge-clean-item">Bảo hành chính hãng 12 tháng</div>
+        <div class="detail-badge-clean-item">Hỗ trợ đổi trả trong vòng 30 ngày</div>
       </div>
 
-      @* Quick specs *@
+      @* ── QUICK SPECS GRID ── *@
       @if (specs != null)
       {
-        <div class="detail-quick-specs">
-          <div class="qs-item"><i class="fas fa-microchip"></i><span>@specs.Chipset</span></div>
-          <div class="qs-item"><i class="fas fa-memory"></i><span>@specs.RamGb GB RAM</span></div>
-          <div class="qs-item"><i class="fas fa-hdd"></i><span>@specs.StorageGb GB</span></div>
-          <div class="qs-item"><i class="fas fa-tv"></i><span>@specs.DisplaySize @specs.RefreshRate Hz</span></div>
-          <div class="qs-item"><i class="fas fa-camera"></i><span>@specs.MainCamera</span></div>
-          <div class="qs-item"><i class="fas fa-battery-three-quarters"></i><span>@specs.BatteryMah mAh</span></div>
+        <div class="detail-quick-specs-clean p-4">
+          <div class="qs-item-clean">
+            <span class="qs-label-clean">Bộ vi xử lý</span>
+            <span class="qs-value-clean">@specs.Chipset</span>
+          </div>
+          <div class="qs-item-clean">
+            <span class="qs-label-clean">Bộ nhớ RAM</span>
+            <span class="qs-value-clean">@specs.RamGb GB RAM</span>
+          </div>
+          <div class="qs-item-clean">
+            <span class="qs-label-clean">Bộ nhớ trong</span>
+            <span class="qs-value-clean">@specs.StorageGb GB ROM</span>
+          </div>
+          <div class="qs-item-clean">
+            <span class="qs-label-clean">Màn hình</span>
+            <span class="qs-value-clean">@specs.DisplaySize, @specs.RefreshRate Hz</span>
+          </div>
         </div>
       }
     </div>
   </div>
 
   @* ── TABS: MÔ TẢ / THÔNG SỐ / ĐÁNH GIÁ ── *@
-  <div class="detail-tabs mb-5">
-    <ul class="nav nav-tabs" id="detailTabs" role="tablist">
+  <div class="detail-tabs-clean mb-5">
+    <ul class="nav nav-tabs-clean" id="detailTabs" role="tablist">
       <li class="nav-item">
-        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabDesc">
-          Mô tả
+        <button class="nav-link-clean active" data-bs-toggle="tab" data-bs-target="#tabDesc">
+          Mô tả sản phẩm
         </button>
       </li>
       @if (specs != null)
       {
         <li class="nav-item">
-          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabSpecs">
+          <button class="nav-link-clean" data-bs-toggle="tab" data-bs-target="#tabSpecs">
             Thông số kỹ thuật
           </button>
         </li>
       }
       <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabReviews">
-          Đánh giá (@p.Reviews.Count)
+        <button class="nav-link-clean" data-bs-toggle="tab" data-bs-target="#tabReviews">
+          Nhận xét khách hàng (@p.Reviews.Count)
         </button>
       </li>
     </ul>
 
-    <div class="tab-content detail-tab-content">
-
+    <div class="tab-content-clean mt-3 p-4">
+      
       @* Tab: Mô tả *@
       <div class="tab-pane fade show active" id="tabDesc">
         @if (!string.IsNullOrEmpty(p.Description))
         {
-          <div class="product-description">@Html.Raw(p.Description)</div>
+          <div class="product-description-clean">@Html.Raw(p.Description)</div>
         }
         else
         {
-          <p class="text-muted">Chưa có mô tả cho sản phẩm này.</p>
+          <p class="text-muted">Chưa có thông tin mô tả chi tiết cho sản phẩm này.</p>
         }
       </div>
 
@@ -246,36 +265,34 @@
       @if (specs != null)
       {
         <div class="tab-pane fade" id="tabSpecs">
-          <div class="specs-table">
-            <div class="specs-section-title">Hiệu năng</div>
-            <div class="specs-row"><span>Chip xử lý</span><span>@specs.Chipset</span></div>
-            <div class="specs-row"><span>RAM</span><span>@specs.RamGb GB</span></div>
-            <div class="specs-row"><span>Bộ nhớ trong</span><span>@specs.StorageGb GB</span></div>
-            <div class="specs-row"><span>Hệ điều hành</span><span>@specs.Os</span></div>
+          <div class="specs-table-clean">
+            <div class="specs-section-title-clean">Cấu hình & Bộ nhớ</div>
+            <div class="specs-row-clean"><span>Vi xử lý (Chipset)</span><span>@specs.Chipset</span></div>
+            <div class="specs-row-clean"><span>Bộ nhớ RAM</span><span>@specs.RamGb GB</span></div>
+            <div class="specs-row-clean"><span>Bộ nhớ trong (ROM)</span><span>@specs.StorageGb GB</span></div>
+            <div class="specs-row-clean"><span>Hệ điều hành</span><span>@specs.Os</span></div>
 
-            <div class="specs-section-title mt-3">Màn hình</div>
-            <div class="specs-row"><span>Kích thước</span><span>@specs.DisplaySize</span></div>
-            <div class="specs-row"><span>Công nghệ</span><span>@specs.DisplayType</span></div>
-            <div class="specs-row"><span>Tần số quét</span><span>@specs.RefreshRate Hz</span></div>
+            <div class="specs-section-title-clean mt-4">Hệ thống Camera</div>
+            <div class="specs-row-clean"><span>Camera sau</span><span>@specs.MainCamera</span></div>
+            <div class="specs-row-clean"><span>Camera trước</span><span>@specs.FrontCamera</span></div>
 
-            <div class="specs-section-title mt-3">Camera</div>
-            <div class="specs-row"><span>Camera sau</span><span>@specs.MainCamera</span></div>
-            <div class="specs-row"><span>Camera trước</span><span>@specs.FrontCamera</span></div>
+            <div class="specs-section-title-clean mt-4">Màn hình hiển thị</div>
+            <div class="specs-row-clean"><span>Kích thước</span><span>@specs.DisplaySize</span></div>
+            <div class="specs-row-clean"><span>Công nghệ màn hình</span><span>@specs.DisplayType</span></div>
+            <div class="specs-row-clean"><span>Tần số quét</span><span>@specs.RefreshRate Hz</span></div>
 
-            <div class="specs-section-title mt-3">Pin & Sạc</div>
-            <div class="specs-row"><span>Dung lượng pin</span><span>@specs.BatteryMah mAh</span></div>
-            <div class="specs-row"><span>Sạc nhanh</span><span>@(specs.FastCharge ? "Có" : "Không")</span></div>
-            <div class="specs-row"><span>Sạc không dây</span><span>@(specs.WirelessCharge ? "Có" : "Không")</span></div>
+            <div class="specs-section-title-clean mt-4">Pin & Sạc</div>
+            <div class="specs-row-clean"><span>Dung lượng Pin</span><span>@specs.BatteryMah mAh</span></div>
+            <div class="specs-row-clean"><span>Sạc nhanh</span><span>@(specs.FastCharge ? "Có hỗ trợ sạc nhanh" : "Chuẩn thường")</span></div>
+            <div class="specs-row-clean"><span>Sạc không dây</span><span>@(specs.WirelessCharge ? "Có hỗ trợ" : "Không")</span></div>
 
-            <div class="specs-section-title mt-3">Kết nối</div>
-            <div class="specs-row"><span>5G</span><span>@(specs.Has5G ? "Có" : "Không")</span></div>
-            <div class="specs-row"><span>NFC</span><span>@(specs.HasNfc ? "Có" : "Không")</span></div>
-
-            <div class="specs-section-title mt-3">Thiết kế</div>
-            <div class="specs-row"><span>Kích thước</span><span>@specs.Dimensions</span></div>
-            <div class="specs-row"><span>Trọng lượng</span><span>@specs.WeightGrams g</span></div>
-            <div class="specs-row"><span>Màu sắc</span><span>@specs.Colors</span></div>
-            <div class="specs-row"><span>Năm ra mắt</span><span>@specs.ReleaseYear</span></div>
+            <div class="specs-section-title-clean mt-4">Kết nối & Kích thước</div>
+            <div class="specs-row-clean"><span>Kết nối 5G</span><span>@(specs.Has5G ? "Có hỗ trợ 5G" : "Không")</span></div>
+            <div class="specs-row-clean"><span>Hỗ trợ NFC</span><span>@(specs.HasNfc ? "Có" : "Không")</span></div>
+            <div class="specs-row-clean"><span>Kích thước</span><span>@specs.Dimensions</span></div>
+            <div class="specs-row-clean"><span>Trọng lượng</span><span>@specs.WeightGrams g</span></div>
+            <div class="specs-row-clean"><span>Màu sắc lựa chọn</span><span>@specs.Colors</span></div>
+            <div class="specs-row-clean"><span>Năm ra mắt</span><span>@specs.ReleaseYear</span></div>
           </div>
         </div>
       }
@@ -286,15 +303,15 @@
         @* Rating summary *@
         @if (p.Reviews.Any())
         {
-          <div class="review-summary mb-4">
-            <div class="review-avg">
-              <div class="review-avg-num">@Model.AvgRating.ToString("0.1")</div>
+          <div class="review-summary-clean mb-4 border-bottom pb-3">
+            <div class="review-avg-clean">
+              <div class="review-avg-num-clean">@Model.AvgRating.ToString("0.1")</div>
               <div>
                 @for (int i = 1; i <= 5; i++)
                 {
                   <i class="@(i <= (int)Math.Round(Model.AvgRating) ? "fas" : "far") fa-star text-warning"></i>
                 }
-                <div class="text-muted small">@p.Reviews.Count đánh giá</div>
+                <div class="text-muted small mt-1">Điểm đánh giá trung bình từ khách hàng</div>
               </div>
             </div>
           </div>
@@ -303,16 +320,16 @@
         @* Review list *@
         @foreach (var r in p.Reviews.OrderByDescending(r => r.CreatedAt))
         {
-          <div class="review-item">
-            <div class="review-header">
-              <div class="review-user">
-                <div class="review-avatar">@(r.User?.Name.Substring(0, 1).ToUpper() ?? "?")</div>
+          <div class="review-item-clean">
+            <div class="review-header-clean">
+              <div class="review-user-clean">
+                <div class="review-avatar-clean">@(r.User?.Name.Substring(0, 1).ToUpper() ?? "?")</div>
                 <div>
                   <div class="fw-semibold">@r.User?.Name</div>
-                  <div class="text-muted small">@r.CreatedAt.ToString("dd/MM/yyyy")</div>
+                  <div class="text-muted small">Đăng ngày: @r.CreatedAt.ToString("dd/MM/yyyy")</div>
                 </div>
               </div>
-              <div class="review-stars">
+              <div class="review-stars-clean">
                 @for (int i = 1; i <= 5; i++)
                 {
                   <i class="@(i <= r.Rating ? "fas" : "far") fa-star text-warning small"></i>
@@ -321,7 +338,7 @@
             </div>
             @if (!string.IsNullOrEmpty(r.Comment))
             {
-              <p class="review-comment">@r.Comment</p>
+              <p class="review-comment-clean mt-2">@r.Comment</p>
             }
           </div>
         }
@@ -329,22 +346,23 @@
         @if (!p.Reviews.Any())
         {
           <div class="text-center py-4 text-muted">
-            <i class="far fa-comment-alt fa-3x mb-3 d-block"></i>
-            Chưa có đánh giá nào. Hãy là người đầu tiên!
+            <i class="far fa-comment-alt fa-2x mb-3 d-block"></i>
+            Chưa có đánh giá nào cho sản phẩm này.
           </div>
         }
 
         @* Write review form *@
         @if (Model.IsLoggedIn)
         {
-          <div class="review-form-wrap mt-4">
-            <h6 class="fw-bold mb-3">Viết đánh giá của bạn</h6>
+          <div class="review-form-wrap-clean mt-4 p-4">
+            <h6 class="fw-bold mb-3">Gửi nhận xét của bạn</h6>
             <form asp-controller="Product" asp-action="AddReview" method="post">
               @Html.AntiForgeryToken()
               <input type="hidden" name="productId" value="@p.Id"/>
+              
               <div class="mb-3">
-                <label class="form-label fw-semibold">Đánh giá sao</label>
-                <div class="star-rating">
+                <label class="form-label fw-semibold small">Mức độ hài lòng</label>
+                <div class="star-rating-clean">
                   @for (int i = 5; i >= 1; i--)
                   {
                     <input type="radio" name="rating" id="star@i" value="@i" required/>
@@ -352,22 +370,23 @@
                   }
                 </div>
               </div>
+
               <div class="mb-3">
-                <label class="form-label fw-semibold">Nhận xét</label>
+                <label class="form-label fw-semibold small">Ý kiến nhận xét</label>
                 <textarea name="comment" class="form-control" rows="3"
-                          placeholder="Chia sẻ trải nghiệm của bạn..."></textarea>
+                          placeholder="Chia sẻ nhận xét của bạn về sản phẩm này..."></textarea>
               </div>
-              <button type="submit" class="btn btn-danger">
-                <i class="fas fa-paper-plane me-2"></i>Gửi đánh giá
+
+              <button type="submit" class="btn btn-add-review-clean">
+                Gửi Đánh Giá
               </button>
             </form>
           </div>
         }
         else
         {
-          <div class="alert alert-light border mt-3">
-            <a asp-controller="Auth" asp-action="Login" class="text-danger fw-semibold">Đăng nhập</a>
-            để viết đánh giá sản phẩm.
+          <div class="alert alert-light border mt-3 text-center py-3">
+            Vui lòng <a asp-controller="Auth" asp-action="Login" class="text-camel fw-semibold">Đăng nhập</a> để viết đánh giá sản phẩm.
           </div>
         }
       </div>
@@ -378,8 +397,10 @@
   @if (Model.Related.Any())
   {
     <div class="mb-5">
-      <h4 class="section-title">Sản phẩm tương tự</h4>
-      <div class="row g-3">
+      <div class="mb-4 border-bottom pb-2">
+        <h4 class="section-title">SẢN PHẨM TƯƠNG TỰ</h4>
+      </div>
+      <div class="row g-4">
         @foreach (var rp in Model.Related)
         {
           <div class="col-6 col-md-3">
@@ -395,133 +416,26 @@
 @* Hidden input for variant tracking *@
 <input type="hidden" id="selectedVariantId" value=""/>
 
-@section Styles {
-<style>
-  /* Gallery */
-  .detail-gallery {}
-  .detail-main-img-wrap {
-    position: relative;
-    background: #f8f9fa;
-    border-radius: 12px;
-    overflow: hidden;
-    aspect-ratio: 1 / 1;
-    border: 1px solid var(--border-color);
-  }
-  .detail-main-img {
-    width: 100%; height: 100%;
-    object-fit: contain;
-    padding: 16px;
-    transition: opacity .2s;
-  }
-  .wishlist-btn {
-    position: absolute; top: 12px; right: 12px;
-    width: 38px; height: 38px; border-radius: 50%;
-    background: #fff; border: 1px solid #dee2e6;
-    color: #aaa; font-size: 1.1rem;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all .2s;
-    box-shadow: 0 2px 6px rgba(0,0,0,.1);
-  }
-  .wishlist-btn:hover, .wishlist-btn.active { color: #dc3545; border-color: #dc3545; }
-  .detail-thumbs {
-    display: flex; gap: 8px; flex-wrap: wrap;
-  }
-  .detail-thumb {
-    width: 64px; height: 64px; border-radius: 8px;
-    border: 2px solid transparent; cursor: pointer;
-    overflow: hidden; background: #f8f9fa;
-    transition: border-color .2s;
-  }
-  .detail-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
-  .detail-thumb.active, .detail-thumb:hover { border-color: var(--primary); }
-
-  /* Detail info */
-  .detail-product-name { font-size: 1.5rem; font-weight: 800; line-height: 1.3; }
-  .badge-brand-apple   { background: #f0f0f0; color: #333; padding: 3px 10px; border-radius: 12px; font-size: .78rem; font-weight: 700; }
-  .badge-brand-samsung { background: #e8eaf6; color: #1428a0; padding: 3px 10px; border-radius: 12px; font-size: .78rem; font-weight: 700; }
-  .detail-price { font-size: 1.9rem; font-weight: 800; color: var(--primary); }
-
-  /* Variant buttons */
-  .variant-label { font-weight: 600; margin-bottom: .4rem; font-size: .88rem; }
-  .variant-btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
-  .variant-btn {
-    padding: 6px 16px; border-radius: 8px; border: 1.5px solid var(--border-color);
-    background: #fff; font-size: .85rem; cursor: pointer;
-    transition: all .2s; font-weight: 500;
-  }
-  .variant-btn:hover { border-color: var(--primary); color: var(--primary); }
-  .variant-btn.active { border-color: var(--primary); background: var(--primary); color: #fff; }
-
-  /* Quantity */
-  .detail-actions { display: flex; gap: 10px; align-items: center; }
-  .qty-wrap { display: flex; align-items: center; border: 1.5px solid var(--border-color); border-radius: 10px; overflow: hidden; }
-  .qty-btn { width: 36px; height: 42px; border: none; background: #f8f9fa; font-size: 1.2rem; cursor: pointer; transition: background .15s; }
-  .qty-btn:hover { background: #e9ecef; }
-  .qty-input { width: 52px; height: 42px; border: none; text-align: center; font-weight: 700; font-size: 1rem; }
-
-  /* Badges */
-  .detail-badges { display: flex; gap: 8px; flex-wrap: wrap; }
-  .detail-badge { font-size: .78rem; padding: 4px 12px; background: #f8f9fa; border-radius: 20px; display: flex; align-items: center; gap: 5px; }
-
-  /* Quick specs */
-  .detail-quick-specs {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 8px; background: #f8f9fa; border-radius: 10px; padding: 14px;
-  }
-  .qs-item { display: flex; align-items: center; gap: 8px; font-size: .83rem; }
-  .qs-item i { width: 16px; color: var(--primary); }
-
-  /* Tabs */
-  .detail-tab-content { background: #fff; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 10px 10px; padding: 1.5rem; }
-  .nav-tabs .nav-link { color: var(--text-muted); font-weight: 600; }
-  .nav-tabs .nav-link.active { color: var(--primary); border-bottom-color: #fff; }
-
-  /* Specs table */
-  .specs-section-title { font-weight: 700; font-size: .85rem; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); margin-bottom: .5rem; }
-  .specs-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: .88rem; }
-  .specs-row span:first-child { color: var(--text-muted); }
-  .specs-row span:last-child  { font-weight: 600; text-align: right; max-width: 60%; }
-
-  /* Reviews */
-  .review-summary { display: flex; align-items: center; gap: 1.5rem; }
-  .review-avg { display: flex; align-items: center; gap: 1rem; }
-  .review-avg-num { font-size: 3.5rem; font-weight: 800; color: var(--primary); line-height: 1; }
-  .review-item { padding: 1rem 0; border-bottom: 1px solid #f0f0f0; }
-  .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
-  .review-user { display: flex; gap: .75rem; align-items: center; }
-  .review-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .9rem; }
-  .review-comment { color: var(--text-muted); font-size: .9rem; margin: 0; }
-  .review-form-wrap { background: #f8f9fa; border-radius: 10px; padding: 1.25rem; }
-
-  /* Star rating input */
-  .star-rating { display: flex; flex-direction: row-reverse; gap: 4px; }
-  .star-rating input { display: none; }
-  .star-rating label { font-size: 2rem; color: #ddd; cursor: pointer; transition: color .15s; }
-  .star-rating input:checked ~ label,
-  .star-rating label:hover,
-  .star-rating label:hover ~ label { color: #ffc107; }
-</style>
-}
-
 @section Scripts {
 <script>
   let selectedVariantId = null;
 
   // Switch gallery image
   function switchImage(src, thumb) {
-    document.getElementById('mainImage').style.opacity = '0';
+    const mainImgEl = document.getElementById('mainImage');
+    mainImgEl.style.opacity = '0.3';
     setTimeout(() => {
-      document.getElementById('mainImage').src = src;
-      document.getElementById('mainImage').style.opacity = '1';
+      mainImgEl.src = src;
+      mainImgEl.style.opacity = '1';
     }, 150);
-    document.querySelectorAll('.detail-thumb').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.detail-thumb-clean').forEach(t => t.classList.remove('active'));
     thumb?.classList.add('active');
   }
 
   // Select variant (storage / color)
   function selectVariant(btn, type) {
     const group = type === 'storage' ? 'storageGroup' : 'colorGroup';
-    document.querySelectorAll(`#${group} .variant-btn`).forEach(b => b.classList.remove('active'));
+    document.querySelectorAll(`#${group} .variant-btn-clean`).forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
     selectedVariantId = btn.dataset.variantId;
@@ -553,9 +467,9 @@
   }
 
   // Auto-select first color variant on load
-  const firstColorBtn = document.querySelector('#colorGroup .variant-btn');
+  const firstColorBtn = document.querySelector('#colorGroup .variant-btn-clean');
   if (firstColorBtn) selectVariant(firstColorBtn, 'color');
-  const firstStorageBtn = document.querySelector('#storageGroup .variant-btn');
+  const firstStorageBtn = document.querySelector('#storageGroup .variant-btn-clean');
   if (firstStorageBtn) selectVariant(firstStorageBtn, 'storage');
 </script>
 }

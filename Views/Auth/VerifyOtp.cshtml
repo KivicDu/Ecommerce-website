@@ -1,30 +1,44 @@
 @model HutechStore.ViewModels.VerifyOtpViewModel
-@{ ViewData["Title"] = "Xác nhận OTP"; }
+@{
+  ViewData["Title"] = "Xác nhận OTP";
+}
 
 <div class="auth-page">
-  <div class="container"><div class="row justify-content-center"><div class="col-md-4">
-    <div class="auth-card">
-      <div class="auth-logo">
-        <i class="fas fa-shield-alt text-danger fa-2x"></i>
-        <h5 class="mt-2 fw-bold">Nhập mã OTP</h5>
-        <p class="text-muted small">Mã OTP đã được gửi tới <strong>@Model.Email</strong></p>
-      </div>
-      <form asp-action="VerifyOtp" method="post">
-        @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="Email"/>
-        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
-        <div class="mb-3">
-          <label asp-for="Otp" class="form-label fw-semibold">Mã OTP (6 chữ số)</label>
-          <input asp-for="Otp" class="form-control form-control-lg text-center fw-bold"
-                 maxlength="6" placeholder="······" style="letter-spacing:8px;font-size:1.5rem"
-                 autocomplete="one-time-code"/>
-          <span asp-validation-for="Otp" class="text-danger small"></span>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-5 col-lg-4">
+        <div class="auth-card-luxury">
+
+          @* Header *@
+          <div class="auth-logo-luxury text-center">
+            <h2 class="auth-title-cinzel">HUTECHSTORE</h2>
+            <p class="auth-subtitle-luxury">Xác thực OTP</p>
+            <p class="text-muted small mt-2">Mã OTP đã được gửi tới email của bạn: <strong>@Model.Email</strong></p>
+          </div>
+
+          <form asp-action="VerifyOtp" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Email"/>
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+            <div class="mb-4">
+              <label asp-for="Otp" class="form-label-clean text-center d-block">Mã xác thực gồm 6 chữ số</label>
+              <input asp-for="Otp" class="form-control form-control-clean text-center otp-input-clean"
+                     maxlength="6" placeholder="· · · · · ·"
+                     autocomplete="one-time-code"/>
+              <span asp-validation-for="Otp" class="text-danger small d-block text-center mt-1"></span>
+            </div>
+
+            <button type="submit" class="btn btn-luxury-submit w-100">
+              Xác nhận mã OTP
+            </button>
+          </form>
+
+          <p class="text-center mt-4 mb-0 small text-muted">
+            Mã OTP có hiệu lực trong vòng 10 phút.
+          </p>
         </div>
-        <button type="submit" class="btn btn-danger w-100 fw-bold py-2">
-          <i class="fas fa-check me-2"></i>Xác nhận
-        </button>
-      </form>
-      <p class="text-center mt-3 mb-0 small text-muted">Mã có hiệu lực 10 phút</p>
+      </div>
     </div>
-  </div></div></div>
+  </div>
 </div>
