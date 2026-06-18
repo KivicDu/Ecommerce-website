@@ -30,10 +30,10 @@
             </select>
           </div>
           <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-danger">
-              <i class="fas fa-save me-2"></i>Lưu
+            <button type="submit" class="btn btn-primary">
+              LƯU
             </button>
-            <button type="button" class="btn btn-outline-secondary" onclick="resetCatForm()">Đặt lại</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="resetCatForm()">ĐẶT LẠI</button>
           </div>
         </form>
       </div>
@@ -59,9 +59,9 @@
                   </span>
                 </td>
                 <td>
-                  <button class="btn btn-outline-primary btn-sm"
+                  <button class="btn btn-outline-secondary btn-sm"
                           onclick="editCat(@c.Id,'@c.Name.Replace("'","\\'")',`@(c.Description ?? "")`,@c.Status)">
-                    <i class="fas fa-edit"></i>
+                    SỬA
                   </button>
                 </td>
               </tr>

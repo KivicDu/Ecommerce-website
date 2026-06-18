@@ -13,7 +13,7 @@
   @foreach (var (val, lbl) in statuses)
   {
     <a href="?status=@val"
-       class="btn btn-sm @(ViewBag.Status?.ToString() == val ? "btn-danger" : "btn-outline-secondary")">
+       class="btn btn-sm @(ViewBag.Status?.ToString() == val ? "btn-primary" : "btn-outline-secondary")">
       @lbl
     </a>
   }
@@ -41,7 +41,7 @@
         @foreach (var o in Model)
         {
           <tr>
-            <td><span class="fw-bold text-danger">#@o.OrderNumber</span></td>
+            <td><span class="fw-bold text-navy">#@o.OrderNumber</span></td>
             <td>
               <div class="fw-semibold small">@(o.User?.Name ?? "-")</div>
               <div class="text-muted" style="font-size:.73rem">@o.ShippingPhone</div>
@@ -52,7 +52,7 @@
                 @string.Join(", ", o.OrderItems.Take(2).Select(i => i.ProductName))@(o.OrderItems.Count > 2 ? "..." : "")
               </div>
             </td>
-            <td class="fw-bold text-danger">@o.TotalAmount.ToString("N0")₫</td>
+            <td class="fw-bold">@o.TotalAmount.ToString("N0")₫</td>
             <td><span class="badge bg-secondary">@o.PaymentMethod.ToUpper()</span></td>
             <td class="text-muted small">@o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
             <td>
@@ -82,7 +82,7 @@
                         status    = o.Status,
                         items     = o.OrderItems.Select(i => i.ProductName + " x" + i.Quantity).ToList()
                       }))'>
-                <i class="fas fa-eye"></i>
+                XEM
               </button>
             </td>
           </tr>
@@ -145,13 +145,13 @@ document.getElementById('orderModal').addEventListener('show.bs.modal', e => {
   const order = JSON.parse(btn.dataset.order);
   document.getElementById('orderModalBody').innerHTML = `
     <table class="table table-sm">
-      <tr><td class="text-muted">Mã đơn</td>      <td class="fw-bold text-danger">#${order.number}</td></tr>
+      <tr><td class="text-muted">Mã đơn</td>      <td class="fw-bold text-navy">#${order.number}</td></tr>
       <tr><td class="text-muted">Khách hàng</td>   <td>${order.name}</td></tr>
       <tr><td class="text-muted">Điện thoại</td>   <td>${order.phone}</td></tr>
       <tr><td class="text-muted">Địa chỉ</td>      <td>${order.address}</td></tr>
       <tr><td class="text-muted">Ghi chú</td>       <td>${order.note || '-'}</td></tr>
       <tr><td class="text-muted">Thanh toán</td>   <td>${order.payment.toUpperCase()}</td></tr>
-      <tr><td class="text-muted">Tổng tiền</td>    <td class="fw-bold text-danger">${order.total}</td></tr>
+      <tr><td class="text-muted">Tổng tiền</td>    <td class="fw-bold">${order.total}</td></tr>
     </table>
     <div class="fw-semibold mt-2 mb-1">Sản phẩm:</div>
     <ul class="list-unstyled mb-0">

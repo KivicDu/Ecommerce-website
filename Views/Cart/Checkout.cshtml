@@ -12,6 +12,10 @@
 
   <form asp-action="PlaceOrder" method="post">
     @Html.AntiForgeryToken()
+    @if (!ViewData.ModelState.IsValid)
+    {
+      <div asp-validation-summary="All" class="alert alert-danger py-2 px-3 mb-4 small fw-semibold"></div>
+    }
     <div class="row g-4">
 
       @* ── LEFT: THÔNG TIN GIAO HÀNG ── *@
@@ -37,7 +41,7 @@
               <label class="form-label fw-semibold">Email nhận xác nhận</label>
               <input type="email" class="form-control"
                      value="@Context.Session.GetString("UserEmail")" readonly
-                     style="background:#f8f9fa"/>
+                     style="background:var(--ivory-warm)"/>
             </div>
             <div class="col-12">
               <label asp-for="Address" class="form-label fw-semibold">Địa chỉ giao hàng</label>
@@ -65,7 +69,9 @@
               <input type="radio" name="PaymentMethod" value="cod" class="d-none"
                      @(Model.PaymentMethod == "cod" ? "checked" : "")
                      onchange="selectPayment(this)"/>
-              <div class="payment-option-icon">💵</div>
+              <div class="payment-option-icon d-flex align-items-center justify-content-center">
+                <i class="fas fa-money-bill-wave" style="color: #27AE60; font-size: 1.4rem;"></i>
+              </div>
               <div>
                 <div class="fw-semibold">Thanh toán khi nhận hàng (COD)</div>
                 <div class="small text-muted">Kiểm tra hàng trước khi thanh toán</div>
@@ -76,7 +82,9 @@
             <label class="payment-option">
               <input type="radio" name="PaymentMethod" value="vnpay" class="d-none"
                      onchange="selectPayment(this)"/>
-              <div class="payment-option-icon">🏦</div>
+              <div class="payment-option-icon d-flex align-items-center justify-content-center">
+                <img src="https://sandbox.vnpayment.vn/paymentv2/Images/brands/logo-vnpay.svg" alt="VNPay" style="height: 20px; width: auto; object-fit: contain;"/>
+              </div>
               <div>
                 <div class="fw-semibold">VNPay</div>
                 <div class="small text-muted">Thanh toán qua VNPay / ATM / Internet Banking</div>
@@ -87,7 +95,9 @@
             <label class="payment-option">
               <input type="radio" name="PaymentMethod" value="momo" class="d-none"
                      onchange="selectPayment(this)"/>
-              <div class="payment-option-icon">💜</div>
+              <div class="payment-option-icon d-flex align-items-center justify-content-center">
+                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.svg" alt="MoMo" style="height: 24px; width: 24px; border-radius: 4px; object-fit: contain;"/>
+              </div>
               <div>
                 <div class="fw-semibold">MoMo</div>
                 <div class="small text-muted">Thanh toán qua ví điện tử MoMo</div>
@@ -98,7 +108,9 @@
             <label class="payment-option" id="bankTransferOption">
               <input type="radio" name="PaymentMethod" value="bank_transfer" class="d-none"
                      onchange="selectPayment(this)"/>
-              <div class="payment-option-icon">📱</div>
+              <div class="payment-option-icon d-flex align-items-center justify-content-center">
+                <i class="fas fa-university" style="color: #0F2A44; font-size: 1.4rem;"></i>
+              </div>
               <div>
                 <div class="fw-semibold">Chuyển khoản ngân hàng</div>
                 <div class="small text-muted">Quét mã QR — nhận xác nhận ngay sau khi chuyển</div>
@@ -191,34 +203,34 @@
 
 @section Styles {
 <style>
-  .checkout-card { background:#fff; border-radius:12px; border:1px solid var(--border-color); padding:1.5rem; }
-  .checkout-card-title { font-weight:700; font-size:1rem; margin-bottom:1.25rem; padding-bottom:.75rem; border-bottom:1px solid #f0f0f0; }
+  .checkout-card { background: var(--ivory-pure); border-radius:12px; border:1px solid rgba(194, 178, 128, 0.15); padding:1.5rem; }
+  .checkout-card-title { font-weight:700; font-size:1rem; margin-bottom:1.25rem; padding-bottom:.75rem; border-bottom:1px solid rgba(194, 178, 128, 0.1); }
 
   .payment-options { display:flex; flex-direction:column; gap:.75rem; }
   .payment-option {
     display:flex; align-items:center; gap:.75rem;
     padding:.875rem 1rem; border-radius:10px;
-    border:1.5px solid var(--border-color); cursor:pointer;
+    border:1.5px solid rgba(194, 178, 128, 0.15); cursor:pointer;
     transition:all .2s;
   }
-  .payment-option:hover { border-color:var(--primary); }
-  .payment-option.active { border-color:var(--primary); background:var(--primary-light); }
+  .payment-option:hover { border-color:var(--navy); }
+  .payment-option.active { border-color:var(--navy); background:var(--ivory-warm); }
   .payment-option-icon { font-size:1.4rem; flex-shrink:0; }
-  .payment-check { color:var(--primary); opacity:0; transition:opacity .2s; }
+  .payment-check { color:var(--navy); opacity:0; transition:opacity .2s; }
   .payment-option.active .payment-check { opacity:1; }
 
   .checkout-items { max-height:300px; overflow-y:auto; }
   .checkout-item { display:flex; align-items:center; gap:.75rem; padding:.5rem 0; border-bottom:1px solid #f8f8f8; }
   .checkout-item:last-child { border-bottom:none; }
-  .checkout-item-img { position:relative; width:52px; height:52px; flex-shrink:0; border-radius:8px; background:#f8f9fa; overflow:hidden; border:1px solid #eee; }
+  .checkout-item-img { position:relative; width:52px; height:52px; flex-shrink:0; border-radius:8px; background:var(--ivory-warm); overflow:hidden; border:1px solid #eee; }
   .checkout-item-img img { width:100%; height:100%; object-fit:contain; padding:4px; }
-  .checkout-qty-badge { position:absolute; top:-4px; right:-4px; width:18px; height:18px; background:var(--primary); color:#fff; border-radius:50%; font-size:.65rem; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .checkout-qty-badge { position:absolute; top:-4px; right:-4px; width:18px; height:18px; background:var(--navy); color:#fff; border-radius:50%; font-size:.65rem; font-weight:700; display:flex; align-items:center; justify-content:center; }
   .checkout-item-info { flex:1; min-width:0; }
   .checkout-item-name { font-size:.83rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .checkout-item-price { font-size:.88rem; white-space:nowrap; }
 
   /* Bank QR preview */
-  .bank-qr-preview-box { background:#fff9f0; border:1.5px solid #f0c06a; border-radius:10px; padding:1rem; }
+  .bank-qr-preview-box { background: var(--ivory-pure)9f0; border:1.5px solid #f0c06a; border-radius:10px; padding:1rem; }
 </style>
 }
 

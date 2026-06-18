@@ -1,0 +1,84 @@
+@* _LuckyWheelWidget.cshtml — Floating Widget for Minigame promotion *@
+<div class="lucky-wheel-widget">
+  <a asp-controller="Minigame" asp-action="Index" class="lucky-wheel-btn" title="Vòng xoay may mắn">
+    <div class="lucky-wheel-btn-content">
+      <svg class="lucky-wheel-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07L14.14 4.93"/>
+      </svg>
+      <span class="lucky-wheel-text">VÒNG XOAY MAY MẮN</span>
+    </div>
+  </a>
+</div>
+
+<style>
+.lucky-wheel-widget {
+  position: fixed !important;
+  bottom: 2rem !important;
+  left: 2rem !important;
+  z-index: 1050 !important;
+}
+
+.lucky-wheel-btn {
+  display: block !important;
+  text-decoration: none !important;
+  border-radius: 30px !important;
+  background: var(--camel) !important;
+  color: var(--navy-deep) !important;
+  box-shadow: 0 8px 32px rgba(194, 178, 128, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  padding: 10px 20px !important;
+  overflow: hidden !important;
+}
+
+.lucky-wheel-btn-content {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.lucky-wheel-svg {
+  width: 24px !important;
+  height: 24px !important;
+  flex-shrink: 0 !important;
+  animation: spinSlow 12s linear infinite !important;
+}
+
+.lucky-wheel-text {
+  font-family: var(--font-sans) !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: var(--navy-deep) !important;
+  white-space: nowrap !important;
+  transition: color 0.3s !important;
+}
+
+.lucky-wheel-btn:hover {
+  transform: translateY(-4px) scale(1.02) !important;
+  background: var(--camel-light) !important;
+  box-shadow: 0 12px 36px rgba(194, 178, 128, 0.4) !important;
+}
+
+@@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Hide text on mobile for cleanliness, show on tablet and up */
+@@media (max-width: 768px) {
+  .lucky-wheel-widget {
+    bottom: 1.5rem !important;
+    left: 1.5rem !important;
+  }
+  .lucky-wheel-text {
+    display: none !important;
+  }
+  .lucky-wheel-btn {
+    padding: 12px !important;
+    border-radius: 50% !important;
+  }
+}
+</style>

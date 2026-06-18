@@ -1,0 +1,376 @@
+@model List<HutechStore.Models.SurveyQuestion>
+@{
+  Layout = "~/Views/Shared/_AdminLayout.cshtml";
+  ViewData["Title"] = "Quản lý Minigame & Khảo sát - HUTECHSTORE";
+  var prizes = ViewBag.Prizes as List<HutechStore.Models.LuckyWheelPrize> ?? new List<HutechStore.Models.LuckyWheelPrize>();
+}
+
+<div class="container-fluid py-4 text-navy">
+  @* Page Title *@
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+      <h2 class="font-serif fw-bold text-navy mb-1">Cấu hình Minigame & Khảo sát</h2>
+      <p class="text-muted small mb-0">Quản lý câu hỏi khảo sát, điều chỉnh tỷ lệ trúng thưởng vòng xoay và xuất báo cáo dữ liệu.</p>
+    </div>
+    
+    @* Export Card *@
+    <div class="card border-0 shadow-sm p-3" style="background: rgba(194, 178, 128, 0.08); border-radius: 12px; border: 1px solid rgba(194, 178, 128, 0.15) !important;">
+      <form asp-action="ExportSurveyCsv" method="get" class="d-flex align-items-center gap-2">
+        <select name="month" class="form-select form-select-sm" style="width: 100px; border-radius: 8px;">
+          @for (int m = 1; m <= 12; m++)
+          {
+            <!option value="@m" @(m == DateTime.Now.Month ? "selected" : "")>Tháng @m</!option>
+          }
+        </select>
+        <select name="year" class="form-select form-select-sm" style="width: 90px; border-radius: 8px;">
+          @for (int y = DateTime.Now.Year - 2; y <= DateTime.Now.Year; y++)
+          {
+            <!option value="@y" @(y == DateTime.Now.Year ? "selected" : "")>Năm @y</!option>
+          }
+        </select>
+        <button type="submit" class="btn btn-sm btn-primary" style="border-radius: 8px; font-weight: 500;">
+          XUẤT BÁO CÁO
+        </button>
+      </form>
+    </div>
+  </div>
+
+  @* Main contents split in tabs *@
+  <ul class="nav nav-tabs-clean mb-4" id="minigameTabs" role="tablist">
+    <li class="nav-item">
+      <button class="nav-link-clean active" data-bs-toggle="tab" data-bs-target="#tabQuestions">
+        Bộ câu hỏi khảo sát (@Model.Count)
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link-clean" data-bs-toggle="tab" data-bs-target="#tabWheel">
+        Tỉ lệ vòng xoay (@prizes.Count giải)
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="minigameTabsContent">
+    
+    @* TAB 1: SURVEY QUESTIONS *@
+    <div class="tab-pane fade show active" id="tabQuestions">
+      <div class="row g-4">
+        
+        @* List questions *@
+        <div class="col-xl-8">
+          <div class="card border-0 shadow-sm p-4" style="background: #ffffff; border-radius: 16px;">
+            <h5 class="fw-bold text-navy mb-3">Danh sách câu hỏi</h5>
+            
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr class="text-muted" style="font-size: 13px;">
+                    <th style="width: 8%;">Thứ tự</th>
+                    <th style="width: 35%;">Nội dung câu hỏi</th>
+                    <th style="width: 35%;">Các lựa chọn trả lời</th>
+                    <th style="width: 12%;" class="text-center">Trạng thái</th>
+                    <th style="width: 10%;" class="text-end">Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (!Model.Any())
+                  {
+                    <tr>
+                      <td colspan="5" class="text-center py-4 text-muted">Chưa có câu hỏi khảo sát nào.</td>
+                    </tr>
+                  }
+                  else
+                  {
+                    foreach (var q in Model)
+                    {
+                      <tr>
+                        <td class="font-monospace text-center fw-bold text-camel">@q.DisplayOrder</td>
+                        <td>
+                          <div class="fw-semibold text-navy">@q.QuestionText</div>
+                          <span class="text-muted" style="font-size: 11px;">Tạo lúc: @q.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        </td>
+                        <td>
+                          <div class="d-flex flex-wrap gap-1">
+                            @foreach (var opt in q.Options.Split(','))
+                            {
+                              <span class="badge bg-light text-navy border font-sans" style="font-size: 11px; font-weight: normal;">@opt.Trim()</span>
+                            }
+                          </div>
+                        </td>
+                        <td class="text-center">
+                          <span class="badge @(q.IsActive ? "bg-success" : "bg-secondary")">
+                            @(q.IsActive ? "Hoạt động" : "Tạm khóa")
+                          </span>
+                        </td>
+                        <td class="text-end">
+                          <div class="d-flex gap-1 justify-content-end">
+                            <button class="btn btn-sm btn-outline-secondary" 
+                                    onclick="openEditModal(@q.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(q.QuestionText))', '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(q.Options))', @q.DisplayOrder, '@(q.IsActive.ToString().ToLower())')">
+                              SỬA
+                            </button>
+                            <form asp-action="DeleteQuestion" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa câu hỏi này không?')" style="display:inline;">
+                              <input type="hidden" name="id" value="@q.Id" />
+                              <button type="submit" class="btn btn-sm btn-outline-danger">
+                                XÓA
+                              </button>
+                            </form>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+            
+            <span class="small text-muted mt-2">Hệ thống sẽ lấy ngẫu nhiên 5 câu hỏi hoạt động mỗi khi khách hàng tham gia khảo sát.</span>
+          </div>
+        </div>
+
+        @* Add question Form *@
+        <div class="col-xl-4">
+          <div class="card border-0 shadow-sm p-4" style="background: #ffffff; border-radius: 16px; border: 1px solid rgba(194, 178, 128, 0.1) !important;">
+            <h5 class="fw-bold text-navy mb-3 border-bottom pb-2">Thêm câu hỏi mới</h5>
+            
+            <form asp-action="AddQuestion" method="post">
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-navy">Nội dung câu hỏi</label>
+                <textarea name="questionText" class="form-control" rows="3" required placeholder="Ví dụ: Bạn mong muốn HUTECHSTORE cải tiến dịch vụ nào nhất?" style="border-radius: 8px; font-size: 14px;"></textarea>
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-navy">Các lựa chọn câu trả lời (phân tách bằng dấu phẩy)</label>
+                <textarea name="options" class="form-control" rows="3" required placeholder="Ví dụ: Giá cả, Chăm sóc khách hàng, Giao hàng nhanh, Chất lượng máy" style="border-radius: 8px; font-size: 14px;"></textarea>
+                <div class="form-text" style="font-size: 11px;">Nhập các câu trả lời ngắn gọn, ngăn cách bởi dấu phẩy `,`</div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label small fw-semibold text-navy">Thứ tự hiển thị</label>
+                <input type="number" name="displayOrder" value="0" class="form-control" style="border-radius: 8px; font-size: 14px;" />
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100 py-2" style="border-radius: 30px; font-weight: 500;">
+                LƯU CÂU HỎI
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    @* TAB 2: LUCKY WHEEL PRIZES *@
+    <div class="tab-pane fade" id="tabWheel">
+      <div class="card border-0 shadow-sm p-4" style="background: #ffffff; border-radius: 16px;">
+        <h5 class="fw-bold text-navy mb-3">Danh sách giải thưởng & Tỉ lệ trúng</h5>
+        
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr class="text-muted" style="font-size: 13px;">
+                <th style="width: 5%;">ID</th>
+                <th style="width: 25%;">Tên giải thưởng (hiển thị trên vòng xoay)</th>
+                <th style="width: 15%;">Loại ưu đãi</th>
+                <th style="width: 15%;">Giá trị giảm giá</th>
+                <th style="width: 10%;" class="text-center">Độ nặng (Trọng số)</th>
+                <th style="width: 10%;" class="text-center">Màu sắc vẽ</th>
+                <th style="width: 10%;" class="text-center">Trạng thái</th>
+                <th style="width: 10%;" class="text-end">Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach (var p in prizes)
+              {
+                <tr>
+                  <td class="font-monospace">@p.Id</td>
+                  <td>
+                    <div class="fw-bold text-navy">@p.Name</div>
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-navy border">
+                      @(p.CouponType == "percent" ? "Phần trăm (%)" : (p.CouponType == "fixed" ? "Số tiền cố định (₫)" : "Không có (Mất lượt)"))
+                    </span>
+                  </td>
+                  <td class="font-monospace fw-semibold text-camel">
+                    @(p.CouponType == "percent" ? $"{p.CouponValue}%" : (p.CouponType == "fixed" ? $"{p.CouponValue:N0}₫" : "-"))
+                  </td>
+                  <td class="text-center font-monospace fw-bold text-navy">@p.Weight</td>
+                  <td class="text-center">
+                    <div class="d-flex align-items-center justify-content-center gap-2">
+                      <div class="rounded-circle" style="width: 18px; height: 18px; background-color: @p.ColorHex; border: 1px solid #ccc;"></div>
+                      <span class="font-monospace small">@p.ColorHex</span>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge @(p.Status == 1 ? "bg-success" : "bg-secondary")">
+                      @(p.Status == 1 ? "Kích hoạt" : "Khóa")
+                    </span>
+                  </td>
+                  <td class="text-end">
+                    <button class="btn btn-sm btn-outline-secondary" 
+                            onclick="openPrizeModal(@p.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Name))', @p.Weight, '@p.CouponType', @p.CouponValue, '@p.ColorHex', @p.Status)">
+                      CẤU HÌNH
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        
+        <span class="small text-muted mt-2">Trọng số càng cao, tỉ lệ trúng của giải thưởng đó càng lớn. Tổng trọng số hiện tại của hệ thống là <strong>@prizes.Sum(p => p.Weight)</strong>.</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+@* Modal Edit Question *@
+<div class="modal fade" id="editQuestionModal" tabindex="-1" aria-labelledby="editQuestionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius: 16px;">
+      <form asp-action="EditQuestion" method="post">
+        <input type="hidden" name="id" id="editQId" />
+        
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title font-serif fw-bold text-navy fs-5" id="editQuestionModalLabel">Sửa câu hỏi khảo sát</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-3">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-navy">Nội dung câu hỏi</label>
+            <textarea name="questionText" id="editQText" class="form-control" rows="3" required style="border-radius: 8px;"></textarea>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-navy">Các lựa chọn (ngăn cách bởi dấu phẩy)</label>
+            <textarea name="options" id="editQOptions" class="form-control" rows="3" required style="border-radius: 8px;"></textarea>
+          </div>
+
+          <div class="row mb-2">
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-navy">Thứ tự hiển thị</label>
+              <input type="number" name="displayOrder" id="editQOrder" class="form-control" style="border-radius: 8px;" />
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-navy">Trạng thái hoạt động</label>
+              <select name="isActive" id="editQActive" class="form-select" style="border-radius: 8px;">
+                <option value="true">Hoạt động</option>
+                <option value="false">Tạm khóa</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-sm btn-outline-navy" data-bs-dismiss="modal" style="border-radius: 20px;">Hủy</button>
+          <button type="submit" class="btn btn-sm btn-camel-gold" style="border-radius: 20px;">Lưu Thay Đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+@* Modal Config Wheel Prize *@
+<div class="modal fade" id="editPrizeModal" tabindex="-1" aria-labelledby="editPrizeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius: 16px;">
+      <form asp-action="UpdatePrize" method="post">
+        <input type="hidden" name="id" id="editPrizeId" />
+        
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title font-serif fw-bold text-navy fs-5" id="editPrizeModalLabel">Cấu hình giải thưởng vòng xoay</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-3">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-navy">Tên giải thưởng (hiển thị trên vòng xoay)</label>
+            <input type="text" name="name" id="editPrizeName" class="form-control" required style="border-radius: 8px;" />
+          </div>
+          
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-navy">Loại ưu đãi</label>
+              <select name="couponType" id="editPrizeType" class="form-select" style="border-radius: 8px;">
+                <option value="percent">Phần trăm (%)</option>
+                <option value="fixed">Số tiền cố định (₫)</option>
+                <option value="none">Không có (Chúc may mắn)</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-navy">Giá trị giảm giá</label>
+              <input type="number" name="couponValue" id="editPrizeValue" step="0.01" class="form-control" style="border-radius: 8px;" />
+            </div>
+          </div>
+
+          <div class="row g-3 mb-2">
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-navy">Trọng số (tỉ lệ trúng)</label>
+              <input type="number" name="weight" id="editPrizeWeight" class="form-control" required style="border-radius: 8px;" />
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-navy">Trạng thái hoạt động</label>
+              <select name="status" id="editPrizeStatus" class="form-select" style="border-radius: 8px;">
+                <option value="1">Kích hoạt</option>
+                <option value="0">Khóa</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label small fw-semibold text-navy">Màu sắc vẽ lát (Hex Color Code)</label>
+            <div class="d-flex align-items-center gap-2">
+              <input type="color" id="editPrizeColorPicker" class="form-control form-control-color" style="width: 50px; height: 38px; border-radius: 8px; border: 1px solid #ccc;" oninput="document.getElementById('editPrizeColor').value = this.value">
+              <input type="text" name="colorHex" id="editPrizeColor" class="form-control" placeholder="#BEB280" required maxlength="7" style="border-radius: 8px;" oninput="document.getElementById('editPrizeColorPicker').value = this.value">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-sm btn-outline-navy" data-bs-dismiss="modal" style="border-radius: 20px;">Hủy</button>
+          <button type="submit" class="btn btn-sm btn-camel-gold" style="border-radius: 20px;">Cập Nhật</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+  // Edit Question Modal control
+  let questionModalInst = null;
+  function openEditModal(id, text, options, order, active) {
+    const modalEl = document.getElementById('editQuestionModal');
+    document.body.appendChild(modalEl); // Append to body to bypass parent container stacking contexts
+    
+    document.getElementById('editQId').value = id;
+    document.getElementById('editQText').value = text;
+    document.getElementById('editQOptions').value = options;
+    document.getElementById('editQOrder').value = order;
+    document.getElementById('editQActive').value = active;
+    
+    if (!questionModalInst) {
+      questionModalInst = new bootstrap.Modal(modalEl);
+    }
+    questionModalInst.show();
+  }
+
+  // Edit Prize Modal control
+  let prizeModalInst = null;
+  function openPrizeModal(id, name, weight, type, value, color, status) {
+    const modalEl = document.getElementById('editPrizeModal');
+    document.body.appendChild(modalEl); // Append to body to bypass parent container stacking contexts
+    
+    document.getElementById('editPrizeId').value = id;
+    document.getElementById('editPrizeName').value = name;
+    document.getElementById('editPrizeWeight').value = weight;
+    document.getElementById('editPrizeType').value = type;
+    document.getElementById('editPrizeValue').value = value;
+    document.getElementById('editPrizeColor').value = color;
+    document.getElementById('editPrizeColorPicker').value = color;
+    document.getElementById('editPrizeStatus').value = status;
+    
+    if (!prizeModalInst) {
+      prizeModalInst = new bootstrap.Modal(modalEl);
+    }
+    prizeModalInst.show();
+  }
+</script>
+}

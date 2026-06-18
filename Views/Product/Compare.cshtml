@@ -1,0 +1,579 @@
+@model List<HutechStore.Models.Product>
+@{
+  ViewData["Title"] = "So sánh sản phẩm - HUTECHSTORE";
+  
+  // Clean dimensions parsing helper in C#
+  (double Height, double Width, double Thickness) ParseDimensions(string? dimStr)
+  {
+    if (string.IsNullOrEmpty(dimStr)) return (150, 75, 8.0);
+    try
+    {
+      // Match numbers in string: e.g. "147.6 x 71.5 x 7.8 mm"
+      var matches = System.Text.RegularExpressions.Regex.Matches(dimStr, @"[0-9]+(\.[0-9]+)?");
+      if (matches.Count >= 3)
+      {
+        double h = double.Parse(matches[0].Value, System.Globalization.CultureInfo.InvariantCulture);
+        double w = double.Parse(matches[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+        double t = double.Parse(matches[2].Value, System.Globalization.CultureInfo.InvariantCulture);
+        return (h, w, t);
+      }
+      else if (matches.Count == 2)
+      {
+        double h = double.Parse(matches[0].Value, System.Globalization.CultureInfo.InvariantCulture);
+        double w = double.Parse(matches[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+        return (h, w, 8.0);
+      }
+    }
+    catch {}
+    return (150, 75, 8.0);
+  }
+
+  // Expert Analysis helper
+  (string ChipAnalysis, string TargetUser, string JobRec, string BatteryHours) AnalyzeDevice(string name, HutechStore.Models.PhoneSpecs? specs)
+  {
+    string chip = specs?.Chipset ?? "";
+    int battery = specs?.BatteryMah ?? 0;
+    
+    string chipAnalysis = "Bộ vi xử lý đa nhân mạnh mẽ, tối ưu hóa tốt các tác vụ văn phòng và giải trí.";
+    string targetUser = "Phù hợp cho nhu cầu làm việc văn phòng, liên lạc trực tuyến và giải trí hàng ngày.";
+    string jobRec = "Học sinh, Sinh viên, Nhân viên văn phòng, Người làm dịch vụ.";
+    string batteryHours = "Sử dụng hỗn hợp lên đến 18 giờ liên tục.";
+
+    if (name.Contains("17 Pro") || name.Contains("17 Pro Max"))
+    {
+      chipAnalysis = "Vi xử lý Apple A19 Pro (3nm) với GPU 6 nhân mạnh nhất thế giới di động, tích hợp nhân dò tia Ray Tracing thế hệ mới và cụm nhân NPU xử lý AI cục bộ cực nhanh.";
+      targetUser = "Sức mạnh đồ họa và tính toán đỉnh cao, chuyên phục vụ các tác vụ dựng hình, biên dịch mã nguồn và chạy các ứng dụng AI tạo sinh phức tạp.";
+      jobRec = "Nhà làm phim, Lập trình viên, Nhiếp ảnh gia chuyên nghiệp, Gamer di động AAA, Doanh nhân công nghệ.";
+      batteryHours = "Lên đến 29 giờ phát video liên tục (~2 ngày sử dụng cơ bản).";
+    }
+    else if (name.Contains("16 Pro") || name.Contains("16 Pro Max") || name.Contains("15 Pro") || name.Contains("15 Pro Max"))
+    {
+      chipAnalysis = "Vi xử lý Apple A18 Pro / A17 Pro tối ưu hóa sâu sắc cho bộ công cụ Apple Intelligence, mang lại hiệu năng đồ họa cực cao và xử lý video ProRES mượt mà.";
+      targetUser = "Thiết bị quay chụp và dựng phim chất lượng Studio, xử lý công việc hiệu suất cao và đa tác vụ không độ trễ.";
+      jobRec = "Content Creator, Chuyên viên thiết kế đồ họa, Quản lý dự án, Nhà báo, Tiktoker.";
+      batteryHours = "Lên đến 27 giờ phát video liên tục.";
+    }
+    else if (name.Contains("17") || name.Contains("17 Plus") || name.Contains("16") || name.Contains("16 Plus") || name.Contains("15") || name.Contains("15 Plus") || name.Contains("Air"))
+    {
+      chipAnalysis = "Vi xử lý Apple A19 / A18 / A16 Bionic tối ưu hiệu năng trên mỗi watt điện, hoạt động mát mẻ và xử lý tức thì mọi ứng dụng công việc.";
+      targetUser = "Độ tin cậy tuyệt đối cho liên lạc thông suốt, xử lý tài liệu, AI hỗ trợ dịch thuật và chụp ảnh nhanh sắc nét.";
+      jobRec = "Doanh nhân, Trưởng phòng, Freelancer, Nhân viên văn phòng, Giảng viên.";
+      batteryHours = "Lên đến 22 giờ sử dụng hỗn hợp.";
+    }
+    else if (name.Contains("16e") || name.Contains("17e"))
+    {
+      chipAnalysis = "Vi xử lý Apple A18e / A17e cân bằng hoàn hảo giữa hiệu năng và tiết kiệm pin, hoạt động mát mẻ cho các nhu cầu hàng ngày.";
+      targetUser = "Lựa chọn kinh tế tối ưu cho học tập, liên lạc làm việc cơ bản và giải trí nhẹ nhàng.";
+      jobRec = "Học sinh, Sinh viên, Người cao tuổi, Tài xế công nghệ, CSKH.";
+      batteryHours = "Lên đến 20 giờ phát video liên tục.";
+    }
+    else if (name.Contains("S25 Ultra") || name.Contains("Fold 6"))
+    {
+      chipAnalysis = "Vi xử lý Snapdragon 8 Elite / Snapdragon 8 Gen 3 for Galaxy đỉnh cao thế giới Android, tích hợp NPU tối ưu hóa sâu sắc cho Galaxy AI và hỗ trợ bút S Pen.";
+      targetUser = "Đa nhiệm chuyên sâu với Samsung DeX (máy tính di động), ghi chú nhanh, phác thảo đồ họa và xử lý tài liệu nhiều cửa sổ cùng lúc.";
+      jobRec = "Kiến trúc sư, Họa sĩ vẽ minh họa, Chuyên viên phân tích tài chính, Kỹ sư xây dựng, Quản lý cấp cao.";
+      batteryHours = "Lên đến 28 giờ phát video liên tục.";
+    }
+    else if (name.Contains("S25+") || name.Contains("S25") || name.Contains("Z Flip 6"))
+    {
+      chipAnalysis = "Vi xử lý Snapdragon / Exynos thế hệ mới được tinh chỉnh cho thiết kế siêu mỏng hoặc màn hình gập, mang lại tốc độ cực nhanh trong một thân máy thời trang.";
+      targetUser = "Sáng tạo góc chụp FlexCam độc đáo không cần chân máy, đa tác vụ văn phòng và thời trang công nghệ cao cấp.";
+      jobRec = "Fashionista, Nhà sáng tạo nội dung mạng xã hội, Nhân viên Marketing, Doanh nhân trẻ.";
+      batteryHours = "Lên đến 21 giờ phát video liên tục.";
+    }
+
+    return (chipAnalysis, targetUser, jobRec, batteryHours);
+  }
+
+  // Dynamic column class based on product count
+  string colClass = Model.Count == 2 ? "col-md-6" : (Model.Count == 1 ? "col-12" : "col-md-4");
+}
+
+<div class="container py-5 text-navy">
+  @* Title section *@
+  <div class="text-center mb-5">
+    <span class="editorial-tag">HUTECHSTORE COMPARISON</span>
+    <h1 class="font-serif fw-bold text-navy mt-2 fs-2">So Sánh Thiết Bị Trực Quan</h1>
+    <p class="text-muted mx-auto" style="max-width: 600px;">Đưa ra quyết định chính xác bằng cách đặt các thiết bị cạnh nhau, so sánh thông số kỹ thuật và kích thước vật lý thực tế.</p>
+  </div>
+
+  @* Control Panel *@
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 p-3 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+    <div class="d-flex align-items-center gap-3">
+      <a asp-action="Index" class="btn btn-sm btn-outline-navy" style="border-radius: 20px; font-weight: 500; letter-spacing: 0.03em;">
+        ← QUAY LẠI CỬA HÀNG
+      </a>
+      <span class="text-muted fs-6">Đang so sánh <strong class="text-navy">@Model.Count</strong> sản phẩm</span>
+    </div>
+    
+    <div class="form-check form-switch d-flex align-items-center gap-2">
+      <input class="form-check-input" type="checkbox" role="switch" id="toggleDiffs" onchange="toggleDifferencesOnly()" style="cursor: pointer; width: 45px; height: 22px;">
+      <label class="form-check-label fw-medium text-navy" for="toggleDiffs" style="cursor: pointer; user-select: none;">Chỉ hiển thị điểm khác biệt</label>
+    </div>
+  </div>
+
+  @* Product cards Row *@
+  <div class="row g-4 mb-5 justify-content-center">
+    @foreach (var prod in Model)
+    {
+      var specs = prod.PhoneSpecs;
+      var priceStr = prod.Price.ToString("N0") + "₫";
+      
+      <div class="col-12 @colClass text-center">
+        <div class="position-relative p-4 rounded-4 shadow-sm h-100" style="background: #fff; border: 1px solid rgba(194, 178, 128, 0.15);">
+          
+          @* Remove Button *@
+          <button type="button" class="btn-close position-absolute" style="top: 15px; right: 15px; font-size: 14px;" 
+                  title="Xóa khỏi danh sách so sánh" 
+                  onclick="removeProductFromComparison(@prod.Id)">
+          </button>
+          
+          <div class="compare-card-img-wrapper mb-3">
+            <img src="@(prod.Image ?? "/images/no-image.png")" alt="@prod.Name" class="img-fluid" style="max-height: 150px; object-fit: contain;"/>
+          </div>
+          <h5 class="fw-bold mb-1 text-navy">@prod.Name</h5>
+          <p class="text-muted small mb-2">@prod.Brand</p>
+          <div class="fw-bold text-navy fs-5 mb-3">@priceStr</div>
+          <form asp-controller="Cart" asp-action="Add" method="post">
+            <input type="hidden" name="productId" value="@prod.Id"/>
+            <button type="submit" class="btn btn-primary w-100" style="border-radius: 20px;">
+              MUA NGAY
+            </button>
+          </form>
+        </div>
+      </div>
+    }
+  </div>
+
+  @* Section 2D Visual Size Comparison *@
+  <div class="mb-5 p-4 rounded-4" style="background: var(--ivory-pure); border: 1px solid rgba(194, 178, 128, 0.15);">
+    <h4 class="font-serif fw-bold text-navy mb-4 border-bottom pb-2">
+      So dáng 2D Tỷ Lệ Thực Tế
+    </h4>
+    
+    <!-- 2D Canvas Row - Full width -->
+    <div class="w-100 mb-4">
+      <div class="row g-4 align-items-end justify-content-center py-5 px-3 rounded-4 shadow-inner" style="background: #ffffff; min-height: 480px; border: 1px solid rgba(0,0,0,0.05); margin: 0;">
+        
+        @foreach (var prod in Model)
+        {
+          var specs = prod.PhoneSpecs;
+          var dim = ParseDimensions(specs?.Dimensions);
+          
+          // Standard scale factor: 1mm = 2.4px
+          var pixelHeight = dim.Height * 2.4;
+          var pixelWidth = dim.Width * 2.4;
+          var pixelThick = dim.Thickness * 2.4;
+          
+          // Find a representing color hex for rendering
+          var firstColor = specs?.Colors?.Split(',').FirstOrDefault()?.Trim() ?? "Titanium";
+          var colorHex = GetHexForColorName(firstColor);
+
+          <div class="col-12 @colClass d-flex flex-column align-items-center mb-4">
+            
+            <div class="d-flex align-items-end gap-4 p-4 rounded-4" style="background: rgba(194, 178, 128, 0.03); border: 1px dashed rgba(194, 178, 128, 0.15);">
+              
+              @* Front View (Height x Width) *@
+              <div class="d-flex flex-column align-items-center">
+                <span class="text-muted font-monospace mb-2" style="font-size: 10px; letter-spacing: 0.05em;">MẶT TRƯỚC</span>
+                <div class="phone-2d-frame shadow-lg position-relative d-flex align-items-center justify-content-center" 
+                     style="width: @(pixelWidth)px; height: @(pixelHeight)px; border-radius: 20px; border: @(Math.Max(1.0, pixelThick/2.5))px solid #333; background: @(colorHex); transition: all 0.3s ease;">
+                  
+                  @* Screen Glass Overlay *@
+                  <div class="phone-2d-screen d-flex flex-column justify-content-between p-2 text-center text-white" 
+                       style="width: calc(100% - 4px); height: calc(100% - 4px); border-radius: 16px; background: rgba(0,0,0,0.88); font-size: 10px;">
+                    
+                    @* Camera Notch *@
+                    <div class="mx-auto rounded-pill" style="width: 28px; height: 5px; background: #222; margin-top: 1px;"></div>
+                    
+                    @* Display spec text *@
+                    <div class="my-auto">
+                      <span class="d-block fw-bold font-monospace text-camel">@(specs?.DisplaySize ?? "N/A")</span>
+                    </div>
+                    
+                    @* Sized info *@
+                    <div class="text-muted mx-auto text-truncate" style="max-width: 90%; font-size: 8px; opacity: 0.6;">
+                      @prod.Name.Replace("iPhone", "iP").Replace("Galaxy", "S")
+                    </div>
+                  </div>
+                </div>
+                <span class="text-navy small font-monospace mt-2">@(dim.Height) x @(dim.Width) mm</span>
+              </div>
+
+              @* Side View (Thickness) *@
+              <div class="d-flex flex-column align-items-center">
+                <span class="text-muted font-monospace mb-2" style="font-size: 10px; letter-spacing: 0.05em;">ĐỘ MỎNG</span>
+                <div class="phone-side-frame shadow-lg" 
+                     style="width: @(Math.Max(5.0, pixelThick))px; height: @(pixelHeight)px; border-radius: 4px; background: linear-gradient(to right, #444, @(colorHex), #222); border: 1px solid #111; transition: all 0.3s ease;">
+                </div>
+                <span class="text-navy small font-monospace mt-2">@(dim.Thickness) mm</span>
+              </div>
+              
+            </div>
+
+            @* Weight Bar Gauge *@
+            <div class="w-100 mt-3 px-2" style="max-width: 280px;">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="text-muted small">Cân nặng:</span>
+                <span class="fw-bold text-navy small">@(specs?.WeightGrams ?? 0)g</span>
+              </div>
+              @{
+                var weightPct = Math.Min(100.0, Math.Max(20.0, ((specs?.WeightGrams ?? 180.0) / 280.0) * 100.0));
+              }
+              <div class="progress" style="height: 4px; background: rgba(194, 178, 128, 0.15); border-radius: 2px;">
+                <div class="progress-bar" role="progressbar" 
+                     style="width: @(weightPct)%; background: linear-gradient(to right, var(--navy), var(--camel)); border-radius: 2px;"></div>
+              </div>
+            </div>
+
+          </div>
+        }
+
+      </div>
+    </div>
+    
+    <!-- Dimension comparisons textual summaries - Row underneath, divided evenly -->
+    <div class="p-4 rounded-4 shadow-sm" style="background: #ffffff; border: 1px solid rgba(194, 178, 128, 0.15);">
+      <h5 class="fw-bold text-navy fs-6 mb-4 border-bottom pb-2 font-serif text-uppercase tracking-wider">Đánh giá kích thước vật lý</h5>
+      
+      <div class="row g-4 justify-content-center">
+        @if (Model.Count >= 2)
+        {
+          // Parse dimensions for all models
+          var validDims = Model.Select(p => {
+            var ps = p.PhoneSpecs;
+            var dim = ParseDimensions(ps?.Dimensions);
+            return new {
+              Name = p.Name,
+              Height = dim.Height,
+              Width = dim.Width,
+              Thickness = dim.Thickness,
+              Weight = ps?.WeightGrams ?? 0
+            };
+          }).ToList();
+
+          // Height comparison
+          var heights = validDims.Select(d => d.Height).ToList();
+          var maxH = heights.Max();
+          var minH = heights.Min();
+          var isAllHEqual = heights.Distinct().Count() == 1;
+          var tallest = validDims.First(d => d.Height == maxH).Name;
+          var tallestDiff = maxH - minH;
+
+          // Width comparison
+          var widths = validDims.Select(d => d.Width).ToList();
+          var maxW = widths.Max();
+          var minW = widths.Min();
+          var isAllWEqual = widths.Distinct().Count() == 1;
+          var widest = validDims.First(d => d.Width == maxW).Name;
+          var widestDiff = maxW - minW;
+
+          // Thickness comparison
+          var thicknesses = validDims.Select(d => d.Thickness).ToList();
+          var maxT = thicknesses.Max();
+          var minT = thicknesses.Min();
+          var isAllTEqual = thicknesses.Distinct().Count() == 1;
+          var thinnest = validDims.First(d => d.Thickness == minT).Name;
+          var thinnestDiff = maxT - minT;
+
+          // Weight comparison
+          var weights = validDims.Where(d => d.Weight > 0).Select(d => d.Weight).ToList();
+          var maxWt = weights.Any() ? weights.Max() : 0;
+          var minWt = weights.Any() ? weights.Min() : 0;
+          var isAllWtEqual = weights.Distinct().Count() <= 1;
+          var lightest = weights.Any() ? validDims.First(d => d.Weight == minWt).Name : "";
+          var lightestDiff = maxWt - minWt;
+
+          <div class="col-12 col-sm-6 col-lg-3">
+            <div class="p-3 rounded-4 h-100" style="background: rgba(194, 178, 128, 0.03); border: 1px solid rgba(194, 178, 128, 0.08);">
+              <span class="text-muted small d-block mb-2 font-monospace" style="font-size: 10px; letter-spacing: 0.05em;">CHIỀU CAO:</span>
+              <span class="text-navy fw-medium" style="font-size: 13.5px; line-height: 1.5; display: block;">
+                @if (isAllHEqual) { <text>Các máy có chiều cao bằng nhau (@maxH mm).</text> }
+                else { <text><strong>@tallest</strong> cao nhất (<strong>@maxH mm</strong>), chênh lệch tối đa <strong>@tallestDiff.ToString("0.0") mm</strong>.</text> }
+              </span>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-lg-3">
+            <div class="p-3 rounded-4 h-100" style="background: rgba(194, 178, 128, 0.03); border: 1px solid rgba(194, 178, 128, 0.08);">
+              <span class="text-muted small d-block mb-2 font-monospace" style="font-size: 10px; letter-spacing: 0.05em;">CHIỀU RỘNG:</span>
+              <span class="text-navy fw-medium" style="font-size: 13.5px; line-height: 1.5; display: block;">
+                @if (isAllWEqual) { <text>Các máy có chiều rộng bằng nhau (@maxW mm).</text> }
+                else { <text><strong>@widest</strong> rộng nhất (<strong>@maxW mm</strong>), chênh lệch tối đa <strong>@widestDiff.ToString("0.0") mm</strong>.</text> }
+              </span>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-lg-3">
+            <div class="p-3 rounded-4 h-100" style="background: rgba(194, 178, 128, 0.03); border: 1px solid rgba(194, 178, 128, 0.08);">
+              <span class="text-muted small d-block mb-2 font-monospace" style="font-size: 10px; letter-spacing: 0.05em;">ĐỘ MỎNG (DÀY):</span>
+              <span class="text-navy fw-medium" style="font-size: 13.5px; line-height: 1.5; display: block;">
+                @if (isAllTEqual) { <text>Các máy có độ dày bằng nhau (@maxT mm).</text> }
+                else { <text><strong>@thinnest</strong> mỏng nhất (<strong>@minT mm</strong>), chênh lệch tối đa <strong>@thinnestDiff.ToString("0.0") mm</strong>.</text> }
+              </span>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-lg-3">
+            <div class="p-3 rounded-4 h-100" style="background: rgba(194, 178, 128, 0.03); border: 1px solid rgba(194, 178, 128, 0.08);">
+              <span class="text-muted small d-block mb-2 font-monospace" style="font-size: 10px; letter-spacing: 0.05em;">TRỌNG LƯỢNG:</span>
+              <span class="text-navy fw-medium" style="font-size: 13.5px; line-height: 1.5; display: block;">
+                @if (isAllWtEqual || string.IsNullOrEmpty(lightest)) { <text>Trọng lượng tương đương nhau.</text> }
+                else { <text><strong>@lightest</strong> nhẹ nhất (<strong>@minWt g</strong>), chênh lệch tối đa <strong>@lightestDiff g</strong>.</text> }
+              </span>
+            </div>
+          </div>
+        }
+        else
+        {
+          <div class="col-12">
+            <p class="text-muted small text-center mb-0">Cần ít nhất 2 sản phẩm để thực hiện so sánh chi tiết.</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  @* Section Expert Analysis (Nhận xét chuyên gia) *@
+  <div class="mb-5 p-4 rounded-4 text-navy" style="background: #ffffff; border: 1px solid rgba(194, 178, 128, 0.15);">
+    <h4 class="font-serif fw-bold text-navy mb-4 border-bottom pb-2">
+      Phân Tích & Tư Vấn Chuyên Sâu
+    </h4>
+    
+    <div class="row g-4 justify-content-center">
+      @foreach (var prod in Model)
+      {
+        var analysis = AnalyzeDevice(prod.Name, prod.PhoneSpecs);
+        <div class="col-12 @colClass">
+          <div class="p-3 rounded-4 h-100" style="background: rgba(194, 178, 128, 0.04); border: 1px solid rgba(194, 178, 128, 0.12);">
+            <h5 class="font-serif fw-bold text-navy mb-3 fs-6 border-bottom pb-1">@prod.Name</h5>
+            
+            <div class="mb-3">
+              <span class="text-muted d-block small font-monospace" style="font-size: 10px;">HIỆU NĂNG CHIP:</span>
+              <p class="text-navy mb-0" style="font-size: 13.5px; line-height: 1.5;">@analysis.ChipAnalysis</p>
+            </div>
+            
+            <div class="mb-3">
+              <span class="text-muted d-block small font-monospace" style="font-size: 10px;">ĐỐI TƯỢNG PHÙ HỢP:</span>
+              <p class="text-navy mb-0" style="font-size: 13.5px; line-height: 1.5;">@analysis.TargetUser</p>
+            </div>
+            
+            <div class="mb-3">
+              <span class="text-muted d-block small font-monospace" style="font-size: 10px;">NGHỀ NGHIỆP PHÙ HỢP:</span>
+              <p class="text-camel fw-semibold mb-0" style="font-size: 13.5px; line-height: 1.5;">@analysis.JobRec</p>
+            </div>
+            
+            <div class="mb-0">
+              <span class="text-muted d-block small font-monospace" style="font-size: 10px;">THỜI LƯỢNG PIN THỰC TẾ:</span>
+              <p class="text-navy fw-bold mb-0" style="font-size: 13.5px; line-height: 1.5;">@analysis.BatteryHours</p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  @* Technical Spec Table *@
+  <div class="table-responsive rounded-4 shadow-sm" style="border: 1px solid rgba(194, 178, 128, 0.15); background: #ffffff;">
+    <table class="table table-hover align-middle mb-0 text-navy">
+      <thead style="background: rgba(10,30,51,0.03);">
+        <tr>
+          <th style="width: 20%; min-width: 150px;" class="ps-4 py-3 fw-bold font-serif text-navy">Thông số kỹ thuật</th>
+          @foreach (var prod in Model)
+          {
+            <th class="py-3 fw-bold text-center text-navy font-serif" style="width: @(80 / Model.Count)%;">@prod.Name</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        
+        @* ── PERFORMANCE ── *@
+        <tr class="table-light-navy font-serif">
+          <td colspan="@(Model.Count + 1)" class="ps-4 py-2 fw-semibold text-navy" style="letter-spacing: 0.05em; background: rgba(194, 178, 128, 0.08);">HIỆU NĂNG & CẤU HÌNH</td>
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Vi xử lý (Chipset)</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.Chipset ?? "N/A")</td>
+          }
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Dung lượng RAM</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.RamGb > 0 ? $"{prod.PhoneSpecs.RamGb} GB" : "N/A")</td>
+          }
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Bộ nhớ trong tiêu chuẩn</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.StorageGb > 0 ? $"{prod.PhoneSpecs.StorageGb} GB" : "N/A")</td>
+          }
+        </tr>
+
+        @* ── DISPLAY ── *@
+        <tr class="table-light-navy font-serif">
+          <td colspan="@(Model.Count + 1)" class="ps-4 py-2 fw-semibold text-navy" style="letter-spacing: 0.05em; background: rgba(194, 178, 128, 0.08);">MÀN HÌNH CHÍNH</td>
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Kích thước màn hình</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.DisplaySize ?? "N/A")</td>
+          }
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Công nghệ màn hình</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.DisplayType ?? "N/A")</td>
+          }
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Tần số quét màn hình</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.RefreshRate > 0 ? $"{prod.PhoneSpecs.RefreshRate} Hz" : "N/A")</td>
+          }
+        </tr>
+
+        @* ── CAMERA ── *@
+        <tr class="table-light-navy font-serif">
+          <td colspan="@(Model.Count + 1)" class="ps-4 py-2 fw-semibold text-navy" style="letter-spacing: 0.05em; background: rgba(194, 178, 128, 0.08);">CAMERA CHỤP ẢNH</td>
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Camera chính sau</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.MainCamera ?? "N/A")</td>
+          }
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Camera trước (Selfie)</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.FrontCamera ?? "N/A")</td>
+          }
+        </tr>
+
+        @* ── BATTERY ── *@
+        <tr class="table-light-navy font-serif">
+          <td colspan="@(Model.Count + 1)" class="ps-4 py-2 fw-semibold text-navy" style="letter-spacing: 0.05em; background: rgba(194, 178, 128, 0.08);">PIN & CÔNG NGHỆ SẠC</td>
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Dung lượng pin</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.BatteryMah > 0 ? $"{prod.PhoneSpecs.BatteryMah} mAh" : "N/A")</td>
+          }
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Hỗ trợ sạc nhanh</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.FastCharge == true ? "Có" : "Không")</td>
+          }
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Hỗ trợ sạc không dây</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.WirelessCharge == true ? "Có" : "Không")</td>
+          }
+        </tr>
+
+        @* ── CONNECTIVITY & MISC ── *@
+        <tr class="table-light-navy font-serif">
+          <td colspan="@(Model.Count + 1)" class="ps-4 py-2 fw-semibold text-navy" style="letter-spacing: 0.05em; background: rgba(194, 178, 128, 0.08);">KẾT NỐI VÀ TÍNH NĂNG KHÁC</td>
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Mạng 5G siêu tốc</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.Has5G == true ? "Có" : "Không")</td>
+          }
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Hỗ trợ NFC</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.HasNfc == true ? "Có" : "Không")</td>
+          }
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Hệ điều hành mặc định</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.Os ?? "N/A")</td>
+          }
+        </tr>
+        <tr class="compare-row">
+          <td class="ps-4 fw-medium text-muted">Năm ra mắt</td>
+          @foreach (var prod in Model)
+          {
+            <td class="compare-val text-center">@(prod.PhoneSpecs?.ReleaseYear > 0 ? prod.PhoneSpecs.ReleaseYear.ToString() : "N/A")</td>
+          }
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@* Functions for background color code mapping *@
+@functions {
+  public static string GetHexForColorName(string name)
+  {
+    var n = name.ToLower().Trim();
+    if (n.Contains("space black") || n.Contains("đen không gian") || n.Contains("black") || n.Contains("đen")) return "#232426";
+    if (n.Contains("natural titanium") || n.Contains("titan tự nhiên") || n.Contains("gray") || n.Contains("xám")) return "#a6a6a4";
+    if (n.Contains("white titanium") || n.Contains("trắng titan") || n.Contains("white") || n.Contains("trắng")) return "#f2f2f2";
+    if (n.Contains("desert titanium") || n.Contains("sa mạc") || n.Contains("gold") || n.Contains("vàng")) return "#c2b29c";
+    if (n.Contains("silver") || n.Contains("bạc")) return "#e3e4e6";
+    if (n.Contains("blue") || n.Contains("xanh")) return "#5b7795";
+    return "#e8e8e8"; // Fallback grey
+  }
+}
+
+@section Scripts {
+<script>
+  function toggleDifferencesOnly() {
+    const showDiffOnly = document.getElementById('toggleDiffs').checked;
+    const rows = document.querySelectorAll('tr.compare-row');
+    
+    rows.forEach(row => {
+      const cells = Array.from(row.querySelectorAll('td.compare-val'));
+      if (cells.length > 1) {
+        const firstVal = cells[0].textContent.trim();
+        const allSame = cells.every(cell => cell.textContent.trim() === firstVal);
+        if (allSame) {
+          if (showDiffOnly) {
+            row.style.display = 'none';
+          } else {
+            row.style.display = '';
+          }
+        }
+      }
+    });
+  }
+
+  function removeProductFromComparison(prodId) {
+    // Parse the current product ids from the URL query parameter `ids`
+    const urlParams = new URLSearchParams(window.location.search);
+    let idsStr = urlParams.get('ids');
+    if (!idsStr) return;
+
+    let idArray = idsStr.split(',').map(x => x.trim()).filter(x => x.length > 0);
+    // Filter out the deleted product id
+    idArray = idArray.filter(id => id !== prodId.toString());
+
+    if (idArray.length === 0) {
+      window.location.href = '/Product';
+    } else {
+      window.location.href = '/Product/Compare?ids=' + idArray.join(',');
+    }
+  }
+</script>
+}

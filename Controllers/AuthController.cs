@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 using HutechStore.Data;
 using HutechStore.Helpers;
 using HutechStore.Models;
@@ -34,11 +35,46 @@ public class AuthController : Controller
     {
         if (!ModelState.IsValid) return View(vm);
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == vm.Email);
-        if (user == null || user.Password != vm.Password)
+        if (user == null)
         {
             ModelState.AddModelError("", "Email hoặc mật khẩu không đúng");
             return View(vm);
         }
+
+        var hasher = new PasswordHasher<User>();
+        bool isValid = false;
+
+        if (!string.IsNullOrEmpty(user.Password))
+        {
+            PasswordVerificationResult result;
+            try
+            {
+                result = hasher.VerifyHashedPassword(user, user.Password, vm.Password);
+            }
+            catch (FormatException)
+            {
+                result = PasswordVerificationResult.Failed;
+            }
+
+            if (result == PasswordVerificationResult.Success || result == PasswordVerificationResult.SuccessRehashNeeded)
+            {
+                isValid = true;
+            }
+            else if (user.Password == vm.Password) // Fallback for legacy plaintext password
+            {
+                isValid = true;
+                // Auto-migrate plaintext password to hashed format
+                user.Password = hasher.HashPassword(user, vm.Password);
+                await _db.SaveChangesAsync();
+            }
+        }
+
+        if (!isValid)
+        {
+            ModelState.AddModelError("", "Email hoặc mật khẩu không đúng");
+            return View(vm);
+        }
+
         SessionHelper.SetUser(HttpContext.Session, user);
         await _cart.MergeSessionCartAsync(user.Id);
         return RedirectAfterLogin(user);
@@ -106,7 +142,11 @@ public class AuthController : Controller
             ModelState.AddModelError("Email", "Email đã được sử dụng");
             return View(vm);
         }
-        var user = new User { Name = vm.Name, Email = vm.Email, Password = vm.Password, Phone = vm.Phone, Address = vm.Address };
+
+        var user = new User { Name = vm.Name, Email = vm.Email, Phone = vm.Phone, Address = vm.Address };
+        var hasher = new PasswordHasher<User>();
+        user.Password = hasher.HashPassword(user, vm.Password);
+
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
         TempData["Success"] = "Đăng ký thành công! Vui lòng đăng nhập.";
@@ -167,7 +207,10 @@ public class AuthController : Controller
         if (!ModelState.IsValid) return View(vm);
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == vm.Email);
         if (user == null) return RedirectToAction("Login");
-        user.Password = vm.NewPassword;
+
+        var hasher = new PasswordHasher<User>();
+        user.Password = hasher.HashPassword(user, vm.NewPassword);
+
         _db.PasswordOtps.RemoveRange(_db.PasswordOtps.Where(p => p.Email == vm.Email));
         await _db.SaveChangesAsync();
         TempData["Success"] = "Đổi mật khẩu thành công!";

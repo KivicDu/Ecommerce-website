@@ -4,6 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>HutechStore</RootNamespace>
+    <UseAppHost>false</UseAppHost>
   </PropertyGroup>
   <ItemGroup>
     <!-- Database -->
@@ -13,10 +14,11 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <!-- Mail -->
-    <PackageReference Include="MailKit" Version="4.11.0" />
+    <PackageReference Include="MailKit" Version="4.17.0" />
     <!-- Google OAuth -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.0" />
     <!-- HTTP Client cho Gemini API -->
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageReference Include="MimeKit" Version="4.17.0" />
   </ItemGroup>
 </Project>

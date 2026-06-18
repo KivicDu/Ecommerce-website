@@ -8,23 +8,25 @@ let isSending = false;
 
 // ── Toggle mo/dong chat ──────────────────────────────────────────
 function toggleChat() {
-  chatOpen = !chatOpen;
   const win = document.getElementById("chatWindow");
   const iconO = document.querySelector(".chat-icon-open");
   const iconC = document.querySelector(".chat-icon-close");
   const dot = document.getElementById("chatDot");
 
+  // Use DOM state as source of truth instead of variable
+  chatOpen = win.classList.contains("d-none");
+
   if (chatOpen) {
     win.classList.remove("d-none");
-    iconO.classList.add("d-none");
-    iconC.classList.remove("d-none");
+    if (iconO) iconO.classList.add("d-none");
+    if (iconC) iconC.classList.remove("d-none");
     if (dot) dot.style.display = "none";
     setTimeout(() => document.getElementById("chatInput")?.focus(), 100);
     scrollToBottom();
   } else {
     win.classList.add("d-none");
-    iconO.classList.remove("d-none");
-    iconC.classList.add("d-none");
+    if (iconO) iconO.classList.remove("d-none");
+    if (iconC) iconC.classList.add("d-none");
   }
 }
 

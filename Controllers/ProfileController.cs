@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using HutechStore.Data;
 using HutechStore.Helpers;
+using HutechStore.Models;
 using HutechStore.ViewModels;
 
 namespace HutechStore.Controllers;
@@ -64,13 +66,38 @@ public class ProfileController : Controller
             return RedirectToAction("Index");
         }
 
-        if (user.Password != vm.OldPassword)
+        var hasher = new PasswordHasher<User>();
+        bool isOldValid = false;
+
+        if (!string.IsNullOrEmpty(user.Password))
+        {
+            PasswordVerificationResult result;
+            try
+            {
+                result = hasher.VerifyHashedPassword(user, user.Password, vm.OldPassword);
+            }
+            catch (FormatException)
+            {
+                result = PasswordVerificationResult.Failed;
+            }
+
+            if (result == PasswordVerificationResult.Success || result == PasswordVerificationResult.SuccessRehashNeeded)
+            {
+                isOldValid = true;
+            }
+            else if (user.Password == vm.OldPassword) // Fallback for legacy plaintext password
+            {
+                isOldValid = true;
+            }
+        }
+
+        if (!isOldValid)
         {
             TempData["Error"] = "Mật khẩu hiện tại không đúng";
             return RedirectToAction("Index");
         }
 
-        user.Password = vm.NewPassword;
+        user.Password = hasher.HashPassword(user, vm.NewPassword);
         await _db.SaveChangesAsync();
         TempData["Success"] = "Đổi mật khẩu thành công!";
         return RedirectToAction("Index");

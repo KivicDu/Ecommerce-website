@@ -1,7 +1,5 @@
 @* ════════════════════════════════════════════════════════════════
    _Footer.cshtml — Footer toàn trang
-   Để thay đổi thông tin liên hệ: sửa trực tiếp block "Liên hệ"
-   Để thêm mạng xã hội: thêm <a> vào block ".social-links"
    ════════════════════════════════════════════════════════════════ *@
 
 <footer class="site-footer">
@@ -14,27 +12,18 @@
         @* COL 1: Thương hiệu *@
         <div class="col-lg-4 col-md-6">
           <div class="footer-brand">
-            <h4 class="footer-logo">
-              <i class="fas fa-mobile-alt me-2 text-danger"></i>
-              Hutech<span class="text-danger">Store</span>
+            <h4 class="footer-logo luxury-logo" style="font-size:1.4rem; margin-bottom:1rem;">
+              HUTECHSTORE
             </h4>
             <p class="footer-tagline">
               Cửa hàng điện thoại uy tín hàng đầu — chuyên iPhone &amp; Samsung chính hãng.
-              Tư vấn chuyên nghiệp, giá tốt nhất thị trường.
+              Tư vấn chuyên nghiệp, chất lượng dịch vụ đẳng cấp vượt trội.
             </p>
             <div class="social-links mt-3">
-              <a href="#" class="social-btn" aria-label="Facebook">
-                <i class="fab fa-facebook-f"></i>
-              </a>
-              <a href="#" class="social-btn" aria-label="Zalo">
-                <i class="fas fa-comment-dots"></i>
-              </a>
-              <a href="#" class="social-btn" aria-label="YouTube">
-                <i class="fab fa-youtube"></i>
-              </a>
-              <a href="#" class="social-btn" aria-label="TikTok">
-                <i class="fab fa-tiktok"></i>
-              </a>
+              <a href="#" class="social-link-text me-3" aria-label="Facebook">FACEBOOK</a>
+              <a href="#" class="social-link-text me-3" aria-label="Zalo">ZALO</a>
+              <a href="#" class="social-link-text me-3" aria-label="YouTube">YOUTUBE</a>
+              <a href="#" class="social-link-text" aria-label="TikTok">TIKTOK</a>
             </div>
           </div>
         </div>
@@ -44,14 +33,8 @@
           <h6 class="footer-heading">Liên kết</h6>
           <ul class="footer-links">
             <li><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-            <li>
-              <a asp-controller="Product" asp-action="Index"
-                 asp-route-brand="Apple">iPhone</a>
-            </li>
-            <li>
-              <a asp-controller="Product" asp-action="Index"
-                 asp-route-brand="Samsung">Samsung</a>
-            </li>
+            <li><a asp-controller="Product" asp-action="Index" asp-route-brand="Apple">iPhone</a></li>
+            <li><a asp-controller="Product" asp-action="Index" asp-route-brand="Samsung">Samsung</a></li>
             <li><a asp-controller="Home" asp-action="About">Về chúng tôi</a></li>
             <li><a asp-controller="Home" asp-action="Contact">Liên hệ</a></li>
           </ul>
@@ -65,9 +48,7 @@
             <li><a href="#">Chính sách đổi trả</a></li>
             <li><a href="#">Hướng dẫn mua hàng</a></li>
             <li><a href="#">Tra cứu đơn hàng</a></li>
-            <li>
-              <a asp-controller="Auth" asp-action="Login">Tài khoản của tôi</a>
-            </li>
+            <li><a asp-controller="Auth" asp-action="Login">Tài khoản của tôi</a></li>
           </ul>
         </div>
 
@@ -76,24 +57,21 @@
           <h6 class="footer-heading">Liên hệ</h6>
           <ul class="footer-contact">
             <li>
-              <i class="fas fa-map-marker-alt"></i>
               <span>475A Điện Biên Phủ, P.25, Q.Bình Thạnh, TP.HCM</span>
             </li>
             <li>
-              <i class="fas fa-phone"></i>
-              <span><a href="tel:19001234">1900 1234</a> (7:30 - 22:00)</span>
+              <span>Hotline: <a href="tel:19001234">1900 1234</a> (7:30 - 22:00)</span>
             </li>
             <li>
-              <i class="fas fa-envelope"></i>
-              <span><a href="mailto:info@hutechstore.com">info@hutechstore.com</a></span>
+              <span>Email: <a href="mailto:info@hutechstore.com">info@hutechstore.com</a></span>
             </li>
           </ul>
 
           @* Payment badges *@
           <div class="payment-badges mt-3">
-            <span class="payment-badge"><i class="fas fa-money-bill-wave"></i> COD</span>
-            <span class="payment-badge"><i class="fas fa-university"></i> VNPay</span>
-            <span class="payment-badge"><i class="fas fa-wallet"></i> MoMo</span>
+            <span class="payment-badge-clean me-2">COD</span>
+            <span class="payment-badge-clean me-2">VNPAY</span>
+            <span class="payment-badge-clean">MOMO</span>
           </div>
         </div>
 
@@ -104,8 +82,8 @@
   @* ── FOOTER BOTTOM ── *@
   <div class="footer-bottom">
     <div class="container d-flex flex-wrap justify-content-between align-items-center">
-      <span>&copy; @DateTime.Now.Year HutechStore. All rights reserved.</span>
-      <span class="text-muted small">Made with <i class="fas fa-heart text-danger"></i> by Hutech Team</span>
+      <span>&copy; @DateTime.Now.Year HUTECHSTORE. All rights reserved.</span>
+      <span class="text-muted small">Designed for elegance by Hutech Team</span>
     </div>
   </div>
 
