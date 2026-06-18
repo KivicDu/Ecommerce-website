@@ -2,30 +2,57 @@
    QUIET LUXURY TECH INTERFACE (APPLE & SAMSUNG ADAPTIVE RE-ENGINEERING)
    ========================================================================== */
 
-   :root {
-    /* Premium Color Space */
-    --admin-sidebar-bg: #0A1E33;               /* Deep Navy (matches site.css) */
-    --admin-sidebar-width: 250px;
-    --admin-topbar-h: 60px;
-    
-    /* Core Luxury Accents */
-    --admin-accent: #0F2A44;                   /* Heritage Navy */
-    --admin-accent-light: rgba(15, 42, 68, 0.05);
-    --admin-mystic-bronze: #C2B280;            /* Camel Gold Accent */
-    --admin-cosmic-blue: #0F2A44;              /* Heritage Navy Highlight */
-    
-    /* Text Typography Vectors */
-    --admin-text-primary: #1D1D1F;              /* Apple Ink Black */
-    --admin-text-muted: #6B6B6F;                /* Warm Slate Gray */
-    --admin-link: #E8E6DF;                      /* Ivory Navigation Link */
-    --admin-link-hover: #C2B280;                /* Camel Gold Navigation Link Hover */
-    --admin-section-label: #9B9B9F;             /* Structural Navigation Group Label */
-    
-    /* System Engineering Attributes */
-    --admin-squircle-radius: 16px;              /* High-End Device Corner Rounding */
-    --admin-premium-blur: blur(20px);           /* Glassmorphic Material Backdrop */
-    --admin-luxury-ease: cubic-bezier(0.16, 1, 0.3, 1); /* Premium Motion Deceleration Curve */
-  }
+:root {
+  /* Inherited & Redefined from site.css for self-containment */
+  --font-serif:         'Lora', Georgia, serif;
+  --font-sans:          'Inter', -apple-system, sans-serif;
+  --navy:               #0F2A44;
+  --navy-deep:          #0A1E33;
+  --navy-soft:          #142F4A;
+  --ivory:              #E8E6DF;
+  --ivory-warm:         #F2F0E8;
+  --ivory-pure:         #FAF9F5;
+  --camel:              #C2B280;
+  --camel-light:        #D4C89E;
+  --camel-dark:         #A69660;
+
+  /* Premium Sidebar & Topbar colors */
+  --admin-sidebar-bg:   var(--navy-deep);
+  --admin-sidebar-width: 250px;
+  --admin-topbar-h:     60px;
+  
+  /* Core Luxury Accents mapping */
+  --admin-accent:       var(--navy-deep);
+  --admin-accent-light: rgba(15, 42, 68, 0.05);
+  --admin-mystic-bronze: var(--camel);
+  --admin-cosmic-blue:  var(--navy);
+  
+  /* Text Typography Vectors mapping */
+  --admin-text-primary: #1D1D1F;
+  --admin-text-muted:   #6B6B6F;
+  --admin-link:         var(--ivory);
+  --admin-link-hover:   var(--camel);
+  --admin-section-label: #9B9B9F;
+  
+  /* System Engineering Attributes */
+  --admin-squircle-radius: 16px;
+  --admin-premium-blur: blur(20px);
+  --admin-luxury-ease:  cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Shadows matching site.css */
+  --shadow-xs:          0 1px 2px rgba(15, 42, 68, 0.02);
+  --shadow-sm:          0 4px 16px rgba(15, 42, 68, 0.03);
+  --shadow-md:          0 12px 32px rgba(15, 42, 68, 0.06);
+  --shadow-lg:          0 24px 64px rgba(15, 42, 68, 0.1);
+  --shadow-camel:       0 8px 24px rgba(194, 178, 128, 0.15);
+}
+  
+.font-serif {
+  font-family: var(--font-serif) !important;
+}
+.font-sans {
+  font-family: var(--font-sans) !important;
+}
   
   /* ── SYSTEM BASE LAYER OVERRIDES ─────────────────────────────── */
   html,
@@ -38,11 +65,17 @@
   }
   
   body.admin-body {
-    background: #E8E6DF; /* Heritage Ivory warm background */
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", system-ui, sans-serif;
+    background: var(--ivory); /* Heritage Ivory warm background */
+    font-family: var(--font-sans);
     color: var(--admin-text-primary);
     letter-spacing: -0.015em;
     overflow: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6, .admin-topbar-title {
+    line-height: 1.45 !important;
+    padding-top: 6px !important;
+    padding-bottom: 3px !important;
   }
   
   .admin-wrapper {
@@ -68,7 +101,9 @@
   }
   
   .admin-sidebar.collapsed {
-    width: 68px;
+    width: 0 !important;
+    overflow: hidden !important;
+    border-right: none !important;
   }
   .admin-sidebar.collapsed .sidebar-brand span,
   .admin-sidebar.collapsed .sidebar-section-label,
@@ -91,12 +126,13 @@
     align-items: center;
     gap: 0.75rem;
     padding: 1.5rem 1.5rem 1.25rem;
-    font-size: 1.15rem;
-    font-weight: 700;
+    font-size: 1.25rem;
+    font-weight: 600;
     color: #FFFFFF;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     flex-shrink: 0;
+    font-family: var(--font-serif) !important;
   }
   .sidebar-brand i {
     color: #FFFFFF;
@@ -109,7 +145,7 @@
   }
   .sidebar-brand span span {
     color: var(--admin-mystic-bronze);
-    font-weight: 400;
+    font-weight: 300;
     letter-spacing: -0.01em;
     margin-left: 1px;
   }
@@ -130,35 +166,32 @@
   .sidebar-link {
     display: flex;
     align-items: center;
-    gap: 0.85rem;
-    padding: 0.65rem 0.85rem;
-    border-radius: 10px;
-    color: var(--admin-link);
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
-    font-size: 0.88rem;
+    font-size: 0.76rem;
     font-weight: 500;
-    transition: all 0.4s var(--admin-luxury-ease);
+    transition: all 0.3s var(--admin-luxury-ease);
     margin-bottom: 4px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     white-space: nowrap;
     overflow: hidden;
     border-left: 0px solid transparent;
   }
-  .sidebar-link i {
-    width: 20px;
-    text-align: center;
-    flex-shrink: 0;
-    font-size: 0.95rem;
-    opacity: 0.8;
-  }
   .sidebar-link:hover {
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--admin-link-hover);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--camel);
+    padding-left: 1.5rem;
   }
   .sidebar-link.active {
-    background: rgba(255, 255, 255, 0.07);
-    color: var(--admin-mystic-bronze);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--camel);
     font-weight: 600;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border-left: 3px solid var(--camel);
+    border-radius: 0 8px 8px 0;
+    padding-left: 1.5rem;
   }
   
   .text-danger-soft {
@@ -211,9 +244,10 @@
     background: rgba(15, 42, 68, 0.04);
   }
   .admin-topbar-title {
-    font-weight: 700;
-    font-size: 1.15rem;
-    letter-spacing: -0.02em;
+    font-family: var(--font-serif) !important;
+    font-weight: 600;
+    font-size: 1.45rem;
+    letter-spacing: -0.01em;
     color: var(--admin-accent);
   }
   .admin-topbar-right {
@@ -231,19 +265,20 @@
   
   /* ── LUXURY STATISTICAL LAYER (APPLE SHOWCASE ACCENTS) ───────── */
   .stat-card {
-    background: #FAF9F5;
+    background: var(--ivory-pure);
     border-radius: var(--admin-squircle-radius);
     padding: 1.5rem;
-    border: 1px solid rgba(15, 42, 68, 0.05);
+    border: 1px solid rgba(194, 178, 128, 0.15);
     display: flex;
     align-items: center;
     gap: 1.25rem;
-    box-shadow: 0 4px 24px rgba(15, 42, 68, 0.02);
-    transition: transform 0.4s var(--admin-luxury-ease), box-shadow 0.4s var(--admin-luxury-ease);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.4s var(--admin-luxury-ease), box-shadow 0.4s var(--admin-luxury-ease), border-color 0.4s var(--admin-luxury-ease);
   }
   .stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(15, 42, 68, 0.08);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--camel);
   }
   .stat-icon {
     width: 46px;
@@ -257,8 +292,8 @@
   }
   
   /* Adaptive Hardware Metallic Backdrops */
-  .stat-icon.red { background: rgba(15, 42, 68, 0.05); color: var(--admin-accent); }
-  .stat-icon.blue { background: rgba(15, 42, 68, 0.05); color: var(--admin-accent); }
+  .stat-icon.red { background: rgba(15, 42, 68, 0.05); color: var(--navy-soft); }
+  .stat-icon.blue { background: rgba(15, 42, 68, 0.05); color: var(--navy-soft); }
   .stat-icon.green { background: rgba(39, 174, 96, 0.06); color: #27AE60; }
   .stat-icon.yellow { background: rgba(194, 178, 128, 0.08); color: var(--admin-mystic-bronze); }
   
@@ -268,6 +303,7 @@
     letter-spacing: -0.04em;
     line-height: 1.1;
     color: var(--admin-accent);
+    font-family: var(--font-sans);
   }
   .stat-label {
     font-size: 0.78rem;
@@ -275,52 +311,67 @@
     color: var(--admin-text-muted);
     margin-top: 3px;
     letter-spacing: -0.01em;
+    font-family: var(--font-sans);
   }
   
   /* ── LUXURY CONTAINERS (SQUIRCLE PARADIGM) ─────────────────── */
   .admin-card {
-    background: #FAF9F5;
+    background: var(--ivory-pure);
     border-radius: var(--admin-squircle-radius);
-    border: 1px solid rgba(15, 42, 68, 0.05);
-    box-shadow: 0 4px 24px rgba(15, 42, 68, 0.02);
+    border: 1px solid rgba(194, 178, 128, 0.15);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
     margin-bottom: 1.5rem;
   }
   .admin-card-header {
     padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid rgba(15, 42, 68, 0.06);
+    background: var(--ivory-warm);
+    border-bottom: 1px solid rgba(194, 178, 128, 0.15);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-weight: 700;
-    font-size: 1.05rem;
-    letter-spacing: -0.02em;
+    font-weight: 600;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
     color: var(--admin-accent);
+    font-family: var(--font-serif) !important;
   }
   .admin-card-body {
     padding: 1.5rem;
   }
   
   /* ── MINIMALIST EDITORIAL TABLES ────────────────────────────── */
+  /* ── MINIMALIST EDITORIAL TABLES ────────────────────────────── */
+  .table-responsive {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 12px;
+    background: #ffffff;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(194, 178, 128, 0.15);
+  }
   .admin-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.9rem;
+    font-family: var(--font-sans);
+    min-width: 850px; /* Prevent column squeezed wrapping */
   }
   .admin-table th {
-    background: #F2F0E8;
+    background: var(--ivory-warm);
     padding: 1rem 1.25rem;
     font-weight: 600;
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--admin-text-muted);
-    border-bottom: 1px solid rgba(15, 42, 68, 0.08);
+    border-bottom: 1px solid rgba(194, 178, 128, 0.15);
     white-space: nowrap;
   }
   .admin-table td {
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid rgba(15, 42, 68, 0.04);
+    border-bottom: 1px solid rgba(194, 178, 128, 0.08);
     vertical-align: middle;
     color: var(--admin-text-primary);
   }
@@ -331,7 +382,7 @@
     transition: background-color 0.25s ease;
   }
   .admin-table tbody tr:hover td {
-    background: rgba(15, 42, 68, 0.005);
+    background: rgba(194, 178, 128, 0.04);
   }
   
   /* Digital Image Previews */
@@ -410,48 +461,71 @@
   
   /* Input & Interface Controls Overhaul */
   .form-control, .form-select {
-    border-radius: 10px !important;
-    border: 1px solid rgba(15, 42, 68, 0.15) !important;
-    background-color: #F2F0E8 !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(194, 178, 128, 0.2) !important;
+    background-color: var(--ivory-warm) !important;
     color: var(--admin-text-primary) !important;
     padding: 0.6rem 0.85rem !important;
     font-size: 0.92rem !important;
     transition: all 0.3s var(--admin-luxury-ease) !important;
+    font-family: var(--font-sans);
   }
   .form-control:focus, .form-select:focus {
-    background-color: #FAF9F5 !important;
-    border-color: var(--admin-accent) !important;
-    box-shadow: 0 0 0 4px rgba(15, 42, 68, 0.05) !important;
+    background-color: var(--ivory-pure) !important;
+    border-color: var(--camel) !important;
+    box-shadow: 0 0 0 4px rgba(194, 178, 128, 0.1) !important;
     outline: none !important;
   }
   
   /* Luxury Hardware Style Buttons Layer */
   .btn {
-    border-radius: 10px !important;
+    border-radius: 8px !important;
     padding: 0.5rem 1.25rem !important;
-    font-weight: 500 !important;
-    letter-spacing: -0.01em;
+    font-weight: 600 !important;
+    font-family: var(--font-sans);
     transition: all 0.3s var(--admin-luxury-ease) !important;
   }
+  .btn-primary {
+    background: var(--navy-deep) !important;
+    border: none !important;
+    color: var(--ivory-pure) !important;
+    box-shadow: var(--shadow-xs) !important;
+  }
+  .btn-primary:hover {
+    background: var(--navy-soft) !important;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm) !important;
+  }
+  .btn-success {
+    background: var(--camel) !important;
+    border: none !important;
+    color: var(--navy-deep) !important;
+    box-shadow: var(--shadow-xs) !important;
+  }
+  .btn-success:hover {
+    background: var(--camel-light) !important;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm) !important;
+  }
   .btn-danger {
-    background: linear-gradient(135deg, var(--admin-accent), var(--admin-sidebar-bg)) !important;
+    background: rgba(225, 29, 72, 0.9) !important;
     border: none !important;
     color: #FFFFFF !important;
-    box-shadow: 0 2px 8px rgba(15, 42, 68, 0.15) !important;
+    box-shadow: var(--shadow-xs) !important;
   }
   .btn-danger:hover {
-    background: linear-gradient(135deg, var(--admin-sidebar-bg), var(--admin-accent)) !important;
-    transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(15, 42, 68, 0.25) !important;
+    background: #E11D48 !important;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm) !important;
   }
   .btn-outline-secondary {
-    border: 1px solid rgba(15, 42, 68, 0.2) !important;
+    border: 1px solid rgba(194, 178, 128, 0.25) !important;
     color: var(--admin-text-primary) !important;
     background: transparent !important;
   }
   .btn-outline-secondary:hover {
-    background: rgba(15, 42, 68, 0.04) !important;
-    color: var(--admin-accent) !important;
+    background: rgba(194, 178, 128, 0.08) !important;
+    color: var(--navy-deep) !important;
   }
   
   /* REVENUE PER-ITEM WATERFALL ENTRANCE ANIMATION */

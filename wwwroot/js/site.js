@@ -136,7 +136,7 @@ async function toggleWishlist(productId, btn) {
 
 /* ── INTERACTIVE APP CART COUNTER ────────────────────────────────  */
 function updateCartBadge(count) {
-  const badge = document.getElementById("cartBadge") || document.querySelector(".cart-badge");
+  const badge = document.getElementById("cartCountBadge") || document.getElementById("cartBadge") || document.querySelector(".cart-badge");
   if (!badge) return;
 
   if (count > 0) {
@@ -349,8 +349,13 @@ function initImageReveal() {
       if (entry.isIntersecting) {
         const img = entry.target;
         img.style.transition = `opacity 0.6s ${EASE.luxury}`;
-        img.style.opacity    = '0';
-        img.addEventListener('load', () => { img.style.opacity = '1'; }, { once: true });
+        if (img.complete) {
+          img.style.opacity = '1';
+        } else {
+          img.style.opacity    = '0';
+          img.addEventListener('load', () => { img.style.opacity = '1'; }, { once: true });
+          img.addEventListener('error', () => { img.style.opacity = '1'; }, { once: true });
+        }
         observer.unobserve(img);
       }
     });
@@ -448,28 +453,46 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-/* Seamless Toggle Controller override for Contextual Chat Layer */
-function toggleChat() {
-  const chatWin = document.getElementById("chatWindow");
-  const toggleBtn = document.getElementById("chatToggle");
+/* Interactive color swatches - CSS filter simulation */
+function changeProductColor(dot, colorName) {
+  const card = dot.closest('.product-card');
+  if (!card) return;
+  const img = card.querySelector('.product-img');
+  if (!img) return;
+
+  const dots = card.querySelectorAll('.color-dot');
+  dots.forEach(d => d.classList.remove('active'));
+  dot.classList.add('active');
+
+  const c = colorName.toLowerCase();
+  img.style.transition = 'filter 0.4s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
   
-  if (!chatWin) return;
-  
-  const isHidden = chatWin.classList.contains("d-none");
-  
-  if (isHidden) {
-    chatWin.classList.remove("d-none");
-    if(toggleBtn) {
-      toggleBtn.querySelector(".chat-icon-open").classList.add("d-none");
-      toggleBtn.querySelector(".chat-icon-close").classList.remove("d-none");
-    }
+  if (c.includes('đen') || c.includes('black') || c.includes('tối')) {
+    img.style.filter = 'brightness(0.6) contrast(1.1) grayscale(0.2)';
+  } else if (c.includes('trắng') || c.includes('white') || c.includes('bạc') || c.includes('silver')) {
+    img.style.filter = 'brightness(1.15) contrast(0.95) saturate(0.9)';
+  } else if (c.includes('sa mạc') || c.includes('desert') || c.includes('vàng') || c.includes('gold')) {
+    img.style.filter = 'sepia(0.4) hue-rotate(-12deg) saturate(1.4) brightness(0.98)';
+  } else if (c.includes('xanh') || c.includes('blue') || c.includes('mòng két')) {
+    img.style.filter = 'hue-rotate(130deg) saturate(0.85) brightness(0.9)';
+  } else if (c.includes('hồng') || c.includes('pink')) {
+    img.style.filter = 'hue-rotate(290deg) saturate(0.9) brightness(1.05)';
+  } else if (c.includes('tự nhiên') || c.includes('natural') || c.includes('xám') || c.includes('gray')) {
+    img.style.filter = 'grayscale(0.4) brightness(0.95) contrast(1.05)';
   } else {
-    chatWin.classList.add("d-none");
-    if(toggleBtn) {
-      toggleBtn.querySelector(".chat-icon-open").classList.remove("d-none");
-      toggleBtn.querySelector(".chat-icon-close").classList.add("d-none");
-    }
+    img.style.filter = 'hue-rotate(45deg) saturate(1.1)';
   }
+}
+
+function resetProductColor(dot) {
+  const card = dot.closest('.product-card');
+  if (!card) return;
+  const img = card.querySelector('.product-img');
+  if (!img) return;
+
+  const dots = card.querySelectorAll('.color-dot');
+  dots.forEach(d => d.classList.remove('active'));
+  img.style.filter = '';
 }
 
 document.addEventListener("DOMContentLoaded", () => {

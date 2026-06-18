@@ -10,6 +10,13 @@
               ?? p.Image
               ?? "/images/no-image.png";
   var inStock  = p.Stock > 0 || variants.Any(v => v.Stock > 0);
+
+  // Lấy danh sách màu sắc của sản phẩm
+  var colors = variants.Any(v => !string.IsNullOrEmpty(v.Color))
+      ? variants.Where(v => !string.IsNullOrEmpty(v.Color)).Select(v => v.Color!).Distinct().ToList()
+      : (specs != null && !string.IsNullOrEmpty(specs.Colors)
+          ? specs.Colors.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim()).ToList()
+          : new List<string> { "Mặc định" });
 }
 
 <div class="container py-4">
@@ -31,200 +38,106 @@
     </ol>
   </nav>
 
-  @* ── MAIN DETAIL SECTION ── *@
-  <div class="row g-4 mb-5">
-
-    @* ── LEFT: IMAGE GALLERY VIEWPORT ── *@
-    <div class="col-lg-5">
-      <div class="detail-gallery">
-        @* Main image *@
-        <div class="detail-main-img-wrap-clean mb-3">
-          <img id="mainImage" src="@mainImg" alt="@p.Name" class="detail-main-img-clean"/>
+  @* ── MAIN DETAIL SECTION: APPLE-STYLE BUY FLOW ── *@
+  <div class="buy-flow-layout mb-5">
+    <div class="buy-flow-grid">
+      
+      @* ── LEFT COLUMN (STICKY GALLERY) ── *@
+      <div class="buy-flow-left">
+        <div class="buy-flow-gallery-viewport">
+          <img id="mainImage" src="@mainImg" alt="@p.Name" class="buy-flow-main-image"/>
+          <img id="mainImageTemp" src="" alt="" class="buy-flow-main-image" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; padding: 0.8rem; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;"/>
           
           <button class="wishlist-btn-clean @(Model.InWishlist ? "active" : "")"
                   onclick="toggleWishlist(@p.Id, this)"
-                  title="@(Model.InWishlist ? "Bỏ yêu thích" : "Thêm yêu thích")">
+                  title="@(Model.InWishlist ? "Bỏ yêu thích" : "Thêm yêu thích")"
+                  style="position: absolute; top: 20px; right: 20px;">
             <i class="@(Model.InWishlist ? "fas" : "far") fa-heart"></i>
           </button>
         </div>
+      </div>
 
-        @* Thumbnail strip *@
-        @if (images.Count > 1)
-        {
-          <div class="detail-thumbs-clean">
-            @foreach (var img in images)
+      @* ── RIGHT COLUMN (SCROLLING CONFIGURATION) ── *@
+      <div class="buy-flow-right">
+        
+        @* Intro Headers *@
+        <div class="buy-flow-intro">
+          <div class="buy-flow-brand-tag">
+            @(p.Brand == "Apple" ? "Sản phẩm Apple" : "Sản phẩm Samsung")
+          </div>
+          <h1 class="buy-flow-product-name">@p.Name</h1>
+          
+          @* Rating review count *@
+          <div class="d-flex align-items-center gap-2 mt-2">
+            <div class="text-warning small">
+              @for (int i = 1; i <= 5; i++)
+              {
+                <i class="@(i <= (int)Math.Round(Model.AvgRating) ? "fas" : "far") fa-star"></i>
+              }
+            </div>
+            <span class="text-muted small">
+              @Model.AvgRating.ToString("0.0") (@p.Reviews.Count đánh giá)
+            </span>
+          </div>
+        </div>
+
+        @* ── STEP 1: SELECT COLOR ── *@
+        <div class="buy-flow-step active" id="colorStep">
+          <span class="buy-flow-step-num">Bước 01</span>
+          <h3 class="buy-flow-step-header">Màu sắc. <em>Chọn màu yêu thích.</em></h3>
+          <p class="buy-flow-step-desc">Sắc màu thời thượng được tinh luyện bền bỉ.</p>
+          
+          <div class="buy-flow-color-grid">
+            @foreach (var c in colors)
             {
-              <div class="detail-thumb-clean @(img.ImageUrl == mainImg ? "active" : "")"
-                   onclick="switchImage('@img.ImageUrl', this)">
-                <img src="@img.ImageUrl" alt="@p.Name thumbnail"/>
-              </div>
+              var hexColor = GetHexForColorName(c);
+              <button type="button" 
+                      class="buy-flow-color-pill" 
+                      data-color="@c"
+                      onclick="selectColor(this, '@c')"
+                      title="@c">
+                <div class="buy-flow-color-inner" style="background-color: @hexColor;"></div>
+              </button>
             }
           </div>
-        }
-      </div>
-    </div>
-
-    @* ── RIGHT: INFO & CONTROLS ── *@
-    <div class="col-lg-7">
-
-      @* Brand & Status *@
-      <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
-        <div class="brand-badge-clean">
-          @if (p.Brand == "Apple")
-          {
-            <span>Sản phẩm Apple</span>
-          }
-          else
-          {
-            <span>Sản phẩm Samsung</span>
-          }
-        </div>
-        
-        <div class="stock-status-clean">
-          @if (inStock)
-          {
-            <span class="text-success fw-medium">Còn hàng</span>
-          }
-          else
-          {
-            <span class="text-muted fw-medium">Hết hàng</span>
-          }
-        </div>
-      </div>
-
-      <h1 class="detail-product-name-clean mb-2">@p.Name</h1>
-
-      @* Rating *@
-      <div class="detail-rating-row-clean mb-4">
-        @for (int i = 1; i <= 5; i++)
-        {
-          <i class="@(i <= (int)Math.Round(Model.AvgRating) ? "fas" : "far") fa-star text-warning small"></i>
-        }
-        <span class="text-muted ms-2 small">
-          @Model.AvgRating.ToString("0.0") (@p.Reviews.Count nhận xét)
-        </span>
-        @if (p.Featured == 1)
-        {
-          <span class="badge-featured-label ms-3">Sản Phẩm Tiêu Biểu</span>
-        }
-      </div>
-
-      @* ── CONTROLS PANEL ── *@
-      <div class="detail-control-panel-clean p-4 mb-4">
-        
-        @* Price display *@
-        <div class="detail-price-wrap-clean mb-4 pb-3 border-bottom">
-          <span class="detail-price-clean" id="displayPrice">@p.Price.ToString("N0")₫</span>
+          <span class="buy-flow-selected-color-text">Màu: <span id="selectedColorLabel" class="text-camel">Chưa chọn</span></span>
         </div>
 
-        @* Variants (màu + dung lượng) *@
-        @if (variants.Any())
-        {
-          @* Storage selector *@
-          var storages = variants.Select(v => v.StorageGb).Distinct().OrderBy(s => s).ToList();
-          @if (storages.Count > 1)
-          {
-            <div class="mb-3">
-              <div class="variant-label-clean">Dung lượng bộ nhớ</div>
-              <div class="variant-btn-group-clean" id="storageGroup">
-                @foreach (var s in storages)
-                {
-                  var first = variants.First(v => v.StorageGb == s);
-                  <button type="button"
-                          class="variant-btn-clean"
-                          data-storage="@s"
-                          data-price="@first.Price"
-                          data-variant-id="@first.Id"
-                          onclick="selectVariant(this, 'storage')">
-                    @s GB
-                  </button>
-                }
-              </div>
-            </div>
-          }
-
-          @* Color selector *@
-          var colors = variants.Select(v => v.Color).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
-          @if (colors.Count > 1)
-          {
-            <div class="mb-4">
-              <div class="variant-label-clean">Màu sắc: <span id="selectedColor" class="fw-semibold text-camel"></span></div>
-              <div class="variant-btn-group-clean" id="colorGroup">
-                @foreach (var c in colors)
-                {
-                  var v = variants.First(vv => vv.Color == c);
-                  <button type="button"
-                          class="variant-btn-clean"
-                          data-color="@c"
-                          data-price="@v.Price"
-                          data-variant-id="@v.Id"
-                          onclick="selectVariant(this, 'color')">
-                    @c
-                  </button>
-                }
-              </div>
-            </div>
-          }
-        }
-
-        @* Quantity + Add to cart *@
-        <div class="detail-actions-clean mb-2">
-          <div class="qty-wrap-clean">
-            <button type="button" class="qty-btn-clean" onclick="changeQty(-1)">−</button>
-            <input type="number" id="qtyInput" value="1" min="1"
-                   max="@(p.Stock > 0 ? p.Stock : 1)" class="qty-input-clean"/>
-            <button type="button" class="qty-btn-clean" onclick="changeQty(1)">+</button>
+        @* ── STEP 2: SELECT STORAGE ── *@
+        <div class="buy-flow-step" id="storageStep">
+          <span class="buy-flow-step-num">Bước 02</span>
+          <h3 class="buy-flow-step-header">Dung lượng. <em>Bộ nhớ lưu trữ.</em></h3>
+          <p class="buy-flow-step-desc">Dung lượng lưu trữ càng lớn, bạn càng lưu trữ được nhiều hình ảnh, video và ứng dụng.</p>
+          
+          <div class="buy-flow-storage-grid" id="storageGrid">
+            @* Rendered dynamically by JavaScript *@
+            <p class="text-muted small">Vui lòng chọn màu sắc trước để xem dung lượng tương ứng.</p>
           </div>
-          
-          <button class="btn btn-add-detail-clean flex-grow-1"
-                  @(!inStock ? "disabled" : "")
-                  onclick="addToCartDetail()">
-            Thêm vào giỏ hàng
-          </button>
-          
-          <button type="button"
-                  class="btn btn-wishlist-detail-clean @(Model.InWishlist ? "active text-danger border-danger" : "")"
-                  id="detailWishlistBtn"
-                  onclick="toggleWishlist(@p.Id, this)"
-                  title="@(Model.InWishlist ? "Bỏ yêu thích" : "Thêm yêu thích")">
-            <i class="@(Model.InWishlist ? "fas" : "far") fa-heart"></i>
+        </div>
+
+        @* ── SUMMARY BOX & ADD TO CART ── *@
+        <div class="buy-flow-summary-box">
+          <div class="buy-flow-summary-info">
+            <span class="buy-flow-summary-selection" id="summarySelectionText">Vui lòng chọn cấu hình sản phẩm</span>
+            <span class="buy-flow-summary-price" id="displayPrice">@p.Price.ToString("N0")₫</span>
+          </div>
+          <button class="btn-buy-flow-submit locked" id="btnBuyFlowAdd" onclick="addToCartDetail(event)" disabled>
+            Hoàn thành các bước chọn
           </button>
         </div>
-      </div>
 
-      @* Brand Logistics Badges *@
-      <div class="detail-badges-clean mb-4">
-        <div class="detail-badge-clean-item">Miễn phí giao hàng toàn quốc từ 5 triệu</div>
-        <div class="detail-badge-clean-item">Bảo hành chính hãng 12 tháng</div>
-        <div class="detail-badge-clean-item">Hỗ trợ đổi trả trong vòng 30 ngày</div>
-      </div>
-
-      @* ── QUICK SPECS GRID ── *@
-      @if (specs != null)
-      {
-        <div class="detail-quick-specs-clean p-4">
-          <div class="qs-item-clean">
-            <span class="qs-label-clean">Bộ vi xử lý</span>
-            <span class="qs-value-clean">@specs.Chipset</span>
-          </div>
-          <div class="qs-item-clean">
-            <span class="qs-label-clean">Bộ nhớ RAM</span>
-            <span class="qs-value-clean">@specs.RamGb GB RAM</span>
-          </div>
-          <div class="qs-item-clean">
-            <span class="qs-label-clean">Bộ nhớ trong</span>
-            <span class="qs-value-clean">@specs.StorageGb GB ROM</span>
-          </div>
-          <div class="qs-item-clean">
-            <span class="qs-label-clean">Màn hình</span>
-            <span class="qs-value-clean">@specs.DisplaySize, @specs.RefreshRate Hz</span>
-          </div>
+        <div class="mt-3">
+          <button type="button" class="btn btn-outline-navy w-100 d-flex align-items-center justify-content-center gap-2 py-2 fs-6" id="btnCompareProduct" onclick="openCompareModal()" style="border-radius: 30px; font-weight: 500; font-family: 'Inter', sans-serif; transition: all 0.3s ease; border: 1.5px solid var(--navy); color: var(--navy); background: transparent;">
+            <i class="fas fa-balance-scale"></i> So sánh với các sản phẩm khác
+          </button>
         </div>
-      }
+
+      </div>
+
     </div>
   </div>
 
-  @* ── TABS: MÔ TẢ / THÔNG SỐ / ĐÁNH GIÁ ── *@
+  @* ── TABS: DESCRIPTION / TECHNICAL SPECS / REVIEWS ── *@
   <div class="detail-tabs-clean mb-5">
     <ul class="nav nav-tabs-clean" id="detailTabs" role="tablist">
       <li class="nav-item">
@@ -247,21 +160,633 @@
       </li>
     </ul>
 
-    <div class="tab-content-clean mt-3 p-4">
+    <div class="tab-content tab-content-clean mt-3 p-4" style="background: var(--ivory-pure); border-radius: 12px; border: 1px solid rgba(194,178,128,0.12);">
       
-      @* Tab: Mô tả *@
+      @* Tab: Description *@
       <div class="tab-pane fade show active" id="tabDesc">
-        @if (!string.IsNullOrEmpty(p.Description))
+        @if (p.Slug == "iphone-air")
         {
-          <div class="product-description-clean">@Html.Raw(p.Description)</div>
+          @* iPhone Air Editorial Layout *@
+          <div class="editorial-storyboard">
+            
+            <div class="editorial-hero mb-5">
+              <video class="w-100 rounded-4 shadow-sm" autoplay muted loop playsinline style="max-height: 550px; object-fit: cover;">
+                <source src="/images/ip_air_details/Apple-iPhone-Air-plateau-250909.mp4" type="video/mp4" />
+              </video>
+              <div class="editorial-caption text-center mt-3">
+                <span class="editorial-tag">IPHONE AIR</span>
+                <h2 class="editorial-headline text-navy mt-1">Nhẹ Tựa Hư Vô. Mỏng Đến Bất Ngờ.</h2>
+                <p class="editorial-lead text-muted mx-auto" style="max-width: 750px;">
+                  Độ mỏng ấn tượng chỉ bằng milimet, biến iPhone Air thành chiếc iPhone mỏng nhẹ nhất từng được chế tác, định hình lại triết lý Quiet Luxury của tương lai.
+                </p>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">CERAMIC SHIELD 2</span>
+                  <h3 class="fw-bold mt-2 text-navy">Bền bỉ gấp đôi</h3>
+                  <p class="text-muted">
+                    Dù sở hữu thân hình siêu mỏng, iPhone Air không hề mỏng manh. Được bao bọc bởi lớp kính Ceramic Shield thế hệ 2 mới nhất, máy mang lại khả năng chống trầy xước và va đập vượt trội so với mọi thế hệ trước.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_air_details/Apple-iPhone-Air-Ceramic-Shield-2-250909.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5 flex-md-row-reverse">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(10, 30, 51, 0.03); border: 1px solid rgba(10, 30, 51, 0.08);">
+                  <span class="editorial-tag">A19 CHIP & PERFORMANCE</span>
+                  <h3 class="fw-bold mt-2 text-navy">Đồ họa console sống động</h3>
+                  <p class="text-muted">
+                    Bên trong kiến trúc mỏng nhẹ của iPhone Air là sức mạnh phần cứng vô song từ Chip A19 được tối ưu hóa. Cho phép chạy mượt mà các tựa game đồ họa console như Arknights: Endfield với hiệu ứng ánh sáng Ray Tracing rực rỡ và tốc độ khung hình cực kỳ ổn định.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_air_details/Apple-iPhone-Air-Gaming-Arknights-250909.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">BATTERY LIFE</span>
+                  <h3 class="fw-bold mt-2 text-navy">Năng lượng bền bỉ cả ngày</h3>
+                  <p class="text-muted">
+                    Thiết kế siêu mỏng đòi hỏi cấu trúc pin hoàn toàn mới. Công nghệ pin anode silicon mật độ năng lượng cao giúp iPhone Air hoạt động bền bỉ suốt ngày dài, đáp ứng mọi nhu cầu làm việc và giải trí không giới hạn.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_air_details/Apple-iPhone-Air-battery-250909.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-4">
+              <div class="col-md-6">
+                <img src="/images/ip_air_details/Apple-iPhone-Air-iOS-Home-Screen-250909_inline.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="iOS Home Screen" style="max-height: 350px; object-fit: cover;" />
+              </div>
+              <div class="col-md-6">
+                <img src="/images/ip_air_details/Apple-iPhone-Air-48MP-250909_big.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="Camera 48MP" style="max-height: 350px; object-fit: cover;" />
+              </div>
+            </div>
+
+          </div>
+        }
+        else if (p.Slug == "iphone-17-pro-max" || p.Slug == "iphone-17-pro")
+        {
+          @* iPhone 17 Pro / Pro Max Editorial Layout *@
+          <div class="editorial-storyboard">
+            
+            <div class="editorial-hero mb-5">
+              <video class="w-100 rounded-4 shadow-sm" autoplay muted loop playsinline style="max-height: 550px; object-fit: cover;">
+                <source src="/images/ip_17_promax_details/Apple-iPhone-17-Pro-forged-plateau-250909.mp4" type="video/mp4" />
+              </video>
+              <div class="editorial-caption text-center mt-3">
+                <span class="editorial-tag">IPHONE 17 PRO SERIES</span>
+                <h2 class="editorial-headline text-navy mt-1">Forged Titanium. Đỉnh Cao Rèn Giũa.</h2>
+                <p class="editorial-lead text-muted mx-auto" style="max-width: 750px;">
+                  Sử dụng chất liệu Titanium Cấp 5 được tinh luyện tinh tế, kết hợp kiến trúc Forged Titanium hoàn toàn mới tạo nên một thiết kế vừa siêu nhẹ vừa cực kỳ bền bỉ.
+                </p>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">CAMERA SYSTEM</span>
+                  <h3 class="fw-bold mt-2 text-navy">Center Stage & Động năng điện ảnh</h3>
+                  <p class="text-muted">
+                    Hệ thống camera hoàn chỉnh với thuật toán Smart HDR mới và tính năng Center Stage cho phép bạn quay chụp tự động lấy nét và thu phóng thông minh, kiến tạo những thước phim điện ảnh đỉnh cao ngay trên tay.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_17_promax_details/Apple-iPhone-17-Pro-camera-Center-Stage-250909.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5 flex-md-row-reverse">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(10, 30, 51, 0.03); border: 1px solid rgba(10, 30, 51, 0.08);">
+                  <span class="editorial-tag">CONSOLE GAMING</span>
+                  <h3 class="fw-bold mt-2 text-navy">Hiệu năng A19 Pro bức phá</h3>
+                  <p class="text-muted">
+                    Chip A19 Pro thế hệ mới tăng tốc xử lý đồ họa lên 30%, kết hợp khả năng dựng hình 3D mượt mà cho các game Console thế hệ tiếp theo như Arknights: Endfield. Tận hưởng đồ họa rực rỡ và chân thực chưa từng có.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_17_promax_details/Apple-iPhone-17-Pro-gaming-Arknights-Endfield-250909.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">POWER & CONNECTIVITY</span>
+                  <h3 class="fw-bold mt-2 text-navy">eSIM & Pin dung lượng cực khủng</h3>
+                  <p class="text-muted">
+                    Thiết kế tối ưu tối đa không gian vật lý bên trong nhờ công nghệ eSIM tích hợp, nhường chỗ cho khối pin dung lượng lớn hơn hẳn, mang lại thời lượng sử dụng vượt mọi mong đợi.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_17_promax_details/Apple-iPhone-17-Pro-esim-larger-battery-250909.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-4">
+              <div class="col-md-6">
+                <img src="/images/ip_17_promax_details/Apple-iPhone-17-Pro-iOS-26-Liquid-Glass-Lock-Screen-250909_inline.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="Liquid Glass Screen" style="max-height: 350px; object-fit: cover;" />
+              </div>
+              <div class="col-md-6">
+                <img src="/images/ip_17_promax_details/Apple-iPhone-17-Pro-Photographic-Styles-Bright-style-250909_big.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="Photographic Styles" style="max-height: 350px; object-fit: cover;" />
+              </div>
+            </div>
+
+          </div>
+        }
+        else if (p.Slug == "iphone-16" || p.Slug == "iphone-16-plus")
+        {
+          @* iPhone 16 / 16 Plus Editorial Layout *@
+          <div class="editorial-storyboard">
+            
+            <div class="editorial-hero mb-5">
+              <video class="w-100 rounded-4 shadow-sm" autoplay muted loop playsinline style="max-height: 550px; object-fit: cover;">
+                <source src="/images/ip_16_details/Apple-iPhone-16-Ceramic-Shield-240909.mp4" type="video/mp4" />
+              </video>
+              <div class="editorial-caption text-center mt-3">
+                <span class="editorial-tag">IPHONE 16 SERIES</span>
+                <h2 class="editorial-headline text-navy mt-1">Độ bền vượt trội. Apple Intelligence.</h2>
+                <p class="editorial-lead text-muted mx-auto" style="max-width: 750px;">
+                  Sở hữu màn kính Ceramic Shield thế hệ mới cứng cáp nhất thế giới smartphone, đồng hành cùng vi xử lý A18 kiến tạo cho kỷ nguyên trí tuệ nhân tạo toàn năng.
+                </p>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">APPLE INTELLIGENCE</span>
+                  <h3 class="fw-bold mt-2 text-navy">Trợ lý Siri thế hệ mới & Writing Tools</h3>
+                  <p class="text-muted">
+                    Trải nghiệm Siri thông minh hiểu ngữ cảnh sâu rộng, kết hợp công cụ Writing Tools tự động biên tập văn bản, tóm tắt thông tin thông minh và tìm kiếm trực quan.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_16_details/Apple-iPhone-16-Apple-Intelligence-Writing-Tools-240909.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5 flex-md-row-reverse">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(10, 30, 51, 0.03); border: 1px solid rgba(10, 30, 51, 0.08);">
+                  <span class="editorial-tag">ACTION BUTTON</span>
+                  <h3 class="fw-bold mt-2 text-navy">Tương tác nhanh với Action Button</h3>
+                  <p class="text-muted">
+                    Lần đầu tiên nút Tác Vụ (Action Button) xuất hiện trên phiên bản tiêu chuẩn, cho phép gán phím tắt nhanh kích hoạt ghi âm, đèn pin, camera hay bất kỳ phím tắt ưa thích nào.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_16_details/Apple-iPhone-16-Action-button-240909.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">GAMING POWER</span>
+                  <h3 class="fw-bold mt-2 text-navy">Vi xử lý A18 đột phá hiệu năng</h3>
+                  <p class="text-muted">
+                    Sự tối ưu hóa phần cứng chip A18 mang lại khả năng xử lý mượt mà cho các tác vụ hàng ngày và các tựa game đồ họa console sống động, cho trải nghiệm giải trí không gián đoạn.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_16_details/Apple-iPhone-16-gaming-240909.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-4">
+              <div class="col-md-6">
+                <img src="/images/ip_16_details/Apple-iPhone-16-Camera-Control-01-240909_inline.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="Camera Control" style="max-height: 350px; object-fit: cover;" />
+              </div>
+              <div class="col-md-6">
+                <img src="/images/ip_16_details/Apple-iPhone-16-Ultra-Wide-photography-01-240909_big.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="Ultra Wide photography" style="max-height: 350px; object-fit: cover;" />
+              </div>
+            </div>
+
+          </div>
+        }
+        else if (p.Slug == "iphone-16e")
+        {
+          @* iPhone 16e Editorial Layout *@
+          <div class="editorial-storyboard">
+            <div class="editorial-hero mb-5">
+              <video class="w-100 rounded-4 shadow-sm" autoplay muted loop playsinline style="max-height: 550px; object-fit: cover;">
+                <source src="/images/ip_16_e_details/Apple-iPhone-16e-4K-video-with-Dolby-Vision-250219.mp4" type="video/mp4" />
+              </video>
+              <div class="editorial-caption text-center mt-3">
+                <span class="editorial-tag">IPHONE 16E</span>
+                <h2 class="editorial-headline text-navy mt-1">Trải Nghiệm Apple Thuần Khiết. Giá Trị Tối Ưu.</h2>
+                <p class="editorial-lead text-muted mx-auto" style="max-width: 750px;">
+                  Đem toàn bộ sức mạnh của chip A16 Bionic cùng hệ sinh thái Apple Intelligence mượt mà vào một mức giá dễ tiếp cận nhất dòng 16 series.
+                </p>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">APPLE INTELLIGENCE</span>
+                  <h3 class="fw-bold mt-2 text-navy">Trợ lý Siri với ChatGPT tích hợp</h3>
+                  <p class="text-muted">
+                    Sức mạnh AI thông minh giúp bạn tìm kiếm thông tin bằng ngôn ngữ tự nhiên, tóm tắt văn bản thông thái và trò chuyện linh hoạt hơn bao giờ hết nhờ ChatGPT tích hợp trực tiếp.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_16_e_details/Apple-iPhone-16e-Apple-Intelligence-Speak-to-Siri-with-Chat-GPT-250219.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5 flex-md-row-reverse">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(10, 30, 51, 0.03); border: 1px solid rgba(10, 30, 51, 0.08);">
+                  <span class="editorial-tag">CLEAN UP TOOL</span>
+                  <h3 class="fw-bold mt-2 text-navy">Xóa chi tiết thừa tức thì</h3>
+                  <p class="text-muted">
+                    Tính năng Clean Up trong Apple Intelligence giúp bạn dọn dẹp các vật thể không mong muốn khỏi khung ảnh chỉ bằng một cú chạm nhẹ, giữ lại khoảnh khắc hoàn mỹ.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_16_e_details/Apple-iPhone-16e-Apple-Intelligence-Clean-Up-250219.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">ACTION BUTTON</span>
+                  <h3 class="fw-bold mt-2 text-navy">Action Button tùy biến thông minh</h3>
+                  <p class="text-muted">
+                    Thay thế cần gạt rung truyền thống bằng phím Tác vụ (Action Button) cho phép kích hoạt nhanh camera, đèn pin, ghi âm hay phím tắt yêu thích của bạn chỉ trong tích tắc.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_16_e_details/Apple-iPhone-16e-Action-button-250219.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-4">
+              <div class="col-md-6">
+                <img src="/images/ip_16_e_details/Apple-iPhone-16e-hero-250219_inline.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="iPhone 16e Design" style="max-height: 350px; object-fit: cover;" />
+              </div>
+              <div class="col-md-6">
+                <img src="/images/ip_16_e_details/Apple-iPhone-16e-48MP-Fusion-photography-250219_big.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="48MP Fusion Camera" style="max-height: 350px; object-fit: cover;" />
+              </div>
+            </div>
+          </div>
+        }
+        else if (p.Slug == "iphone-17" || p.Slug == "iphone-17-plus")
+        {
+          @* iPhone 17 / 17 Plus Editorial Layout *@
+          <div class="editorial-storyboard">
+            <div class="editorial-hero mb-5">
+              <video class="w-100 rounded-4 shadow-sm" autoplay muted loop playsinline style="max-height: 550px; object-fit: cover;">
+                <source src="/images/ip_17_details/Apple-iPhone-17-Ceramic-Shield-2-250909.mp4" type="video/mp4" />
+              </video>
+              <div class="editorial-caption text-center mt-3">
+                <span class="editorial-tag">IPHONE 17 SERIES</span>
+                <h2 class="editorial-headline text-navy mt-1">Thiết kế hoàn toàn mới. Ceramic Shield 2.</h2>
+                <p class="editorial-lead text-muted mx-auto" style="max-width: 750px;">
+                  Sở hữu mặt kính Ceramic Shield 2 cứng cáp nhất từ trước đến nay, bảo vệ tối đa thiết kế nhôm tái chế sang trọng thế hệ mới của iPhone 17.
+                </p>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">A19 CHIP POWER</span>
+                  <h3 class="fw-bold mt-2 text-navy">Hiệu năng A19 bứt phá mọi ranh giới</h3>
+                  <p class="text-muted">
+                    Kiến trúc vi xử lý A19 thế hệ mới tối ưu sâu cho Apple Intelligence và các game Console phức tạp, mang lại hiệu ứng hình ảnh sống động và thời lượng pin xuất sắc.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_17_details/Apple-iPhone-17-A19-gaming-250909.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-4">
+              <div class="col-md-6">
+                <img src="/images/ip_17_details/Apple-iPhone-17-Lock-Screen-250909_inline.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="iPhone 17 Lock Screen" style="max-height: 350px; object-fit: cover;" />
+              </div>
+              <div class="col-md-6">
+                <img src="/images/ip_17_details/Apple-iPhone-17-Ultra-Wide-photography-01-250909_big.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="Ultra Wide Photography" style="max-height: 350px; object-fit: cover;" />
+              </div>
+            </div>
+          </div>
+        }
+        else if (p.Slug == "iphone-17e")
+        {
+          @* iPhone 17e Editorial Layout *@
+          <div class="editorial-storyboard">
+            <div class="editorial-hero mb-5">
+              <video class="w-100 rounded-4 shadow-sm" autoplay muted loop playsinline style="max-height: 550px; object-fit: cover;">
+                <source src="/images/ip_17_e_details/Ceramic-Shield.mp4" type="video/mp4" />
+              </video>
+              <div class="editorial-caption text-center mt-3">
+                <span class="editorial-tag">IPHONE 17E</span>
+                <h2 class="editorial-headline text-navy mt-1">Quiet Luxury trong tầm tay</h2>
+                <p class="editorial-lead text-muted mx-auto" style="max-width: 750px;">
+                  Bảo vệ vượt trội với Ceramic Shield bền bỉ cùng thiết kế gọn nhẹ, đem các tính năng trí tuệ nhân tạo toàn năng đến gần hơn với mọi khách hàng.
+                </p>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">GAMING POWER</span>
+                  <h3 class="fw-bold mt-2 text-navy">Chiến game console cực mượt</h3>
+                  <p class="text-muted">
+                    Dòng máy tiêu chuẩn được trang bị vi xử lý cao cấp hỗ trợ hiển thị 3D sắc sảo và mượt mà cho mọi tựa game, đảm bảo khung hình ổn định xuyên suốt cuộc chơi.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_17_e_details/gaming.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-4">
+              <div class="col-md-4">
+                <img src="/images/ip_17_e_details/photography.jpg" class="w-100 rounded-4 shadow-sm" alt="Photography" style="max-height: 250px; object-fit: cover;" />
+              </div>
+              <div class="col-md-4">
+                <img src="/images/ip_17_e_details/video-4k-60-fps-Dolby-vision.jpg" class="w-100 rounded-4 shadow-sm" alt="4K Dolby Vision" style="max-height: 250px; object-fit: cover;" />
+              </div>
+              <div class="col-md-4">
+                <img src="/images/ip_17_e_details/accessories.jpg" class="w-100 rounded-4 shadow-sm" alt="Accessories" style="max-height: 250px; object-fit: cover;" />
+              </div>
+            </div>
+          </div>
+        }
+        else if (p.Slug == "iphone-16-pro" || p.Slug == "iphone-16-pro-max")
+        {
+          @* iPhone 16 Pro / Pro Max Editorial Layout *@
+          <div class="editorial-storyboard">
+            <div class="editorial-hero mb-5">
+              <video class="w-100 rounded-4 shadow-sm" autoplay muted loop playsinline style="max-height: 550px; object-fit: cover;">
+                <source src="/images/ip_16_pro_details/Apple-iPhone-16-Pro-light-and-durable-upgraded-design-240909.mp4" type="video/mp4" />
+              </video>
+              <div class="editorial-caption text-center mt-3">
+                <span class="editorial-tag">IPHONE 16 PRO SERIES</span>
+                <h2 class="editorial-headline text-navy mt-1">Titanium bền nhẹ. Đồ họa consoles đột phá.</h2>
+                <p class="editorial-lead text-muted mx-auto" style="max-width: 750px;">
+                  Sử dụng chất liệu Titanium nhẹ và cứng cáp bậc nhất, kết hợp chip A18 Pro nâng tầm hiệu năng xử lý đồ họa console và quay phim điện ảnh chuyên nghiệp.
+                </p>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">CINEMATIC VIDEO</span>
+                  <h3 class="fw-bold mt-2 text-navy">Quay phim 4K 120fps Dolby Vision</h3>
+                  <p class="text-muted">
+                    Lần đầu tiên trên dòng Pro hỗ trợ quay video 4K với tốc độ 120 khung hình/giây chuẩn Dolby Vision chuyên nghiệp, đem lại độ chi tiết hoàn mỹ và khả năng chỉnh sửa màu sắc Log điện ảnh.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_16_pro_details/Apple-iPhone-16-Pro-4K120-fps-video-recording-Dolby-Vision-240909.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5 flex-md-row-reverse">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(10, 30, 51, 0.03); border: 1px solid rgba(10, 30, 51, 0.08);">
+                  <span class="editorial-tag">CAMERA CONTROL</span>
+                  <h3 class="fw-bold mt-2 text-navy">Tương tác nhạy bén với Camera Control</h3>
+                  <p class="text-muted">
+                    Nút Camera Control cảm ứng lực thế hệ mới giúp bạn mở nhanh camera, zoom hình mượt mà và chuyển đổi các chế độ chụp chân thực chỉ bằng thao tác trượt ngón tay.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_16_pro_details/Apple-iPhone-16-Pro-Camera-Control-240909.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">CONSOLE QUALITY GAMING</span>
+                  <h3 class="fw-bold mt-2 text-navy">Chiến game Death Stranding hoành tráng</h3>
+                  <p class="text-muted">
+                    Được tăng tốc độ xử lý đồ họa bởi chip A18 Pro mạnh mẽ, iPhone 16 Pro vận hành trơn tru những tựa game console khủng như Death Stranding với độ phản hồi cực cao.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_16_pro_details/Apple-iPhone-16-Pro-gaming-Death-Stranding-240909.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-4">
+              <div class="col-md-6">
+                <img src="/images/ip_16_pro_details/Apple-iPhone-16-Pro-camera-system-240909_inline.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="Camera System" style="max-height: 350px; object-fit: cover;" />
+              </div>
+              <div class="col-md-6">
+                <img src="/images/ip_16_pro_details/Apple-iPhone-16-Pro-Vibrant-photography-240909_big.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="Vibrant Photography" style="max-height: 350px; object-fit: cover;" />
+              </div>
+            </div>
+          </div>
+        }
+        else if (p.Slug == "iphone-15" || p.Slug == "iphone-15-plus")
+        {
+          @* iPhone 15 / 15 Plus Editorial Layout *@
+          <div class="editorial-storyboard">
+            <div class="editorial-hero mb-5">
+              <video class="w-100 rounded-4 shadow-sm" autoplay muted loop playsinline style="max-height: 550px; object-fit: cover;">
+                <source src="/images/ip_15_details/Apple-iPhone-15-lineup-Dynamic-Island-incoming-call-230912.mp4" type="video/mp4" />
+              </video>
+              <div class="editorial-caption text-center mt-3">
+                <span class="editorial-tag">IPHONE 15 SERIES</span>
+                <h2 class="editorial-headline text-navy mt-1">Tương tác sống động cùng Dynamic Island</h2>
+                <p class="editorial-lead text-muted mx-auto" style="max-width: 750px;">
+                  Trải nghiệm sự biến đổi linh hoạt của Dynamic Island để tương tác nhanh với thông báo cuộc gọi, âm nhạc và widget trực quan sinh động ngay đầu màn hình.
+                </p>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">PORTRAIT MODE</span>
+                  <h3 class="fw-bold mt-2 text-navy">Chân dung xóa phông tự động</h3>
+                  <p class="text-muted">
+                    Công nghệ xử lý hình ảnh thông minh giúp bạn tự động chụp ảnh chân dung xóa phông sắc sảo mà không cần chuyển đổi thủ công chế độ chụp.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_15_details/Apple-iPhone-15-lineup-Portrait-mode-demo-230912.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5 flex-md-row-reverse">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(10, 30, 51, 0.03); border: 1px solid rgba(10, 30, 51, 0.08);">
+                  <span class="editorial-tag">A16 BIONIC POWER</span>
+                  <h3 class="fw-bold mt-2 text-navy">Sức mạnh A16 Bionic tối ưu đồ họa</h3>
+                  <p class="text-muted">
+                    Chip A16 Bionic đem lại hiệu năng mạnh mẽ vượt bậc, giúp xử lý các game mobile 3D sống động mượt mà và kéo dài tối đa thời gian sử dụng pin cả ngày.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_15_details/Apple-iPhone-15-lineup-gaming-230912.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-4">
+              <div class="col-md-6">
+                <img src="/images/ip_15_details/Apple-iPhone-15-lineup-design-230912_big.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="iPhone 15 Design" style="max-height: 350px; object-fit: cover;" />
+              </div>
+              <div class="col-md-6">
+                <img src="/images/ip_15_details/Apple-iPhone-15-48MP-01-230912_big.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="48MP Camera" style="max-height: 350px; object-fit: cover;" />
+              </div>
+            </div>
+          </div>
+        }
+        else if (p.Slug == "iphone-15-pro" || p.Slug == "iphone-15-pro-max")
+        {
+          @* iPhone 15 Pro / Pro Max Editorial Layout *@
+          <div class="editorial-storyboard">
+            <div class="editorial-hero mb-5">
+              <video class="w-100 rounded-4 shadow-sm" autoplay muted loop playsinline style="max-height: 550px; object-fit: cover;">
+                <source src="/images/ip_15_pro_details/Apple-iPhone-15-Pro-lineup-A17-Pro-chip-gaming-230912.mp4" type="video/mp4" />
+              </video>
+              <div class="editorial-caption text-center mt-3">
+                <span class="editorial-tag">IPHONE 15 PRO SERIES</span>
+                <h2 class="editorial-headline text-navy mt-1">Chip A17 Pro 3nm đầu tiên. Titanium siêu mỏng nhẹ.</h2>
+                <p class="editorial-lead text-muted mx-auto" style="max-width: 750px;">
+                  Bộ vi xử lý 3nm đầu tiên mở ra kỷ nguyên mới của đồ họa Console di động. Khung viền Titanium cấp hàng không vũ trụ siêu bền bỉ và nhẹ dịu.
+                </p>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(194, 178, 128, 0.08); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="editorial-tag">ACTION BUTTON</span>
+                  <h3 class="fw-bold mt-2 text-navy">Nút Tác vụ (Action Button) tùy chỉnh</h3>
+                  <p class="text-muted">
+                    Nút Action Button đa năng mới cho phép bạn gán phím tắt nhanh để bật nhanh ghi âm, đèn pin, camera hay kích hoạt phím tắt tùy chỉnh trong nháy mắt.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_15_pro_details/Apple-iPhone-15-Pro-lineup-Action-button-230912.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-5 flex-md-row-reverse">
+              <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background: rgba(10, 30, 51, 0.03); border: 1px solid rgba(10, 30, 51, 0.08);">
+                  <span class="editorial-tag">OPTICAL ZOOM</span>
+                  <h3 class="fw-bold mt-2 text-navy">Ống kính Telephoto Zoom quang học đỉnh cao</h3>
+                  <p class="text-muted">
+                    Bắt trọn khoảnh khắc ở xa với độ phân giải tuyệt đối nhờ hệ thống camera Zoom quang học (3x trên Pro, 5x trên Pro Max) với ống kính tetraprism độc quyền.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <video class="w-100 rounded-4" autoplay muted loop playsinline style="max-height: 320px; object-fit: cover;">
+                  <source src="/images/ip_15_pro_details/Apple-iPhone-15-Pro-lineup-Camera-optical-zoom-230912.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="row g-4 align-items-center mb-4">
+              <div class="col-md-6">
+                <img src="/images/ip_15_pro_details/Apple-iPhone-15-Pro-lineup-design-230912_big.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="iPhone 15 Pro Design" style="max-height: 350px; object-fit: cover;" />
+              </div>
+              <div class="col-md-6">
+                <img src="/images/ip_15_pro_details/Apple-iPhone-15-Pro-Max-48MP-camera-02-230912_big.jpg.large_2x.jpg" class="w-100 rounded-4 shadow-sm" alt="48MP Pro Camera" style="max-height: 350px; object-fit: cover;" />
+              </div>
+            </div>
+          </div>
         }
         else
         {
-          <p class="text-muted">Chưa có thông tin mô tả chi tiết cho sản phẩm này.</p>
+          if (!string.IsNullOrEmpty(p.Description))
+          {
+            <div class="product-description-clean">@Html.Raw(p.Description)</div>
+          }
+          else
+          {
+            <p class="text-muted">Chưa có thông tin mô tả chi tiết cho sản phẩm này.</p>
+          }
         }
       </div>
 
-      @* Tab: Thông số kỹ thuật *@
+      @* Tab: Technical Specs *@
       @if (specs != null)
       {
         <div class="tab-pane fade" id="tabSpecs">
@@ -297,10 +822,8 @@
         </div>
       }
 
-      @* Tab: Đánh giá *@
+      @* Tab: Reviews *@
       <div class="tab-pane fade" id="tabReviews">
-
-        @* Rating summary *@
         @if (p.Reviews.Any())
         {
           <div class="review-summary-clean mb-4 border-bottom pb-3">
@@ -315,78 +838,126 @@
               </div>
             </div>
           </div>
-        }
 
-        @* Review list *@
-        @foreach (var r in p.Reviews.OrderByDescending(r => r.CreatedAt))
-        {
-          <div class="review-item-clean">
-            <div class="review-header-clean">
-              <div class="review-user-clean">
-                <div class="review-avatar-clean">@(r.User?.Name.Substring(0, 1).ToUpper() ?? "?")</div>
-                <div>
-                  <div class="fw-semibold">@r.User?.Name</div>
-                  <div class="text-muted small">Đăng ngày: @r.CreatedAt.ToString("dd/MM/yyyy")</div>
+          @foreach (var r in p.Reviews.OrderByDescending(r => r.CreatedAt))
+          {
+            <div class="review-item-clean">
+              <div class="review-header-clean">
+                <div class="review-user-clean">
+                  <div class="review-avatar-clean">@(r.User?.Name.Substring(0, 1).ToUpper() ?? "?")</div>
+                  <div>
+                    <div class="fw-semibold text-navy">@r.User?.Name</div>
+                    <div class="text-muted small">Đăng ngày: @r.CreatedAt.ToString("dd/MM/yyyy")</div>
+                  </div>
                 </div>
-              </div>
-              <div class="review-stars-clean">
-                @for (int i = 1; i <= 5; i++)
-                {
-                  <i class="@(i <= r.Rating ? "fas" : "far") fa-star text-warning small"></i>
-                }
-              </div>
-            </div>
-            @if (!string.IsNullOrEmpty(r.Comment))
-            {
-              <p class="review-comment-clean mt-2">@r.Comment</p>
-            }
-          </div>
-        }
-
-        @if (!p.Reviews.Any())
-        {
-          <div class="text-center py-4 text-muted">
-            <i class="far fa-comment-alt fa-2x mb-3 d-block"></i>
-            Chưa có đánh giá nào cho sản phẩm này.
-          </div>
-        }
-
-        @* Write review form *@
-        @if (Model.IsLoggedIn)
-        {
-          <div class="review-form-wrap-clean mt-4 p-4">
-            <h6 class="fw-bold mb-3">Gửi nhận xét của bạn</h6>
-            <form asp-controller="Product" asp-action="AddReview" method="post">
-              @Html.AntiForgeryToken()
-              <input type="hidden" name="productId" value="@p.Id"/>
-              
-              <div class="mb-3">
-                <label class="form-label fw-semibold small">Mức độ hài lòng</label>
-                <div class="star-rating-clean">
-                  @for (int i = 5; i >= 1; i--)
+                <div class="review-stars-clean">
+                  @for (int i = 1; i <= 5; i++)
                   {
-                    <input type="radio" name="rating" id="star@i" value="@i" required/>
-                    <label for="star@i"><i class="fas fa-star"></i></label>
+                    <i class="@(i <= r.Rating ? "fas" : "far") fa-star text-warning small"></i>
                   }
                 </div>
               </div>
+              @if (!string.IsNullOrEmpty(r.Comment))
+              {
+                <p class="review-comment-clean mt-2">@r.Comment</p>
+              }
+            </div>
+          }
 
-              <div class="mb-3">
-                <label class="form-label fw-semibold small">Ý kiến nhận xét</label>
-                <textarea name="comment" class="form-control" rows="3"
-                          placeholder="Chia sẻ nhận xét của bạn về sản phẩm này..."></textarea>
-              </div>
+          @if (Model.IsLoggedIn)
+          {
+            <div class="review-form-wrap-clean mt-4 p-4" style="background: var(--ivory-warm); border-radius: 12px; border: 1px solid rgba(194,178,128,0.12); max-width: 650px;">
+              <h6 class="fw-bold mb-3 text-navy">Gửi nhận xét của bạn</h6>
+              <form asp-controller="Product" asp-action="AddReview" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="productId" value="@p.Id"/>
+                
+                <div class="mb-3">
+                  <label class="form-label fw-semibold small">Mức độ hài lòng</label>
+                  <div class="star-rating-clean">
+                    @for (int i = 5; i >= 1; i--)
+                    {
+                      <input type="radio" name="rating" id="star@i" value="@i" required/>
+                      <label for="star@i"><i class="fas fa-star"></i></label>
+                    }
+                  </div>
+                </div>
 
-              <button type="submit" class="btn btn-add-review-clean">
-                Gửi Đánh Giá
-              </button>
-            </form>
-          </div>
+                <div class="mb-3">
+                  <label class="form-label fw-semibold small">Ý kiến nhận xét</label>
+                  <textarea name="comment" class="form-control" rows="3"
+                            placeholder="Chia sẻ nhận xét của bạn về sản phẩm này..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-add-review-clean">
+                  Gửi Đánh Giá
+                </button>
+              </form>
+            </div>
+          }
+          else
+          {
+            <div class="alert alert-light border mt-3 text-center py-3" style="max-width: 650px;">
+              Vui lòng <a asp-controller="Auth" asp-action="Login" class="text-camel fw-semibold">Đăng nhập</a> để viết đánh giá sản phẩm.
+            </div>
+          }
         }
         else
         {
-          <div class="alert alert-light border mt-3 text-center py-3">
-            Vui lòng <a asp-controller="Auth" asp-action="Login" class="text-camel fw-semibold">Đăng nhập</a> để viết đánh giá sản phẩm.
+          <div class="review-empty-state-container">
+            @if (Model.IsLoggedIn)
+            {
+              <div class="row g-4 align-items-center">
+                <div class="col-md-5 text-center text-md-start">
+                  <div class="p-4">
+                    <i class="far fa-comment-alt fa-3x text-camel mb-3"></i>
+                    <h5 class="fw-bold text-navy">Chưa có đánh giá nào</h5>
+                    <p class="text-muted small">Hãy là người đầu tiên chia sẻ cảm nhận của bạn về @p.Name để giúp những khách hàng khác có sự lựa chọn tốt nhất.</p>
+                  </div>
+                </div>
+                <div class="col-md-7">
+                  <div class="review-form-wrap-clean p-4" style="background: var(--ivory-warm); border-radius: 12px; border: 1px solid rgba(194,178,128,0.12);">
+                    <h6 class="fw-bold mb-3 text-navy">Gửi nhận xét của bạn</h6>
+                    <form asp-controller="Product" asp-action="AddReview" method="post">
+                      @Html.AntiForgeryToken()
+                      <input type="hidden" name="productId" value="@p.Id"/>
+                      
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold small">Mức độ hài lòng</label>
+                        <div class="star-rating-clean">
+                          @for (int i = 5; i >= 1; i--)
+                          {
+                            <input type="radio" name="rating" id="star@i" value="@i" required/>
+                            <label for="star@i"><i class="fas fa-star"></i></label>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold small">Ý kiến nhận xét</label>
+                        <textarea name="comment" class="form-control" rows="3"
+                                  placeholder="Chia sẻ nhận xét của bạn về sản phẩm này..."></textarea>
+                      </div>
+
+                      <button type="submit" class="btn btn-add-review-clean">
+                        Gửi Đánh Giá
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            }
+            else
+            {
+              <div class="text-center py-5 mx-auto" style="max-width: 480px;">
+                <i class="far fa-comment-alt fa-3x text-camel mb-3"></i>
+                <h5 class="fw-bold text-navy">Chưa có đánh giá nào</h5>
+                <p class="text-muted small mb-4">Hãy là người đầu tiên đánh giá sản phẩm này.</p>
+                <div class="p-3 rounded-3" style="background: rgba(194, 178, 128, 0.06); border: 1px solid rgba(194, 178, 128, 0.15);">
+                  <span class="small text-muted">Vui lòng <a asp-controller="Auth" asp-action="Login" class="text-camel fw-semibold text-decoration-none">Đăng nhập</a> để viết đánh giá.</span>
+                </div>
+              </div>
+            }
           </div>
         }
       </div>
@@ -411,65 +982,432 @@
     </div>
   }
 
+  <!-- Modal So sánh sản phẩm -->
+  <div class="modal fade" id="compareSelectModal" tabindex="-1" aria-labelledby="compareSelectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content text-navy" style="border-radius: 20px; border: 1px solid rgba(194, 178, 128, 0.25); background: var(--ivory-pure); box-shadow: 0 15px 35px rgba(0,0,0,0.15);">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title font-serif fw-bold text-navy fs-4" id="compareSelectModalLabel">So sánh với sản phẩm khác</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-4">
+          <p class="text-muted small mb-4">Chọn tối đa 2 thiết bị khác dưới đây để so sánh chi tiết cùng với <strong>@p.Name</strong>.</p>
+          
+          <div class="mb-4 position-relative">
+            <input type="text" id="compareSearchInput" class="form-control" placeholder="Tìm nhanh theo tên sản phẩm..." style="border-radius: 30px; padding: 12px 20px; border: 1px solid rgba(194, 178, 128, 0.3); font-family: 'Inter', sans-serif; background: #fff;" oninput="filterCompareList()">
+            <i class="fas fa-search position-absolute" style="right: 20px; top: 18px; color: var(--camel);"></i>
+          </div>
+
+          <div class="compare-product-list" id="compareProductList" style="max-height: 350px; overflow-y: auto; padding-right: 5px;">
+            <!-- Rendered via AJAX -->
+            <div class="text-center py-5">
+              <div class="spinner-border text-camel" role="status"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0 d-flex justify-content-between align-items-center">
+          <div class="selected-compare-count text-muted small">
+            Đã chọn: <span id="selectedCompareCountNum" class="fw-semibold text-camel">0</span> / 2 sản phẩm
+          </div>
+          <button type="button" class="btn-camel-gold px-4 py-2" id="btnGoToCompare" onclick="goToComparisonPage(@p.Id)" disabled style="border-radius: 30px; font-weight: 500;">
+            Bắt đầu so sánh
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-@* Hidden input for variant tracking *@
-<input type="hidden" id="selectedVariantId" value=""/>
+@functions {
+  public static string GetHexForColorName(string? name)
+  {
+    if (string.IsNullOrEmpty(name)) return "#bebebe";
+    var n = name.ToLower().Trim();
+
+    // Đen / Xám / Titanium
+    if (n.Contains("đen vân cacbon")) return "#1c1c1c";
+    if (n.Contains("đen không gian") || n.Contains("space black")) return "#232426";
+    if (n.Contains("đen titan") || n.Contains("titan đen") || n.Contains("titanium đen")) return "#282829";
+    if (n.Contains("đen bóng")) return "#0c0d0e";
+    if (n.Contains("đen xanh") || n.Contains("xanh đen") || n.Contains("đen huyền bí")) return "#1f262e";
+    if (n.Contains("đen") || n.Contains("black")) return "#222222";
+    if (n.Contains("titan tự nhiên") || n.Contains("tự nhiên titan") || n.Contains("natural titanium")) return "#a6a6a4";
+    if (n.Contains("titan xám") || n.Contains("xám bạc") || n.Contains("xám đá") || n.Contains("xám") || n.Contains("gray") || n.Contains("grey")) return "#8e8e93";
+
+    // Trắng / Bạc
+    if (n.Contains("bạc shadow") || n.Contains("silver shadow")) return "#d1d5db";
+    if (n.Contains("bạc ánh trăng") || n.Contains("moonlight silver")) return "#e5e7eb";
+    if (n.Contains("trắng titan") || n.Contains("titan trắng")) return "#e3e4e5";
+    if (n.Contains("trắng bạc") || n.Contains("titan trắng bạc")) return "#eceeed";
+    if (n.Contains("bạc bóng") || n.Contains("bạc") || n.Contains("silver")) return "#e3e4e6";
+    if (n.Contains("trắng hồng") || n.Contains("hồng đào") || n.Contains("trắng") || n.Contains("white")) return "#f9f9fb";
+
+    // Vàng / Sa mạc / Đồng / Gold
+    if (n.Contains("sa mạc titan") || n.Contains("desert titanium") || n.Contains("sa mạc")) return "#c2b29c";
+    if (n.Contains("titan vàng hồng") || n.Contains("vàng hồng") || n.Contains("pink gold")) return "#e8c3b9";
+    if (n.Contains("vàng nhạt")) return "#f7ebd3";
+    if (n.Contains("vàng vangarde") || n.Contains("vàng") || n.Contains("gold") || n.Contains("yellow")) return "#f9e09b";
+
+    // Hồng / Đỏ
+    if (n.Contains("hồng phấn") || n.Contains("soft pink")) return "#f7d5d7";
+    if (n.Contains("hồng") || n.Contains("pink")) return "#ffc5cb";
+    if (n.Contains("đỏ san hô") || n.Contains("đỏ") || n.Contains("red")) return "#d03a3a";
+
+    // Xanh Lá / Mint / Ngọc / Xô Thơm
+    if (n.Contains("titan xanh ngọc") || n.Contains("xanh ngọc") || n.Contains("jade green")) return "#9cd3c2";
+    if (n.Contains("xanh bạc hà") || n.Contains("xanh mint") || n.Contains("mint")) return "#bce3cb";
+    if (n.Contains("xanh xô thơm") || n.Contains("sage")) return "#b4c3b6";
+    if (n.Contains("teal") || n.Contains("mòng két")) return "#4f7f80";
+    if (n.Contains("xanh lá") || n.Contains("green")) return "#a2cd5a";
+
+    // Xanh Dương / Navy / Băng / Sương Mù
+    if (n.Contains("xanh sâu thẳm") || n.Contains("deep blue") || n.Contains("dark blue")) return "#2d4257";
+    if (n.Contains("xanh navy") || n.Contains("navy")) return "#1b365d";
+    if (n.Contains("xanh titan") || n.Contains("titan xanh") || n.Contains("xanh dương titan")) return "#4f637a";
+    if (n.Contains("xanh bầu trời") || n.Contains("sky blue")) return "#a5c4d4";
+    if (n.Contains("xanh sương mù") || n.Contains("mist blue")) return "#99aab8";
+    if (n.Contains("xanh băng giá") || n.Contains("xanh băng") || n.Contains("icy blue")) return "#d2e3eb";
+    if (n.Contains("xanh craft") || n.Contains("xanh dương") || n.Contains("xanh") || n.Contains("blue") || n.Contains("xanh lưu ly")) return "#5b7795";
+
+    // Tím / Oải Hương / Cam
+    if (n.Contains("oải hương") || n.Contains("lavender")) return "#dfdaf2";
+    if (n.Contains("cam vũ trụ") || n.Contains("cosmic orange")) return "#e36e3b";
+
+    return "#808080";
+  }
+}
 
 @section Scripts {
 <script>
+  // Dynamic Data Serialization
+  const images = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(images.Select(i => new { i.ImageUrl, i.IsMain })));
+  const variants = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(variants.Select(v => new { v.Id, v.Color, v.StorageGb, v.Price, v.Stock })));
+
+  let selectedColor = null;
+  let selectedStorage = null;
   let selectedVariantId = null;
 
-  // Switch gallery image
-  function switchImage(src, thumb) {
-    const mainImgEl = document.getElementById('mainImage');
-    mainImgEl.style.opacity = '0.3';
-    setTimeout(() => {
-      mainImgEl.src = src;
-      mainImgEl.style.opacity = '1';
-    }, 150);
-    document.querySelectorAll('.detail-thumb-clean').forEach(t => t.classList.remove('active'));
-    thumb?.classList.add('active');
+  // Find image matching color name pattern
+  function getImageForColor(colorName) {
+    if (!images || images.length === 0) return null;
+    const normalized = colorName.toLowerCase().replace(/\s+/g, '').trim();
+    
+    // Translation/mapping table for specific color names
+    const colorMap = {
+      'đenkhônggian': ['spaceblack', 'black'],
+      'bạcánhtrăng': ['cloudwhite', 'white', 'silver'],
+      'xanhbầutrời': ['skyblue', 'blue'],
+      'vàngnhạt': ['lightgold', 'gold', 'yellow'],
+      'camvũtrụ': ['cosmicorange', 'orange'],
+      'xanhsâuthẳm': ['deepblue', 'blue'],
+      'bạc': ['silver', 'white'],
+      'xanhsươngmù': ['mist_blue', 'mist', 'blue'],
+      'oảihương': ['lavender', 'purple'],
+      'xanhxôthơm': ['sage', 'green'],
+      'hồngphấn': ['soft-pink', 'pink'],
+      'đỏsanthô': ['coralred', 'red'],
+      'xanhbănggiá': ['icyblue', 'blue'],
+      'đenxanh': ['blueblack', 'black'],
+      'xanhbạchà': ['mint', 'green'],
+      'xanhnavy': ['navy', 'blue'],
+      'vànghồng': ['pinkgold', 'pink'],
+      'titanxám': ['titaniumgray', 'gray', 'grey'],
+      'titanđen': ['titaniumblack', 'black'],
+      'titanđenbóng': ['titaniumjetblack', 'black'],
+      'titantrắngbạc': ['titaniumwhitesilver', 'silver', 'white'],
+      'titanxanhngọc': ['titaniumjadegreen', 'green'],
+      'titanxanhbạc': ['titaniumsilverblue', 'blue'],
+      'titanvànghồng': ['titaniumpinkgold', 'pink'],
+      'đenvâncacbon': ['crafted-black', 'carbon', 'black'],
+      'hồngđào': ['peach', 'pink'],
+      'bạcshadow': ['silver-shadow', 'silvershadow', 'silver'],
+      'xanhdương': ['blue'],
+      'xanhdươngtitan': ['bluetitanium', 'blue'],
+      'titantựnhiên': ['naturaltitanium', 'natural', 'gray', 'grey'],
+      'đentitan': ['blacktitanium', 'black'],
+      'trắngtitan': ['whitetitanium', 'white'],
+      'samactitan': ['deserttitanium', 'desert', 'gold'],
+      'sa mạctitan': ['deserttitanium', 'desert', 'gold'],
+      'xanhlưuly': ['ultramarine', 'blue'],
+      'trắngbạc': ['whitesilver', 'white', 'silver'],
+    };
+
+    // First try exact matches with mapped keywords
+    const keywords = colorMap[normalized] || [];
+    for (const kw of keywords) {
+      const match = images.find(img => {
+        const url = img.ImageUrl.toLowerCase();
+        const filename = url.substring(url.lastIndexOf('/') + 1);
+        return filename.includes(kw);
+      });
+      if (match) return match.ImageUrl;
+    }
+
+    // Try finding by normalized name directly in filename
+    const matchDirect = images.find(img => {
+      const url = img.ImageUrl.toLowerCase();
+      const filename = url.substring(url.lastIndexOf('/') + 1);
+      
+      const removeDiacritics = (str) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
+      const filenameClean = removeDiacritics(filename);
+      const normalizedClean = removeDiacritics(normalized);
+      
+      return filenameClean.includes(normalizedClean);
+    });
+    if (matchDirect) return matchDirect.ImageUrl;
+
+    // Fallback: general mapping based on generic terms
+    let matchGeneric = images.find(img => {
+      const url = img.ImageUrl.toLowerCase();
+      if ((normalized.includes("đen") || normalized.includes("black")) && (url.includes("black") || url.includes("dark") || url.includes("carbon") || url.includes("shadow"))) return true;
+      if ((normalized.includes("trắng") || normalized.includes("white")) && (url.includes("white") || url.includes("light"))) return true;
+      if ((normalized.includes("bạc") || normalized.includes("silver")) && (url.includes("silver") || url.includes("shadow") || url.includes("whitesilver"))) return true;
+      if ((normalized.includes("tựnhiên") || normalized.includes("natural")) && (url.includes("natural") || url.includes("gray") || url.includes("grey") || url.includes("slate"))) return true;
+      if ((normalized.includes("vàng") || normalized.includes("yellow") || normalized.includes("gold")) && (url.includes("gold") || url.includes("yellow") || url.includes("vangarde"))) return true;
+      if ((normalized.includes("xanh") || normalized.includes("blue") || normalized.includes("navy") || normalized.includes("mòngkét")) && (url.includes("blue") || url.includes("navy") || url.includes("sky") || url.includes("icy") || url.includes("craft") || url.includes("teal") || url.includes("ultramarine"))) return true;
+      if ((normalized.includes("lá") || normalized.includes("green") || normalized.includes("mint") || normalized.includes("sage")) && (url.includes("green") || url.includes("sage") || url.includes("mint") || url.includes("teal") || url.includes("jade"))) return true;
+      if ((normalized.includes("hồng") || normalized.includes("pink") || normalized.includes("đào") || normalized.includes("peach")) && (url.includes("pink") || url.includes("peach") || url.includes("rose") || url.includes("soft-pink") || url.includes("soft_pink"))) return true;
+      if ((normalized.includes("oảihương") || normalized.includes("lavender")) && (url.includes("lavender") || url.includes("purple"))) return true;
+      if ((normalized.includes("sươngmù") || normalized.includes("mist")) && url.includes("mist")) return true;
+      if ((normalized.includes("cam") || normalized.includes("orange")) && url.includes("orange")) return true;
+      if ((normalized.includes("đỏ") || normalized.includes("red")) && (url.includes("red") || url.includes("coral"))) return true;
+      return false;
+    });
+
+    if (matchGeneric) return matchGeneric.ImageUrl;
+
+    // Last resort: find the main image or first image
+    const mainImg = images.find(img => img.IsMain);
+    return mainImg ? mainImg.ImageUrl : (images[0] ? images[0].ImageUrl : null);
   }
 
-  // Select variant (storage / color)
-  function selectVariant(btn, type) {
-    const group = type === 'storage' ? 'storageGroup' : 'colorGroup';
-    document.querySelectorAll(`#${group} .variant-btn-clean`).forEach(b => b.classList.remove('active'));
+  // Handle color selection
+  function selectColor(btn, color) {
+    document.querySelectorAll('#colorStep .buy-flow-color-pill').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
-    selectedVariantId = btn.dataset.variantId;
-    document.getElementById('selectedVariantId').value = selectedVariantId;
+    selectedColor = color;
+    document.getElementById('selectedColorLabel').textContent = color;
 
-    const price = parseInt(btn.dataset.price);
-    if (!isNaN(price)) {
-      document.getElementById('displayPrice').textContent = price.toLocaleString('vi-VN') + '₫';
+    // Transition image with soft fade and preload to prevent blinking
+    const newSrc = getImageForColor(color);
+    if (newSrc) {
+      const mainImgEl = document.getElementById('mainImage');
+      const tempImgEl = document.getElementById('mainImageTemp');
+      if (tempImgEl) {
+        tempImgEl.onload = () => {
+          tempImgEl.style.opacity = '1';
+          setTimeout(() => {
+            mainImgEl.src = newSrc;
+            tempImgEl.style.opacity = '0';
+          }, 300);
+        };
+        tempImgEl.src = newSrc;
+      } else {
+        mainImgEl.src = newSrc;
+      }
     }
 
-    if (type === 'color') {
-      const el = document.getElementById('selectedColor');
-      if (el) el.textContent = btn.dataset.color;
+    // Activate Step 2
+    const storageStep = document.getElementById('storageStep');
+    if (storageStep) storageStep.classList.add('active');
+
+    // Populate storage grid based on color
+    const grid = document.getElementById('storageGrid');
+    if (grid) {
+      grid.innerHTML = '';
+
+      const colorVariants = variants.filter(v => v.Color === color);
+      
+      // Sort storages ascending
+      colorVariants.sort((a, b) => a.StorageGb - b.StorageGb);
+
+      colorVariants.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'buy-flow-storage-card';
+        if (selectedStorage === v.StorageGb) {
+          card.classList.add('active');
+          selectedVariantId = v.Id;
+        }
+        card.innerHTML = `
+          <span class="buy-flow-storage-cap">${v.StorageGb} GB</span>
+          <span class="buy-flow-storage-price">${v.Price.toLocaleString('vi-VN')}₫</span>
+        `;
+        card.onclick = () => selectStorage(card, v.StorageGb, v.Price, v.Id);
+        grid.appendChild(card);
+      });
+    }
+
+    updateSummary();
+  }
+
+  // Handle storage selection
+  function selectStorage(cardEl, storage, price, variantId) {
+    document.querySelectorAll('.buy-flow-storage-card').forEach(c => c.classList.remove('active'));
+    cardEl.classList.add('active');
+
+    selectedStorage = storage;
+    selectedVariantId = variantId;
+
+    updateSummary();
+  }
+
+  // Update selection text and enable checkout button
+  function updateSummary() {
+    const displayPrice = document.getElementById('displayPrice');
+    const summaryText = document.getElementById('summarySelectionText');
+    const submitBtn = document.getElementById('btnBuyFlowAdd');
+
+    if (selectedColor && selectedStorage) {
+      // Find variant details
+      const variant = variants.find(v => v.Id === selectedVariantId);
+      const priceVal = variant ? variant.Price : 0;
+      
+      if (displayPrice) displayPrice.textContent = priceVal.toLocaleString('vi-VN') + '₫';
+      if (summaryText) summaryText.textContent = `@Model.Product.Name, Màu: ${selectedColor}, Dung lượng: ${selectedStorage}GB`;
+      
+      // Unlock checkout button
+      if (submitBtn) {
+        submitBtn.classList.remove('locked');
+        submitBtn.removeAttribute('disabled');
+        submitBtn.textContent = 'Thêm vào giỏ hàng';
+      }
+    } else {
+      let missing = [];
+      if (!selectedColor) missing.push("màu sắc");
+      if (!selectedStorage) missing.push("dung lượng");
+      
+      if (summaryText) summaryText.textContent = "Vui lòng chọn " + missing.join(" và ");
+      if (submitBtn) {
+        submitBtn.classList.add('locked');
+        submitBtn.setAttribute('disabled', 'true');
+        submitBtn.textContent = 'Hoàn thành các bước chọn';
+      }
     }
   }
 
-  // Qty control
-  function changeQty(delta) {
-    const input = document.getElementById('qtyInput');
-    const max   = parseInt(input.max) || 99;
-    input.value = Math.max(1, Math.min(max, parseInt(input.value || 1) + delta));
+  // Add item to cart
+  function addToCartDetail(event) {
+    if (!selectedVariantId) {
+      showToast("Vui lòng hoàn thành đầy đủ lựa chọn", "error");
+      return;
+    }
+    addToCart(@p.Id, event, parseInt(selectedVariantId), 1);
   }
 
-  // Add to cart from detail page
-  function addToCartDetail() {
-    const qty       = parseInt(document.getElementById('qtyInput').value) || 1;
-    const variantId = selectedVariantId ? parseInt(selectedVariantId) : null;
-    addToCart(@p.Id, null, variantId, qty);
+  // Auto-select first variant on load if exists
+  document.addEventListener('DOMContentLoaded', () => {
+    const firstColorBtn = document.querySelector('#colorStep .buy-flow-color-pill');
+    if (firstColorBtn) {
+      firstColorBtn.click();
+    }
+  });
+
+  // Product Comparison logic
+  let allCompareProducts = [];
+  let selectedCompareIds = [];
+  let isCompareListLoaded = false;
+
+  function openCompareModal() {
+    const modalEl = document.getElementById('compareSelectModal');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+
+    if (!isCompareListLoaded) {
+      fetch(`/Product/GetCompareList?currentProductId=@p.Id`)
+        .then(res => res.json())
+        .then(data => {
+          allCompareProducts = data;
+          isCompareListLoaded = true;
+          renderCompareProducts(data);
+        })
+        .catch(err => {
+          console.error("Lỗi khi tải danh sách sản phẩm so sánh:", err);
+          document.getElementById('compareProductList').innerHTML = '<p class="text-center text-danger py-4">Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.</p>';
+        });
+    }
   }
 
-  // Auto-select first color variant on load
-  const firstColorBtn = document.querySelector('#colorGroup .variant-btn-clean');
-  if (firstColorBtn) selectVariant(firstColorBtn, 'color');
-  const firstStorageBtn = document.querySelector('#storageGroup .variant-btn-clean');
-  if (firstStorageBtn) selectVariant(firstStorageBtn, 'storage');
+  function renderCompareProducts(products) {
+    const listEl = document.getElementById('compareProductList');
+    if (!products || products.length === 0) {
+      listEl.innerHTML = '<p class="text-center text-muted py-4">Không tìm thấy sản phẩm nào.</p>';
+      return;
+    }
+
+    listEl.innerHTML = products.map(prod => {
+      const isChecked = selectedCompareIds.includes(prod.id) ? 'checked' : '';
+      return `
+        <div class="compare-prod-item d-flex align-items-center justify-content-between p-2 mb-2 rounded-3" style="border: 1px solid rgba(194, 178, 128, 0.15); background: #fff; transition: all 0.2s ease;" id="compare-item-${prod.id}">
+          <div class="d-flex align-items-center gap-3">
+            <img src="${prod.image}" alt="${prod.name}" style="width: 48px; height: 48px; object-fit: contain; border-radius: 6px;" />
+            <div>
+              <h6 class="mb-0 fw-semibold fs-6 text-navy">${prod.name}</h6>
+              <span class="badge bg-secondary text-white font-monospace" style="font-size: 10px;">${prod.brand}</span>
+            </div>
+          </div>
+          <div class="form-check pe-3">
+            <input class="form-check-input compare-chk" type="checkbox" value="${prod.id}" id="chk-${prod.id}" ${isChecked} onchange="onCompareCheckboxChange(this, ${prod.id})">
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function filterCompareList() {
+    const q = document.getElementById('compareSearchInput').value.toLowerCase().trim();
+    if (!q) {
+      renderCompareProducts(allCompareProducts);
+      return;
+    }
+    const filtered = allCompareProducts.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
+    renderCompareProducts(filtered);
+  }
+
+  function onCompareCheckboxChange(chk, id) {
+    if (chk.checked) {
+      if (selectedCompareIds.length >= 2) {
+        chk.checked = false;
+        alert("Chỉ được chọn tối đa 2 sản phẩm khác để so sánh!");
+        return;
+      }
+      selectedCompareIds.push(id);
+    } else {
+      selectedCompareIds = selectedCompareIds.filter(x => x !== id);
+    }
+    
+    // Update border styling
+    document.querySelectorAll('.compare-prod-item').forEach(item => {
+      item.style.borderColor = 'rgba(194, 178, 128, 0.15)';
+      item.style.background = '#fff';
+    });
+    selectedCompareIds.forEach(selectedId => {
+      const itemEl = document.getElementById(`compare-item-${selectedId}`);
+      if (itemEl) {
+        itemEl.style.borderColor = 'var(--camel)';
+        itemEl.style.background = 'rgba(194, 178, 128, 0.05)';
+      }
+    });
+
+    // Update count
+    document.getElementById('selectedCompareCountNum').textContent = selectedCompareIds.length;
+    
+    // Update button state
+    const btn = document.getElementById('btnGoToCompare');
+    if (selectedCompareIds.length > 0) {
+      btn.removeAttribute('disabled');
+      btn.style.opacity = '1';
+    } else {
+      btn.setAttribute('disabled', 'true');
+      btn.style.opacity = '0.5';
+    }
+  }
+
+  function goToComparisonPage(currentId) {
+    if (selectedCompareIds.length === 0) return;
+    const ids = [currentId, ...selectedCompareIds].join(',');
+    window.location.href = `/Product/Compare?ids=${ids}`;
+  }
 </script>
 }

@@ -10,7 +10,7 @@
 
 <div class="d-flex align-items-center gap-3 mb-4">
   <a asp-action="Products" class="btn btn-outline-secondary btn-sm">
-    <i class="fas fa-arrow-left"></i>
+    QUAY LẠI
   </a>
   <h5 class="fw-bold mb-0">@(isEdit ? "Sửa: " + Model.Name : "Thêm sản phẩm mới")</h5>
 </div>
@@ -157,13 +157,13 @@
 
           @* ── MÀU SẮC: Visual Tag Input ── *@
           <div class="col-12">
-            <label class="form-label fw-semibold"><i class="fas fa-palette me-1 text-muted"></i>Màu sắc (PhoneSpecs)</label>
+            <label class="form-label fw-semibold">Màu sắc (PhoneSpecs)</label>
             <div class="color-tags-wrap" id="colorTagsWrap"></div>
             <div class="d-flex gap-2 mt-2">
               <input type="text" id="colorInput" class="form-control form-control-sm"
                      placeholder="Nhập tên màu, ví dụ: Đen Titan..." style="max-width:240px"/>
               <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="addColor()">
-                <i class="fas fa-plus me-1"></i>Thêm
+                THÊM
               </button>
             </div>
             <input type="hidden" asp-for="Colors" id="colorsHidden"/>
@@ -174,7 +174,7 @@
 
       @* ── BIẾN THỂ SẢN PHẨM ── *@
       <div class="admin-form-section">
-        <div class="admin-form-section-title"><i class="fas fa-layer-group me-2"></i>Biến thể sản phẩm</div>
+        <div class="admin-form-section-title">Biến thể sản phẩm</div>
         <p class="text-muted small mb-2">Thêm các phiên bản màu sắc / dung lượng với giá và tồn kho riêng.</p>
         <div class="table-responsive mb-2">
           <table class="table table-sm table-bordered align-middle" id="variantsTable">
@@ -191,14 +191,14 @@
             <tbody id="variantsBody">
               <tr id="variantsEmpty">
                 <td colspan="6" class="text-center text-muted py-3">
-                  <i class="fas fa-info-circle me-1"></i>Chưa có biến thể. Nhấn "Thêm biến thể" để bắt đầu.
+                  Chưa có biến thể. Nhấn "Thêm biến thể" để bắt đầu.
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
         <button type="button" class="btn btn-outline-primary btn-sm" onclick="addVariantRow()">
-          <i class="fas fa-plus me-1"></i>Thêm biến thể
+          THÊM BIẾN THỂ
         </button>
         <input type="hidden" name="VariantsJson" id="variantsJsonInput"/>
         <input type="hidden" id="existingVariantsData" value="@Html.Encode(Model.VariantsJson ?? "[]")"/>
@@ -237,8 +237,7 @@
           else
           {
             <div class="img-preview-placeholder" id="imgPlaceholder">
-              <i class="fas fa-camera fa-2x text-muted"></i>
-              <div class="small text-muted mt-2">Chọn ảnh</div>
+              <div class="small text-muted mt-2">CHỌN ẢNH</div>
             </div>
           }
         </div>
@@ -275,8 +274,8 @@
 
       @* Save buttons *@
       <div class="d-grid gap-2">
-        <button type="submit" class="btn btn-danger btn-lg fw-bold">
-          <i class="fas fa-save me-2"></i>@(isEdit ? "Lưu thay đổi" : "Thêm sản phẩm")
+        <button type="submit" class="btn btn-primary btn-lg fw-bold">
+          @(isEdit ? "LƯU THAY ĐỔI" : "THÊM SẢN PHẨM")
         </button>
         <a asp-action="Products" class="btn btn-outline-secondary">Huỷ</a>
       </div>
@@ -368,7 +367,7 @@
   function renderColorTags() {
     colorTagsWrap.innerHTML = colorList.map(c => `
       <span class="color-tag">
-        <i class="fas fa-circle me-1" style="font-size:.6rem;opacity:.6"></i>${escHtml(c)}
+        ${escHtml(c)}
         <button type="button" class="color-tag-remove" onclick="removeColor(${JSON.stringify(c)})" title="Xóa màu này">×</button>
       </span>
     `).join('');
@@ -412,7 +411,7 @@
     const tbody = document.getElementById('variantsBody');
     const empty = document.getElementById('variantsEmpty');
     if (variants.length === 0) {
-      tbody.innerHTML = `<tr id="variantsEmpty"><td colspan="6" class="text-center text-muted py-3"><i class="fas fa-info-circle me-1"></i>Chưa có biến thể. Nhấn "Thêm biến thể" để bắt đầu.</td></tr>`;
+      tbody.innerHTML = `<tr id="variantsEmpty"><td colspan="6" class="text-center text-muted py-3">Chưa có biến thể. Nhấn "Thêm biến thể" để bắt đầu.</td></tr>`;
       syncVariants();
       return;
     }
@@ -431,7 +430,7 @@
              onchange="variants[${i}].Stock=Number(this.value);syncVariants()"/></td>
         <td>
           <button type="button" class="btn btn-outline-danger btn-sm variant-del-btn" onclick="removeVariantRow(${i})" title="Xóa biến thể này">
-            <i class="fas fa-trash fa-xs"></i>
+            XÓA
           </button>
         </td>
       </tr>

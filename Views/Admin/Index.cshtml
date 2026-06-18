@@ -60,22 +60,19 @@
   <div class="col-lg-8">
     <div class="admin-card">
       <div class="admin-card-header">
-        <span><i class="fas fa-chart-bar me-2 text-danger"></i>Doanh thu</span>
+        <span>Doanh thu</span>
         <div class="d-flex align-items-center gap-2 flex-wrap">
-          @if (Model.ChartType == "month")
-          {
-            <select class="form-select form-select-sm" style="width:auto"
-                    onchange="location='?chartType=month&year='+this.value">
-              @foreach (var y in Model.AvailableYears)
-              {
-                @if (y == Model.SelectedYear) { <option value="@y" selected>@y</option> } else { <option value="@y">@y</option> }
-              }
-            </select>
-          }
+          <select id="revenueYearSelect" class="form-select form-select-sm @(Model.ChartType == "month" ? "" : "d-none")" style="width:auto"
+                  onchange="updateRevenueChart('month', this.value)">
+            @foreach (var y in Model.AvailableYears)
+            {
+              @if (y == Model.SelectedYear) { <option value="@y" selected>@y</option> } else { <option value="@y">@y</option> }
+            }
+          </select>
           <div class="btn-group btn-group-sm">
-            <a href="?chartType=week"  class="btn @(Model.ChartType=="week" ?"btn-danger":"btn-outline-secondary")">Tuần</a>
-            <a href="?chartType=month" class="btn @(Model.ChartType=="month"?"btn-danger":"btn-outline-secondary")">Tháng</a>
-            <a href="?chartType=year"  class="btn @(Model.ChartType=="year" ?"btn-danger":"btn-outline-secondary")">Năm</a>
+            <button type="button" id="btn-chart-week" onclick="updateRevenueChart('week')" class="btn btn-revenue-toggle @(Model.ChartType=="week" ?"btn-primary":"btn-outline-secondary")">Tuần</button>
+            <button type="button" id="btn-chart-month" onclick="updateRevenueChart('month')" class="btn btn-revenue-toggle @(Model.ChartType=="month" ?"btn-primary":"btn-outline-secondary")">Tháng</button>
+            <button type="button" id="btn-chart-year" onclick="updateRevenueChart('year')" class="btn btn-revenue-toggle @(Model.ChartType=="year" ?"btn-primary":"btn-outline-secondary")">Năm</button>
           </div>
         </div>
       </div>
@@ -91,7 +88,7 @@
   <div class="col-lg-4">
     <div class="admin-card h-100">
       <div class="admin-card-header">
-        <span><i class="fas fa-trophy me-2 text-warning"></i>Top sản phẩm</span>
+        <span>Top sản phẩm bán chạy</span>
       </div>
       <div class="admin-card-body p-0">
         @foreach (var (tp, i) in Model.TopProducts.Select((t, i) => (t, i + 1)))
@@ -121,7 +118,7 @@
   <div class="col-lg-8">
     <div class="admin-card">
       <div class="admin-card-header">
-        <span><i class="fas fa-clock me-2 text-primary"></i>Đơn hàng gần đây</span>
+        <span>Đơn hàng gần đây</span>
         <a asp-action="Orders" class="btn btn-outline-secondary btn-sm">Xem tất cả</a>
       </div>
       <div class="table-responsive">
@@ -161,7 +158,7 @@
   <div class="col-lg-4">
     <div class="admin-card">
       <div class="admin-card-header">
-        <span><i class="fas fa-chart-pie me-2 text-success"></i>Theo trạng thái</span>
+        <span>Theo trạng thái</span>
       </div>
       <div class="admin-card-body">
         <div class="chart-wrap" style="height:200px">
@@ -198,7 +195,7 @@
 <script>
 // Revenue bar chart
 const revCtx = document.getElementById('revenueChart').getContext('2d');
-new Chart(revCtx, {
+window.myRevenueChart = new Chart(revCtx, {
   type: 'bar',
   data: {
     labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartData.Select(d => d.Label))),
@@ -214,6 +211,10 @@ new Chart(revCtx, {
   options: {
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { display: false } },
+    animation: {
+      duration: 400,
+      easing: 'easeOutQuart'
+    },
     scales: {
       y: {
         ticks: {
@@ -225,6 +226,42 @@ new Chart(revCtx, {
     }
   }
 });
+
+let currentChartType = '@Model.ChartType';
+let currentYear = @Model.SelectedYear;
+
+function updateRevenueChart(type, year) {
+  currentChartType = type;
+  if (year) currentYear = year;
+  
+  const yearSelect = document.getElementById('revenueYearSelect');
+  if (type === 'month') {
+    yearSelect.classList.remove('d-none');
+  } else {
+    yearSelect.classList.add('d-none');
+  }
+
+  document.querySelectorAll('.btn-revenue-toggle').forEach(btn => {
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-outline-secondary');
+  });
+  const activeBtn = document.getElementById('btn-chart-' + type);
+  if (activeBtn) {
+    activeBtn.classList.remove('btn-outline-secondary');
+    activeBtn.classList.add('btn-primary');
+  }
+
+  fetch(`/Admin/GetRevenueData?chartType=${type}&year=${currentYear}`)
+    .then(res => res.json())
+    .then(res => {
+      if (res.success && window.myRevenueChart) {
+        window.myRevenueChart.data.labels = res.labels;
+        window.myRevenueChart.data.datasets[0].data = res.values;
+        window.myRevenueChart.update();
+      }
+    })
+    .catch(err => console.error("Lỗi khi tải dữ liệu biểu đồ:", err));
+}
 
 // Status donut chart
 @{

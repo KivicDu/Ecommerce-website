@@ -67,8 +67,9 @@
               <div class="cart-item-actions">
                 <div class="qty-wrap-sm">
                   <button class="qty-btn-sm" onclick="updateQty(@item.Id, -1)">−</button>
-                  <input type="number" class="qty-input-sm" id="qty_@item.Id"
-                         value="@item.Quantity" min="1" max="99"
+                  <input type="text" class="qty-input-sm" id="qty_@item.Id"
+                         value="@item.Quantity"
+                         oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                          onchange="updateQtyDirect(@item.Id, this.value)"/>
                   <button class="qty-btn-sm" onclick="updateQty(@item.Id, 1)">+</button>
                 </div>
@@ -114,14 +115,14 @@
               <input type="text" id="couponInput" class="form-control"
                      placeholder="Mã giảm giá..."
                      value="@ViewBag.CouponCode"/>
-              <button class="btn btn-outline-danger" onclick="applyCoupon()">
+              <button class="btn btn-coupon-apply" onclick="applyCoupon()">
                 Áp dụng
               </button>
             </div>
             <div id="couponMsg" class="small mt-1"></div>
           </div>
 
-          <a asp-action="Checkout" class="btn btn-danger w-100 btn-lg fw-bold">
+          <a asp-action="Checkout" class="btn-checkout-premium">
             <i class="fas fa-lock me-2"></i>Tiến hành đặt hàng
           </a>
 
@@ -160,18 +161,24 @@
   .qty-wrap-sm { display: flex; align-items: center; border: 1.5px solid rgba(194, 178, 128, 0.15); border-radius: 8px; overflow: hidden; }
   .qty-btn-sm { width: 28px; height: 28px; border: none; background: var(--ivory-warm); font-size: 1rem; cursor: pointer; transition: background .15s; }
   .qty-btn-sm:hover { background: var(--ivory); }
-  .qty-input-sm { width: 40px; height: 28px; border: none; text-align: center; font-weight: 600; font-size: .85rem; }
+  .qty-input-sm { width: 40px; height: 28px; border: none; text-align: center; font-weight: 600; font-size: .85rem; outline: none; background: transparent; }
   .cart-item-subtotal { font-weight: 700; color: var(--navy); font-size: .95rem; }
   .cart-remove-btn { background: none; border: none; color: #ccc; cursor: pointer; padding: 2px 4px; transition: color .15s; }
   .cart-remove-btn:hover { color: var(--navy); }
 
   /* Order summary */
-  .order-summary { background: var(--ivory-pure); border-radius: 12px; border: 1px solid rgba(194, 178, 128, 0.15); padding: 1.5rem; position: sticky; top: 80px; }
-  .summary-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: .9rem; }
-  .summary-total { font-size: 1.1rem; font-weight: 800; }
-  .summary-total span:last-child { color: var(--navy); }
-  .coupon-wrap {}
-  .pay-icon { background: var(--ivory-warm); border: 1px solid rgba(194, 178, 128, 0.15); border-radius: 6px; padding: 3px 10px; font-size: .75rem; font-weight: 600; }
+  .order-summary { background: var(--ivory-pure); border-radius: 16px; border: 1px solid rgba(194, 178, 128, 0.15); padding: 1.75rem; position: sticky; top: 100px; box-shadow: var(--shadow-sm); }
+  .order-summary h5 { font-family: var(--font-serif) !important; font-size: 1.35rem !important; font-weight: 600 !important; color: var(--navy-deep) !important; letter-spacing: -0.01em; }
+  .summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: .9rem; font-family: var(--font-sans); color: var(--text-secondary); font-weight: 500; }
+  .summary-total { font-size: 1.15rem; font-weight: 700; color: var(--navy-deep); border-top: 1px dashed rgba(194, 178, 128, 0.25); padding-top: 12px; margin-top: 8px; }
+  .summary-total span:last-child { color: var(--navy-deep) !important; }
+  .coupon-wrap .form-control { background: var(--ivory-warm); border: 1px solid rgba(194, 178, 128, 0.2); border-radius: 8px 0 0 8px !important; font-family: var(--font-sans); color: var(--text-primary); font-size: 0.82rem; }
+  .coupon-wrap .form-control:focus { box-shadow: none; border-color: var(--camel); }
+  .btn-coupon-apply { background: var(--navy-deep) !important; color: var(--ivory-pure) !important; border: none !important; font-family: var(--font-sans) !important; font-weight: 600 !important; border-radius: 0 8px 8px 0 !important; padding: 0.4rem 1.2rem !important; font-size: 0.8rem !important; transition: all 0.3s var(--ease-luxury) !important; }
+  .btn-coupon-apply:hover { background: var(--navy-soft) !important; color: var(--ivory-pure) !important; }
+  .btn-checkout-premium { background: var(--camel) !important; color: var(--navy-deep) !important; font-family: var(--font-sans) !important; font-weight: 700 !important; font-size: 0.95rem !important; padding: 0.8rem 1.5rem !important; border-radius: 12px !important; border: none !important; transition: all 0.3s var(--ease-luxury) !important; display: flex; align-items: center; justify-content: center; width: 100%; text-decoration: none; box-shadow: var(--shadow-sm); }
+  .btn-checkout-premium:hover { background: var(--camel-light) !important; color: var(--navy-deep) !important; transform: translateY(-1.5px); box-shadow: var(--shadow-camel); }
+  .pay-icon { background: var(--ivory-warm); border: 1px solid rgba(194, 178, 128, 0.15); border-radius: 6px; padding: 4px 12px; font-size: .72rem; font-weight: 600; font-family: var(--font-sans); color: var(--text-secondary); }
 </style>
 }
 

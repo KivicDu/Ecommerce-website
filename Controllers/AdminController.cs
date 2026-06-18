@@ -129,6 +129,55 @@ public class AdminController : Controller
         return View(vm);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetRevenueData(string chartType = "month", int year = 0)
+    {
+        if (!IsAdmin()) return Json(new { success = false, message = "Access denied" });
+        if (year == 0) year = DateTime.Now.Year;
+
+        List<RevenueItem> chartData;
+        var now = DateTime.UtcNow;
+
+        if (chartType == "week")
+        {
+            var startWeek = now.AddDays(-6).Date;
+            chartData = Enumerable.Range(0, 7).Select(i =>
+            {
+                var d = startWeek.AddDays(i);
+                var rev = _db.Orders
+                    .Where(o => o.CreatedAt.Date == d && o.Status != "cancelled")
+                    .Sum(o => (decimal?)o.TotalAmount) ?? 0;
+                return new RevenueItem { Label = d.ToString("dd/MM"), Revenue = rev };
+            }).ToList();
+        }
+        else if (chartType == "year")
+        {
+            var years = await _db.Orders.Select(o => o.CreatedAt.Year).Distinct().OrderByDescending(y => y).Take(5).ToListAsync();
+            chartData = years.Select(y =>
+            {
+                var rev = _db.Orders.Where(o => o.CreatedAt.Year == y && o.Status != "cancelled").Sum(o => (decimal?)o.TotalAmount) ?? 0;
+                return new RevenueItem { Label = y.ToString(), Revenue = rev };
+            }).ToList();
+        }
+        else // month
+        {
+            chartData = Enumerable.Range(1, 12).Select(m =>
+            {
+                var rev = _db.Orders
+                    .Where(o => o.CreatedAt.Year == year && o.CreatedAt.Month == m && o.Status != "cancelled")
+                    .Sum(o => (decimal?)o.TotalAmount) ?? 0;
+                var cnt = _db.Orders.Count(o => o.CreatedAt.Year == year && o.CreatedAt.Month == m);
+                return new RevenueItem { Label = $"T{m}", Revenue = rev, OrderCount = cnt };
+            }).ToList();
+        }
+
+        return Json(new { 
+            success = true, 
+            labels = chartData.Select(d => d.Label).ToList(), 
+            values = chartData.Select(d => d.Revenue).ToList() 
+        });
+    }
+
     // ══════════════════════════════════════════════════════════════
     //  PRODUCTS
     // ══════════════════════════════════════════════════════════════
@@ -574,6 +623,136 @@ public class AdminController : Controller
         using var stream = new FileStream(path, FileMode.Create);
         await file.CopyToAsync(stream);
         return "/images/products/" + fileName;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  MINIGAME & SURVEY MANAGEMENT
+    // ══════════════════════════════════════════════════════════════
+    public async Task<IActionResult> Minigame()
+    {
+        if (!IsAdmin()) return Deny();
+        
+        var questions = await _db.SurveyQuestions
+            .OrderBy(q => q.DisplayOrder)
+            .ToListAsync();
+            
+        var prizes = await _db.LuckyWheelPrizes
+            .ToListAsync();
+            
+        ViewBag.Prizes = prizes;
+        return View(questions);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddQuestion(string questionText, string options, int displayOrder)
+    {
+        if (!IsAdmin()) return Deny();
+        if (!string.IsNullOrWhiteSpace(questionText) && !string.IsNullOrWhiteSpace(options))
+        {
+            _db.SurveyQuestions.Add(new SurveyQuestion
+            {
+                QuestionText = questionText.Trim(),
+                Options = options.Trim(),
+                IsActive = true,
+                DisplayOrder = displayOrder,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Thêm câu hỏi khảo sát thành công!";
+        }
+        else
+        {
+            TempData["Error"] = "Vui lòng nhập đầy đủ thông tin câu hỏi và các lựa chọn!";
+        }
+        return RedirectToAction("Minigame");
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditQuestion(int id, string questionText, string options, bool isActive, int displayOrder)
+    {
+        if (!IsAdmin()) return Deny();
+        var q = await _db.SurveyQuestions.FindAsync(id);
+        if (q != null)
+        {
+            q.QuestionText = questionText.Trim();
+            q.Options = options.Trim();
+            q.IsActive = isActive;
+            q.DisplayOrder = displayOrder;
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Cập nhật câu hỏi thành công!";
+        }
+        return RedirectToAction("Minigame");
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteQuestion(int id)
+    {
+        if (!IsAdmin()) return Deny();
+        var q = await _db.SurveyQuestions.FindAsync(id);
+        if (q != null)
+        {
+            _db.SurveyQuestions.Remove(q);
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Xóa câu hỏi thành công!";
+        }
+        return RedirectToAction("Minigame");
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdatePrize(int id, string name, int weight, string couponType, decimal couponValue, string colorHex, int status)
+    {
+        if (!IsAdmin()) return Deny();
+        var prize = await _db.LuckyWheelPrizes.FindAsync(id);
+        if (prize != null)
+        {
+            prize.Name = name.Trim();
+            prize.Weight = weight;
+            prize.CouponType = couponType.Trim();
+            prize.CouponValue = couponValue;
+            prize.ColorHex = colorHex.Trim();
+            prize.Status = status;
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Cập nhật giải thưởng thành công!";
+        }
+        return RedirectToAction("Minigame");
+    }
+
+    public async Task<IActionResult> ExportSurveyCsv(int month, int year)
+    {
+        if (!IsAdmin()) return Deny();
+
+        var surveys = await _db.Surveys
+            .Include(s => s.Responses)
+            .ThenInclude(r => r.Question)
+            .Include(s => s.User)
+            .Where(s => s.CreatedAt.Month == month && s.CreatedAt.Year == year)
+            .OrderBy(s => s.CreatedAt)
+            .ToListAsync();
+
+        var csvBuilder = new System.Text.StringBuilder();
+        // Prepend UTF-8 BOM so Excel opens it correctly with accents
+        csvBuilder.Append('\uFEFF');
+        csvBuilder.AppendLine("ID Khảo Sát,Ngày Tạo,Tài Khoản,Tuổi,Giới Tính,Câu Hỏi,Câu Trả Lời");
+
+        foreach (var s in surveys)
+        {
+            var email = s.User?.Email;
+            var ip = s.IpAddress ?? "N/A";
+            var dateStr = s.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss");
+            var userText = string.IsNullOrEmpty(email) ? $"Khách ({ip})" : email;
+            
+            foreach (var r in s.Responses)
+            {
+                var qText = r.Question?.QuestionText ?? "Câu hỏi đã bị xóa";
+                var escapedQ = $"\"{qText.Replace("\"", "\"\"")}\"";
+                var escapedAns = $"\"{r.AnswerText.Replace("\"", "\"\"")}\"";
+                
+                csvBuilder.AppendLine($"{s.Id},{dateStr},{userText},{s.Age},{s.Gender},{escapedQ},{escapedAns}");
+            }
+        }
+
+        var bytes = System.Text.Encoding.UTF8.GetBytes(csvBuilder.ToString());
+        return File(bytes, "text/csv", $"BaoCaoKhaoSat_{month:D2}_{year}.csv");
     }
 }
 

@@ -1,193 +1,414 @@
 @{
   ViewData["Title"] = "Luxury Boutique";
+  ViewData["HeaderTransparent"] = true;
   var featured  = ViewBag.Featured  as List<HutechStore.Models.Product> ?? new();
   var iphones   = ViewBag.IPhones   as List<HutechStore.Models.Product> ?? new();
   var samsungs  = ViewBag.Samsungs  as List<HutechStore.Models.Product> ?? new();
 }
 
-@* ── CINEMATIC HERO SECTION ── *@
-<section class="hero-banner-luxury">
-  <div class="hero-ambient-glow"></div>
-  <div class="container relative">
-    <div class="row justify-content-center text-center">
-      <div class="col-lg-10">
-        <div class="hero-content-boutique">
-          <div class="luxury-slogan mb-3">BOUTIQUE SERIES 2026</div>
-          <h1 class="hero-title-cinematic">
-            QUYỀN LỰC TỐI GIẢN.<br/>
-            <span class="text-camel-gold">ĐỊNH HÌNH VỊ THẾ.</span>
-          </h1>
-          <p class="hero-subtitle-cinematic">
-            Nơi công nghệ đỉnh cao giao thoa cùng nghệ thuật chế tác tối giản. Khám phá các tuyệt tác di động xứng tầm vị thế của bạn.
-          </p>
-          <div class="hero-actions-luxury d-flex justify-content-center gap-3">
-            <a asp-controller="Product" asp-action="Index" class="btn-luxury-action">
-              KHÁM PHÁ CỬA HÀNG
-            </a>
-            <button class="btn-luxury-outline" onclick="toggleChat()">
-              TRÒ CHUYỆN VỚI AI
-            </button>
-          </div>
-        </div>
-      </div>
+@* ══════════════════════════════════════════════════════════════════
+   SECTION 1 — CINEMATIC VIDEO HERO · iPhone Air
+   "Bán câu chuyện, không bán sản phẩm"
+   ══════════════════════════════════════════════════════════════════ *@
+<section class="hero-video-banner">
+  <video muted playsinline poster="/images/banner/Apple-iPhone-Air-hero-250909_big.jpg.large_2x.jpg" data-play-once="true">
+    <source src="/images/ip_air_details/Apple-iPhone-Air-plateau-250909.mp4" type="video/mp4"/>
+  </video>
+  <div class="hero-video-overlay"></div>
+  <div class="hero-video-content">
+    <div class="luxury-slogan">CHẾ TÁC DI SẢN · 2025</div>
+    <h1>
+      IPHONE AIR.<br/>
+      <strong>NHẸ TỰA HƯ VÔ.</strong>
+    </h1>
+    <p class="hero-tagline">
+      Khi công nghệ biến mất, chỉ còn lại sự thuần khiết tối thượng.
+      Định hình ngôn ngữ Quiet Luxury mới với thiết kế siêu mỏng chưa từng có.
+    </p>
+    <div class="hero-cta-group">
+      <a asp-controller="Product" asp-action="Detail" asp-route-id="iphone-air" class="btn-hero-glass primary">
+        KHÁM PHÁ CÂU CHUYỆN
+      </a>
+      <button class="btn-hero-glass secondary" onclick="toggleChat()">
+        TƯ VẤN AI TRỰC TUYẾN
+      </button>
     </div>
   </div>
-  <div class="hero-scroll-indicator">
-    <div class="mouse-scroll"></div>
+  <div class="hero-scroll-hint">
+    <span>KHÁM PHÁ</span>
+    <div class="scroll-line"></div>
   </div>
 </section>
 
-@* ── BRAND PROMOTIONS & CATEGORY SLIDERS ── *@
+@* ══════════════════════════════════════════════════════════════════
+   SECTION 2 — THE ART OF TITANIUM · iPhone 17 Pro Max
+   Editorial story: video + text asymmetric layout
+   ══════════════════════════════════════════════════════════════════ *@
+<section class="story-section dark">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <div class="story-media-wrap">
+          <video muted playsinline data-play-once="true">
+            <source src="/images/ip_17_promax_details/Apple-iPhone-17-Pro-camera-Center-Stage-250909.mp4" type="video/mp4"/>
+          </video>
+          <span class="media-label">IPHONE 17 PRO MAX</span>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="story-eyebrow">KIẾN TRÚC TITANIUM CẤP ĐỘ 5</div>
+        <h2 class="story-title">
+          CHÚNG TÔI KHÔNG<br/>
+          THIẾT KẾ THIẾT BỊ.<br/>
+          CHÚNG TÔI <em>RÈN</em><br/>
+          TÁC PHẨM.
+        </h2>
+        <p class="story-text">
+          Với khung viền Forged Titanium tinh luyện qua nhiệt độ cao
+          và hệ thống camera điện ảnh thế hệ mới, iPhone 17 Pro Max
+          là biểu tượng cho những ai dẫn đầu và tôn sùng sự hoàn mỹ trong từng chi tiết.
+        </p>
+        <a asp-controller="Product" asp-action="Detail" asp-route-id="iphone-17-pro-max" class="btn-story-cta">
+          KHÁM PHÁ CÂU CHUYỆN
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
 
-@* 1. APPLE IPHONE SECTION *@
+@* ══════════════════════════════════════════════════════════════════
+   SECTION 3 — THE PURENESS OF AIR · iPhone Air
+   Editorial story: image + text (reversed layout)
+   ══════════════════════════════════════════════════════════════════ *@
+<section class="story-section light">
+  <div class="container">
+    <div class="row align-items-center g-5 flex-lg-row-reverse">
+      <div class="col-lg-7">
+        <div class="story-media-wrap">
+          <video muted playsinline data-play-once="true">
+            <source src="/images/ip_air_details/Apple-iPhone-Air-Ceramic-Shield-2-250909.mp4" type="video/mp4"/>
+          </video>
+          <span class="media-label">CERAMIC SHIELD 2</span>
+        </div>
+      </div>
+      <div class="col-lg-5 pe-lg-5">
+        <div class="story-eyebrow">SỰ TINH GIẢN TỐI THƯỢNG</div>
+        <h2 class="story-title">
+          QUIET LUXURY.<br/>
+          MỎNG TỰA<br/>
+          CÁNH BƯỚM.
+        </h2>
+        <p class="story-text">
+          Sự sang trọng thực sự bắt nguồn từ những gì bạn không thể nhìn thấy.
+          Bằng cách lược bỏ mọi chi tiết thừa thãi và tối ưu hóa độ dày chỉ tính bằng milimet,
+          iPhone Air mang đến cảm giác cầm nắm thanh thoát chưa từng có.
+        </p>
+        <a asp-controller="Product" asp-action="Detail" asp-route-id="iphone-air" class="btn-story-cta">
+          KHÁM PHÁ CÂU CHUYỆN
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider"/>
+
+@* ══════════════════════════════════════════════════════════════════
+   SECTION 4 — CURATED COLLECTION: APPLE iPHONE
+   Art Gallery Style
+   ══════════════════════════════════════════════════════════════════ *@
 @if (iphones.Any())
 {
-  <section class="py-5" style="background: var(--ivory-pure);">
+  <section class="story-section warm" style="padding-top: 5rem; padding-bottom: 5rem;">
     <div class="container">
-      
-      @* Category Promo Banner *@
-      <div class="category-promo-banner apple-promo mb-4">
-        <div class="promo-content">
-          <span class="promo-eyebrow">APPLE FLAGSHIP</span>
-          <h3 class="promo-title">iPhone 16 Pro Max</h3>
-          <p class="promo-desc">Chế tác từ Titanium thế hệ mới. Apple Intelligence nâng tầm cuộc sống.</p>
-          <a asp-controller="Product" asp-action="Index" asp-route-Brand="Apple" class="btn-promo-action">Khám Phá Dòng Máy</a>
-        </div>
-      </div>
-
-      @* Category Title *@
-      <div class="d-flex justify-content-between align-items-end mb-3 mt-5">
-        <div>
-          <h2 class="category-heading-title">IPHONE</h2>
-          <div class="category-subheading">Sản phẩm Apple chính hãng mới nhất</div>
-        </div>
-        <a asp-controller="Product" asp-action="Index" asp-route-Brand="Apple" class="view-all-link">
-          Xem tất cả iPhone
-        </a>
-      </div>
-
-      @* Horizontal Slider Container *@
-      <div class="slider-wrapper">
-        <button class="slider-nav-btn prev-btn" onclick="slideContainer('iphone-slider', -1)" aria-label="Slide left">
-          <i class="fas fa-chevron-left"></i>
-        </button>
-        <div class="luxury-slider-container" id="iphone-slider">
-          <div class="slider-row">
-            @foreach (var p in iphones)
-            {
-              <div class="slider-item">
-                @await Html.PartialAsync("_ProductCard", p)
-              </div>
-            }
-          </div>
-        </div>
-        <button class="slider-nav-btn next-btn" onclick="slideContainer('iphone-slider', 1)" aria-label="Slide right">
-          <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
-
-    </div>
-  </section>
-}
-
-@* 2. SAMSUNG GALAXY SECTION *@
-@if (samsungs.Any())
-{
-  <section class="py-5" style="background: var(--ivory-warm); border-top: 1px solid rgba(194,178,128,0.1);">
-    <div class="container">
-      
-      @* Category Promo Banner *@
-      <div class="category-promo-banner samsung-promo mb-4">
-        <div class="promo-content">
-          <span class="promo-eyebrow">SAMSUNG FLAGSHIP</span>
-          <h3 class="promo-title">Galaxy S25 Ultra</h3>
-          <p class="promo-desc">Hiệu năng tối thượng cùng Snapdragon 8 Elite. Tích hợp bút S Pen quyền năng.</p>
-          <a asp-controller="Product" asp-action="Index" asp-route-Brand="Samsung" class="btn-promo-action">Khám Phá Dòng Máy</a>
-        </div>
-      </div>
-
-      @* Category Title *@
-      <div class="d-flex justify-content-between align-items-end mb-3 mt-5">
-        <div>
-          <h2 class="category-heading-title">SAMSUNG GALAXY</h2>
-          <div class="category-subheading">Đỉnh cao công nghệ và sáng tạo từ Samsung</div>
-        </div>
-        <a asp-controller="Product" asp-action="Index" asp-route-Brand="Samsung" class="view-all-link">
-          Xem tất cả Samsung
-        </a>
-      </div>
-
-      @* Horizontal Slider Container *@
-      <div class="slider-wrapper">
-        <button class="slider-nav-btn prev-btn" onclick="slideContainer('samsung-slider', -1)" aria-label="Slide left">
-          <i class="fas fa-chevron-left"></i>
-        </button>
-        <div class="luxury-slider-container" id="samsung-slider">
-          <div class="slider-row">
-            @foreach (var p in samsungs)
-            {
-              <div class="slider-item">
-                @await Html.PartialAsync("_ProductCard", p)
-              </div>
-            }
-          </div>
-        </div>
-        <button class="slider-nav-btn next-btn" onclick="slideContainer('samsung-slider', 1)" aria-label="Slide right">
-          <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
-
-    </div>
-  </section>
-}
-
-@* ── FEATURED PRODUCTS (ART GALLERY GRID) ── *@
-@if (featured.Any())
-{
-  <section class="py-5" style="background: var(--ivory-pure);">
-    <div class="container">
-      <div class="d-flex justify-content-between align-items-center mb-5 border-bottom pb-3">
-        <div>
-          <h2 class="category-heading-title">SẢN PHẨM TIÊU BIỂU</h2>
-          <div class="category-subheading">Tuyển chọn những thiết kế nổi bật được yêu thích nhất</div>
-        </div>
-        <a asp-controller="Product" asp-action="Index" class="view-all-link">
-          Xem tất cả sản phẩm
-        </a>
+      <div class="gallery-section-header">
+        <div class="section-tag">BỘ SƯU TẬP TUYỂN CHỌN</div>
+        <h2>APPLE iPHONE</h2>
+        <p>
+          Tuyển tập những tuyệt tác di động từ Apple — nơi hội tụ giữa công nghệ tiên phong
+          và ngôn ngữ thiết kế tối giản đỉnh cao.
+        </p>
       </div>
       <div class="row g-4 justify-content-center">
-        @foreach (var p in featured)
+        @foreach (var p in iphones.Take(4))
         {
-          <div class="col-12 col-md-6 col-lg-4">
+          <div class="col-6 col-md-4 col-lg-3">
             @await Html.PartialAsync("_ProductCard", p)
           </div>
         }
       </div>
+      <div class="text-center mt-4">
+        <a asp-controller="Product" asp-action="Index" asp-route-Brand="Apple" class="btn-story-cta">
+          TẤT CẢ IPHONE →
+        </a>
+      </div>
     </div>
   </section>
 }
 
-@* ── MINIMAL AI CONCIERGE BANNER ── *@
-<section class="py-5" style="background: var(--navy-deep); position:relative; overflow:hidden;">
-  <div class="hero-ambient-glow" style="opacity: 0.15;"></div>
-  <div class="container">
-    <div class="ai-concierge-lounge-clean p-5 text-center">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <div class="ai-lounge-badge mb-3">AI CONCIERGE</div>
-          <h3 class="mb-3 text-white fw-light" style="letter-spacing: 0.05em; font-family: 'Cinzel', serif;">TRÌNH TƯ VẤN THÔNG MINH</h3>
-          <p class="text-white opacity-75 mb-4" style="font-size: 1.05rem; line-height: 1.6;">
-            Hãy chia sẻ nhu cầu, ngân sách hoặc sở thích sử dụng của bạn. Trợ lý AI cao cấp của chúng tôi sẽ đề xuất thiết bị tối ưu và phù hợp nhất.
-          </p>
-          <div class="ai-chips d-flex justify-content-center flex-wrap gap-2 mb-4">
-            <span class="ai-chip-clean" onclick="openChatWithText('Tìm máy chơi game mượt mà dưới 15 triệu')">Cấu hình chơi game</span>
-            <span class="ai-chip-clean" onclick="openChatWithText('Gợi ý điện thoại chụp ảnh đẹp nhất hiện nay')">Chụp ảnh chuyên nghiệp</span>
-            <span class="ai-chip-clean" onclick="openChatWithText('Tư vấn dòng máy cao cấp tầm giá 20-30 triệu')">Phân khúc cao cấp</span>
-            <span class="ai-chip-clean" onclick="openChatWithText('So sánh sự khác nhau giữa iOS và Android')">iOS vs Android</span>
+@* ══════════════════════════════════════════════════════════════════
+   SECTION 5 — CONTEMPORARY FOLDING · Samsung Galaxy Z Series
+   Cinematic Video Carousel with Sync Progress Tabs (Quiet Luxury Style)
+   ══════════════════════════════════════════════════════════════════ *@
+<section class="samsung-carousel-section">
+  <div class="samsung-carousel-container">
+    <div class="samsung-slider-track" id="samsungSliderTrack">
+      
+      <!-- Slide 1: Thiết Kế -->
+      <div class="samsung-slide">
+        <video class="samsung-slide-video" muted playsinline data-index="0">
+          <source src="/images/banner/galaxy-z-fold6-features-highlights-design.webm" type="video/webm"/>
+        </video>
+        <div class="samsung-slide-overlay">
+          <div class="samsung-slide-content">
+            <div class="samsung-slide-eyebrow">GALAXY Z FOLD 6 · KIỆT TÁC THIẾT KẾ</div>
+            <h2 class="samsung-slide-title">TUYỆT TÁC ĐỐI XỨNG.<br/>MỎNG NHẸ <em>HOÀN MỸ.</em></h2>
+            <p class="samsung-slide-text">
+              Thiết kế đối xứng hoàn hảo với khung viền Armor Aluminum tinh luyện thế hệ mới. 
+              Mỏng hơn, nhẹ hơn và nằm gọn ghẽ trong lòng bàn tay đầy tinh tế.
+            </p>
+            <a asp-controller="Product" asp-action="Detail" asp-route-id="samsung-galaxy-z-fold6" class="btn-hero-glass primary">KHÁM PHÁ CÂU CHUYỆN</a>
           </div>
-          <button class="btn-luxury-gold-clean px-5 py-3" onclick="toggleChat()">
-            BẮT ĐẦU TRÒ CHUYỆN
-          </button>
+        </div>
+      </div>
+
+      <!-- Slide 2: Note Assist -->
+      <div class="samsung-slide">
+        <video class="samsung-slide-video" muted playsinline data-index="1">
+          <source src="/images/banner/galaxy-z-fold6-features-highlights-note-assist.webm" type="video/webm"/>
+        </video>
+        <div class="samsung-slide-overlay">
+          <div class="samsung-slide-content">
+            <div class="samsung-slide-eyebrow">GALAXY AI · TRỢ LÝ NOTE QUYỀN NĂNG</div>
+            <h2 class="samsung-slide-title">TỐI ƯU TRÁT VĂN.<br/>TỰ ĐỘNG KHAI <em>SÁNG.</em></h2>
+            <p class="samsung-slide-text">
+              Ghi chú nhanh chóng với bút S Pen và để Galaxy AI lo phần còn lại. 
+              Tự động tóm tắt văn bản, chuyển ngữ và dàn trang ghi chú chỉ trong một cú chạm.
+            </p>
+            <a asp-controller="Product" asp-action="Detail" asp-route-id="samsung-galaxy-z-fold6" class="btn-hero-glass primary">KHÁM PHÁ CÂU CHUYỆN</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3: Hiệu Năng -->
+      <div class="samsung-slide">
+        <video class="samsung-slide-video" muted playsinline data-index="2">
+          <source src="/images/banner/galaxy-z-fold6-features-highlights-performance-a.webm" type="video/webm"/>
+        </video>
+        <div class="samsung-slide-overlay">
+          <div class="samsung-slide-content">
+            <div class="samsung-slide-eyebrow">SNAPDRAGON 8 GEN 3 · CHIẾN GAME ĐỈNH CAO</div>
+            <h2 class="samsung-slide-title">HIỆU NĂNG BẤT BẠI.<br/>BỨT PHÁ GIỚI <em>HẠN.</em></h2>
+            <p class="samsung-slide-text">
+              Tận hưởng đồ họa mượt mà nhờ chip Snapdragon 8 Gen 3 for Galaxy và buồng hơi làm mát lớn hơn 1.6 lần. 
+              Chinh phục mọi tựa game đỉnh cao mà không lo gián đoạn.
+            </p>
+            <a asp-controller="Product" asp-action="Detail" asp-route-id="samsung-galaxy-z-fold6" class="btn-hero-glass primary">KHÁM PHÁ CÂU CHUYỆN</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4: Màn Hình Gập -->
+      <div class="samsung-slide">
+        <video class="samsung-slide-video" muted playsinline data-index="3">
+          <source src="/images/banner/galaxy-z-fold6-features-form-factor.webm" type="video/webm"/>
+        </video>
+        <div class="samsung-slide-overlay">
+          <div class="samsung-slide-content">
+            <div class="samsung-slide-eyebrow">BẢN LỀ FLEX · NẾP GẤP TÀNG HÌNH</div>
+            <h2 class="samsung-slide-title">MÀN HÌNH ĐA CHIỀU.<br/>NẾP GẤP VÔ <em>HÌNH.</em></h2>
+            <p class="samsung-slide-text">
+              Bản lề Flex kép thế hệ mới giảm thiểu tối đa lực tác động lực gập, nếp gấp mờ nhạt 
+              mang lại trải nghiệm màn hình phẳng liền mạch hoàn mỹ chưa từng có.
+            </p>
+            <a asp-controller="Product" asp-action="Detail" asp-route-id="samsung-galaxy-z-fold6" class="btn-hero-glass primary">KHÁM PHÁ CÂU CHUYỆN</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 5: FlexCam -->
+      <div class="samsung-slide">
+        <video class="samsung-slide-video" muted playsinline data-index="4">
+          <source src="/images/banner/galaxy-z-fold6-features-highlights-cts.webm" type="video/webm"/>
+        </video>
+        <div class="samsung-slide-overlay">
+          <div class="samsung-slide-content">
+            <div class="samsung-slide-eyebrow">FLEXCAM AUTO ZOOM · CHỤP HÌNH KHÔNG CHẠM</div>
+            <h2 class="samsung-slide-title">GÓC CHỤP LINH HOẠT.<br/>TỰ ĐỘNG THU <em>PHÓNG.</em></h2>
+            <p class="samsung-slide-text">
+              Chụp ảnh rảnh tay với FlexCam tự động nhận diện chủ thể và căn chỉnh khung hình 
+              tối ưu nhất thông qua Galaxy AI. Bức ảnh hoàn hảo luôn trong tầm tay.
+            </p>
+            <a asp-controller="Product" asp-action="Detail" asp-route-id="samsung-galaxy-z-fold6" class="btn-hero-glass primary">KHÁM PHÁ CÂU CHUYỆN</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Navigation Tabs with progress -->
+    <div class="samsung-carousel-nav" id="samsungCarouselNav">
+      <button class="samsung-nav-tab active" data-slide="0">
+        <span class="samsung-nav-tab-label">TÍNH NĂNG 01</span>
+        <span class="samsung-nav-tab-title">Thiết Kế Mỏng Nhẹ</span>
+        <div class="tab-progress-track"><div class="tab-progress-fill"></div></div>
+      </button>
+      <button class="samsung-nav-tab" data-slide="1">
+        <span class="samsung-nav-tab-label">TÍNH NĂNG 02</span>
+        <span class="samsung-nav-tab-title">Trợ Lý Note AI</span>
+        <div class="tab-progress-track"><div class="tab-progress-fill"></div></div>
+      </button>
+      <button class="samsung-nav-tab" data-slide="2">
+        <span class="samsung-nav-tab-label">TÍNH NĂNG 03</span>
+        <span class="samsung-nav-tab-title">Hiệu Năng Game</span>
+        <div class="tab-progress-track"><div class="tab-progress-fill"></div></div>
+      </button>
+      <button class="samsung-nav-tab" data-slide="3">
+        <span class="samsung-nav-tab-label">TÍNH NĂNG 04</span>
+        <span class="samsung-nav-tab-title">Màn Hình Gập Flex</span>
+        <div class="tab-progress-track"><div class="tab-progress-fill"></div></div>
+      </button>
+      <button class="samsung-nav-tab" data-slide="4">
+        <span class="samsung-nav-tab-label">TÍNH NĂNG 05</span>
+        <span class="samsung-nav-tab-title">FlexCam Tự Động</span>
+        <div class="tab-progress-track"><div class="tab-progress-fill"></div></div>
+      </button>
+    </div>
+
+  </div>
+</section>
+
+@* ══════════════════════════════════════════════════════════════════
+   SECTION 6 — CURATED COLLECTION: SAMSUNG GALAXY
+   Art Gallery Style
+   ══════════════════════════════════════════════════════════════════ *@
+@if (samsungs.Any())
+{
+  <section class="story-section light" style="padding-top: 5rem; padding-bottom: 5rem;">
+    <div class="container">
+      <div class="gallery-section-header">
+        <div class="section-tag">HIỆU NĂNG TỐI THƯỢNG</div>
+        <h2>SAMSUNG GALAXY</h2>
+        <p>
+          Đỉnh cao công nghệ và sáng tạo từ Samsung — từ hệ sinh thái Galaxy AI đa nhiệm
+          đến bút S Pen thông minh và camera 200MP tiên phong.
+        </p>
+      </div>
+      <div class="row g-4 justify-content-center">
+        @foreach (var p in samsungs.Take(4))
+        {
+          <div class="col-6 col-md-4 col-lg-3">
+            @await Html.PartialAsync("_ProductCard", p)
+          </div>
+        }
+      </div>
+      <div class="text-center mt-4">
+        <a asp-controller="Product" asp-action="Index" asp-route-Brand="Samsung" class="btn-story-cta">
+          TẤT CẢ GALAXY →
+        </a>
+      </div>
+    </div>
+  </section>
+}
+
+<hr class="section-divider"/>
+
+@* ══════════════════════════════════════════════════════════════════
+   SECTION 7 — FEATURED PRODUCTS · "TUYỆT TÁC TUYỂN CHỌN"
+   ══════════════════════════════════════════════════════════════════ *@
+@if (featured.Any())
+{
+  <section class="story-section warm" style="padding-top: 5rem; padding-bottom: 5rem;">
+    <div class="container">
+      <div class="gallery-section-header">
+        <div class="section-tag">TUYỆT TÁC TUYỂN CHỌN</div>
+        <h2>SẢN PHẨM TIÊU BIỂU</h2>
+        <p>Tuyển chọn những thiết kế nổi bật được yêu thích nhất tại HutechStore.</p>
+      </div>
+      <div class="row g-4 justify-content-center">
+        @foreach (var p in featured.Take(8))
+        {
+          <div class="col-6 col-md-4 col-lg-3">
+            @await Html.PartialAsync("_ProductCard", p)
+          </div>
+        }
+      </div>
+      <div class="text-center mt-4">
+        <a asp-controller="Product" asp-action="Index" class="btn-story-cta">
+          TẤT CẢ SẢN PHẨM →
+        </a>
+      </div>
+    </div>
+  </section>
+}
+
+@* ══════════════════════════════════════════════════════════════════
+   SECTION 8 — AI CONCIERGE · Tư Vấn Thông Minh
+   ══════════════════════════════════════════════════════════════════ *@
+<section class="ai-concierge-section">
+  <div class="ambient-glow"></div>
+  <div class="container position-relative" style="z-index:2;">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8">
+        <div class="ai-lounge-badge">AI CONCIERGE</div>
+        <h3 class="mb-3 text-white fw-light" style="letter-spacing: 0.08em; font-family: var(--font-serif);">
+          TRÌNH TƯ VẤN THÔNG MINH
+        </h3>
+        <p class="text-white opacity-75 mb-4" style="font-size: 1rem; line-height: 1.7; font-weight: 300;">
+          Hãy chia sẻ nhu cầu, ngân sách hoặc sở thích sử dụng của bạn.
+          Trợ lý AI cao cấp của chúng tôi sẽ đề xuất thiết bị tối ưu và phù hợp nhất.
+        </p>
+        <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
+          <span class="ai-chip-clean" onclick="openChatWithText('Tìm máy chơi game mượt mà dưới 15 triệu')">Cấu hình chơi game</span>
+          <span class="ai-chip-clean" onclick="openChatWithText('Gợi ý điện thoại chụp ảnh đẹp nhất hiện nay')">Chụp ảnh chuyên nghiệp</span>
+          <span class="ai-chip-clean" onclick="openChatWithText('Tư vấn dòng máy cao cấp tầm giá 20-30 triệu')">Phân khúc cao cấp</span>
+          <span class="ai-chip-clean" onclick="openChatWithText('So sánh iPhone 17 Pro Max và Galaxy S25 Ultra')">So sánh Flagship</span>
+        </div>
+        <button class="btn-luxury-gold-clean" onclick="toggleChat()">
+          BẮT ĐẦU TRÒ CHUYỆN
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+@* ── SECTION: LUCKY WHEEL EVENT (QUIET LUXURY REDESIGN) ── *@
+<section class="minigame-banner-section py-5" style="background: var(--ivory-warm); border-top: 1px solid rgba(194, 178, 128, 0.15); border-bottom: 1px solid rgba(194, 178, 128, 0.15);">
+  <div class="container py-4">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <div class="p-3" style="border-left: 2px solid var(--camel);">
+          <span class="editorial-tag" style="letter-spacing: 0.15em;">ĐẶC QUYỀN MUA SẮM</span>
+          <h2 class="font-serif fw-light text-navy mt-2 mb-3" style="font-size: 2.2rem; letter-spacing: 0.02em; line-height: 1.3;">
+            VÒNG XOAY MAY MẮN &<br/>
+            KHẢO SÁT Ý KIẾN KHÁCH HÀNG
+          </h2>
+          <p class="text-muted mb-4" style="font-size: 0.95rem; line-height: 1.7; font-weight: 300;">
+            Dành 1 phút chia sẻ cảm nhận của bạn về HutechStore để nhận ngay 1 lượt quay 
+            may mắn với cơ hội trúng các mã giảm giá đặc quyền lên tới <strong>1,000,000₫</strong> 
+            và hàng ngàn phần quà giá trị khác.
+          </p>
+          <a asp-controller="Minigame" asp-action="Index" class="btn btn-primary px-4 py-2" style="border-radius: 30px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">
+            THAM GIA VÒNG XOAY
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center">
+        <div class="position-relative d-inline-block p-4">
+          @* Minimalist abstract wheel representation using CSS *@
+          <div class="wheel-promo-art" style="width: 280px; height: 280px; border-radius: 50%; border: 3px solid var(--camel); position: relative; margin: 0 auto; background: var(--ivory-pure); box-shadow: 0 12px 32px rgba(15, 42, 68, 0.05); display: flex; align-items: center; justify-content: center; animation: spinSlow 30s linear infinite;">
+            <div style="position: absolute; width: 100%; height: 1px; background: rgba(194, 178, 128, 0.25); transform: rotate(0deg);"></div>
+            <div style="position: absolute; width: 100%; height: 1px; background: rgba(194, 178, 128, 0.25); transform: rotate(45deg);"></div>
+            <div style="position: absolute; width: 100%; height: 1px; background: rgba(194, 178, 128, 0.25); transform: rotate(90deg);"></div>
+            <div style="position: absolute; width: 100%; height: 1px; background: rgba(194, 178, 128, 0.25); transform: rotate(135deg);"></div>
+            <div style="width: 240px; height: 240px; border-radius: 50%; border: 1px solid rgba(194, 178, 128, 0.15); background: var(--ivory-warm); display: flex; align-items: center; justify-content: center;">
+              <div style="width: 180px; height: 180px; border-radius: 50%; border: 2px dashed var(--camel); background: var(--ivory-pure); display: flex; align-items: center; justify-content: center;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--navy); border: 2px solid var(--camel);"></div>
+              </div>
+            </div>
+          </div>
+          @* Pointer *@
+          <div style="position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-top: 24px solid var(--camel); z-index: 5;"></div>
         </div>
       </div>
     </div>
@@ -196,18 +417,6 @@
 
 @section Scripts {
 <script>
-  // Slide horizontal container
-  function slideContainer(containerId, direction) {
-    const container = document.getElementById(containerId);
-    if (container) {
-      const scrollAmount = container.clientWidth * 0.75;
-      container.scrollBy({
-        left: direction * scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  }
-
   function openChatWithText(text) {
     if (!chatOpen) toggleChat();
     setTimeout(() => {
@@ -218,5 +427,165 @@
       }
     }, 300);
   }
+
+  // ══════════════════════════════════════════════════════════════
+  // INTERSECTION OBSERVER — Play Once on Scroll for Story Videos
+  // ══════════════════════════════════════════════════════════════
+  document.addEventListener('DOMContentLoaded', () => {
+    // Select all videos with data-play-once attribute (story & hero videos)
+    const playOnceVideos = document.querySelectorAll('video[data-play-once="true"]');
+    
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const video = entry.target;
+        
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
+          // Only play if not already finished
+          if (!video.dataset.finished) {
+            video.play().catch(() => {});
+          }
+        } else {
+          // Pause when scrolled out of view (but don't mark as finished)
+          if (!video.paused && !video.ended) {
+            video.pause();
+          }
+        }
+      });
+    }, { threshold: 0.25 });
+
+    playOnceVideos.forEach(video => {
+      // When video ends, mark it as finished so it never replays
+      video.addEventListener('ended', () => {
+        video.dataset.finished = 'true';
+      });
+      
+      videoObserver.observe(video);
+    });
+
+    // ══════════════════════════════════════════════════════════════
+    // SAMSUNG VIDEO CAROUSEL — Plays Once Per Slide, Stops at Slide 5
+    // ══════════════════════════════════════════════════════════════
+    const sliderTrack = document.getElementById('samsungSliderTrack');
+    const slides = document.querySelectorAll('.samsung-slide');
+    const tabs = document.querySelectorAll('.samsung-nav-tab');
+    const videos = document.querySelectorAll('.samsung-slide-video');
+    
+    let currentSlide = 0;
+    let animationFrameId = null;
+    let carouselFinished = false;
+
+    // Samsung Carousel IntersectionObserver — only start first video when carousel is visible
+    const carouselSection = document.querySelector('.samsung-carousel-section');
+    let carouselStarted = false;
+
+    const carouselObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !carouselStarted) {
+          carouselStarted = true;
+          playVideo(0);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    if (carouselSection) {
+      carouselObserver.observe(carouselSection);
+    }
+
+    function initSlider() {
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => {
+          if (carouselFinished && index === slides.length - 1) return;
+          carouselFinished = false;
+          goToSlide(index);
+        });
+      });
+    }
+
+    function playVideo(index) {
+      // Pause all other videos
+      videos.forEach((vid, i) => {
+        if (i !== index) {
+          vid.pause();
+          vid.currentTime = 0;
+        }
+      });
+
+      const activeVid = videos[index];
+      if (activeVid) {
+        activeVid.currentTime = 0;
+        activeVid.muted = true;
+        const playPromise = activeVid.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.log("Autoplay block: ", error);
+          });
+        }
+
+        // Track progress
+        startProgressTracking(activeVid, index);
+      }
+    }
+
+    function startProgressTracking(video, index) {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+      // Reset all fills
+      document.querySelectorAll('.tab-progress-fill').forEach(fill => {
+        fill.style.width = '0%';
+      });
+
+      const activeFill = tabs[index].querySelector('.tab-progress-fill');
+
+      function updateProgress() {
+        if (video.duration) {
+          const pct = (video.currentTime / video.duration) * 100;
+          if (activeFill) {
+            activeFill.style.width = `${pct}%`;
+          }
+        }
+        
+        if (!video.paused && !video.ended) {
+          animationFrameId = requestAnimationFrame(updateProgress);
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(updateProgress);
+
+      // Transition to next slide when current video ends
+      video.onended = () => {
+        if (activeFill) activeFill.style.width = '100%';
+        
+        const nextIndex = index + 1;
+        
+        // If this is the LAST slide (index 4), STOP — do not loop back
+        if (nextIndex >= slides.length) {
+          carouselFinished = true;
+          if (animationFrameId) cancelAnimationFrame(animationFrameId);
+          return; // Stop carousel completely
+        }
+        
+        // Otherwise, transition to next slide after a small delay
+        setTimeout(() => {
+          goToSlide(nextIndex);
+        }, 400);
+      };
+    }
+
+    function goToSlide(index) {
+      if (index === currentSlide) return;
+
+      tabs.forEach(t => t.classList.remove('active'));
+      tabs[index].classList.add('active');
+
+      if (sliderTrack) {
+        sliderTrack.style.transform = `translate3d(-${index * 100}%, 0, 0)`;
+      }
+
+      currentSlide = index;
+      playVideo(index);
+    }
+
+    initSlider();
+  });
 </script>
 }

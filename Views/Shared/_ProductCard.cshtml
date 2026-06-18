@@ -1,123 +1,38 @@
 @* ════════════════════════════════════════════════════════════════
-   _ProductCard.cshtml — Card sản phẩm dùng chung
+   _ProductCard.cshtml — Minimalist Luxury Product Card
    ════════════════════════════════════════════════════════════════ *@
 
 @model HutechStore.Models.Product
 
 @{
-  var rating    = Model.Reviews.Any() ? Model.Reviews.Average(r => r.Rating) : 0;
-  var ratingInt = (int)Math.Round(rating);
   var lowestPrice = Model.ProductVariants.Any(v => v.Status == 1)
       ? Model.ProductVariants.Where(v => v.Status == 1).Min(v => v.Price)
       : Model.Price;
   var hasVariants = Model.ProductVariants.Any(v => v.Status == 1);
-  var inStock     = Model.Stock > 0 || Model.ProductVariants.Any(v => v.Status == 1 && v.Stock > 0);
   var slug        = string.IsNullOrEmpty(Model.Slug) ? Model.Id.ToString() : Model.Slug;
-
-  // Lấy WishlistIds từ ViewBag
-  var wishlistIds = ViewBag.WishlistIds as HashSet<int> ?? new HashSet<int>();
-  var inWishlist  = wishlistIds.Contains(Model.Id);
 }
 
-<div class="product-card h-100">
-  <a href="/Product/Detail/@slug" class="product-card-link" tabindex="-1">
-    
-    @* Nút tim yêu thích *@
-    <button class="product-card-wishlist @(inWishlist ? "active" : "")"
-            onclick="toggleWishlist(@Model.Id, this); event.preventDefault(); event.stopPropagation();"
-            title="@(inWishlist ? "Bỏ yêu thích" : "Thêm yêu thích")">
-      <i class="@(inWishlist ? "fas" : "far") fa-heart"></i>
-    </button>
-
-    @* Khung ảnh sản phẩm *@
-    <div class="product-img-wrap">
-      @if (Model.Featured == 1)
-      {
-        <span class="badge-featured-clean">NỔI BẬT</span>
-      }
-      @if (!inStock)
-      {
-        <div class="out-of-stock-overlay-clean">HẾT HÀNG</div>
-      }
-      <img src="@(string.IsNullOrEmpty(Model.Image) ? "/images/no-image.png" : Model.Image)"
-           alt="@Model.Name"
-           class="product-img"
-           loading="lazy"
-           onerror="this.onerror=null;this.src='/images/no-image.png'"/>
-    </div>
-  </a>
-
-  @* ── CARD BODY ── *@
-  <div class="product-card-body">
-
-    @* Brand name *@
-    <div class="product-brand mb-1">
-      @if (Model.Brand == "Apple")
-      {
-        <span class="brand-text">Apple</span>
-      }
-      else
-      {
-        <span class="brand-text">Samsung</span>
-      }
-    </div>
-
-    @* Tên sản phẩm *@
-    <h6 class="product-name">
-      <a href="/Product/Detail/@slug">@Model.Name</a>
-    </h6>
-
-    @* Thông số rút gọn *@
-    @if (Model.PhoneSpecs != null)
-    {
-      <div class="product-specs-clean">
-        <span class="spec-item">@Model.PhoneSpecs.Chipset</span>
-        <span class="spec-divider">·</span>
-        <span class="spec-item">@Model.PhoneSpecs.StorageGb GB</span>
-      </div>
-    }
-
-    @* Đánh giá *@
-    @if (Model.Reviews.Any())
-    {
-      <div class="product-rating mt-2">
-        @for (int i = 1; i <= 5; i++)
-        {
-          <i class="@(i <= ratingInt ? "fas" : "far") fa-star text-warning small"></i>
-        }
-        <span class="rating-count text-muted small ms-1">(@Model.Reviews.Count)</span>
-      </div>
-    }
-
-    @* Giá bán *@
-    <div class="product-price-wrap mt-2">
-      @if (hasVariants)
-      {
-        <span class="price-from-text">Từ </span>
-      }
-      <span class="product-price">@lowestPrice.ToString("N0")₫</span>
-    </div>
-
+<a href="/Product/Detail/@slug" class="minimal-card">
+  @* Image Frame *@
+  <div class="product-img-wrap">
+    <img src="@(string.IsNullOrEmpty(Model.Image) ? "/images/no-image.png" : Model.Image)"
+         alt="@Model.Name"
+         class="product-img"
+         loading="lazy"
+         onerror="this.onerror=null;this.src='/images/no-image.png'"/>
   </div>
 
-  @* ── CARD FOOTER ── *@
-  <div class="product-card-footer-clean">
-    <a href="/Product/Detail/@slug" class="btn btn-detail-clean">
-      Chi tiết
-    </a>
-    @if (inStock)
+  @* Product Name *@
+  <h6 class="product-name">
+    @Model.Name
+  </h6>
+
+  @* Price Display *@
+  <div class="product-price-wrap">
+    @if (hasVariants)
     {
-      <button class="btn btn-add-cart-clean"
-              onclick="addToCart(@Model.Id, event)"
-              data-product-id="@Model.Id">
-        Mua ngay
-      </button>
+      <span class="price-from">Từ </span>
     }
-    else
-    {
-      <button class="btn btn-add-cart-clean disabled" disabled>
-        Hết hàng
-      </button>
-    }
+    <span class="product-price">@lowestPrice.ToString("N0")₫</span>
   </div>
-</div>
+</a>

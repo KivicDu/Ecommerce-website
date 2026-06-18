@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#0F2A44"/>
   <title>@ViewData["Title"] - HutechStore</title>
 
-  {{!-- Premium fonts: Inter (weight 300-900) --}}
+  @* Premium fonts: Cormorant Garamond & Inter *@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 
   <link rel="stylesheet" href="~/css/bootstrap.min.css"/>
   <link rel="stylesheet" href="~/css/fontawesome.min.css"/>
@@ -53,6 +53,9 @@
 
 @* ── AI CHAT WIDGET ───────────────────────────────────────────── *@
 @await Html.PartialAsync("_ChatWidget")
+
+@* ── LUCKY WHEEL WIDGET ────────────────────────────────────────── *@
+@await Html.PartialAsync("_LuckyWheelWidget")
 
 <script src="~/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js"></script>

@@ -175,6 +175,68 @@ public class ProductController : Controller
         return RedirectToAction("Detail", new { id = slug });
     }
 
+    // GET /Product/Compare?ids=1,2,3
+    public async Task<IActionResult> Compare(string ids)
+    {
+        if (string.IsNullOrEmpty(ids))
+        {
+            TempData["Error"] = "Vui lòng chọn sản phẩm để so sánh";
+            return RedirectToAction("Index");
+        }
+
+        var idList = ids.Split(',')
+                        .Select(x => int.TryParse(x.Trim(), out int val) ? val : 0)
+                        .Where(val => val > 0)
+                        .Distinct()
+                        .Take(3)
+                        .ToList();
+
+        if (!idList.Any())
+        {
+            TempData["Error"] = "Sản phẩm so sánh không hợp lệ";
+            return RedirectToAction("Index");
+        }
+
+        var products = await _db.Products
+            .Include(p => p.Category)
+            .Include(p => p.PhoneSpecs)
+            .Include(p => p.Reviews)
+            .Where(p => idList.Contains(p.Id) && p.Status == 1)
+            .ToListAsync();
+
+        // Sắp xếp lại theo thứ tự ids truyền vào ban đầu
+        var orderedProducts = idList
+            .Select(id => products.FirstOrDefault(p => p.Id == id))
+            .Where(p => p != null)
+            .Cast<Product>()
+            .ToList();
+
+        if (!orderedProducts.Any())
+        {
+            TempData["Error"] = "Không tìm thấy sản phẩm cần so sánh";
+            return RedirectToAction("Index");
+        }
+
+        return View(orderedProducts);
+    }
+
+    // GET /Product/GetCompareList?currentProductId=5
+    [HttpGet]
+    public async Task<IActionResult> GetCompareList(int currentProductId)
+    {
+        var list = await _db.Products
+            .Where(p => p.Status == 1 && p.Id != currentProductId)
+            .Select(p => new {
+                id = p.Id,
+                name = p.Name,
+                image = p.Image ?? "/images/no-image.png",
+                brand = p.Brand
+            })
+            .ToListAsync();
+
+        return Json(list);
+    }
+
     // ── Helper ────────────────────────────────────────────────────────────────
     private IQueryable<Product> GetProductWithIncludes() =>
         _db.Products

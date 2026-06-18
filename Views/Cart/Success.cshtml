@@ -217,10 +217,10 @@
             </div>
             <div class="order-info-row">
               <span>Thanh toán</span>
-              <span>
-                @if (Model.PaymentMethod == "cod") { <text>💵 Thanh toán khi nhận hàng (COD)</text> }
-                else if (Model.PaymentMethod == "vnpay") { <text>🏦 VNPay</text> }
-                else if (Model.PaymentMethod == "momo") { <text>💜 MoMo</text> }
+              <span class="d-flex align-items-center gap-1">
+                @if (Model.PaymentMethod == "cod") { <text><i class="fas fa-money-bill-wave text-success me-1"></i> Thanh toán khi nhận hàng (COD)</text> }
+                else if (Model.PaymentMethod == "vnpay") { <text><img src="https://sandbox.vnpayment.vn/paymentv2/Images/brands/logo-vnpay.svg" alt="VNPay" style="height: 16px; width: auto; object-fit: contain; vertical-align: middle; margin-right: 4px;"/> VNPay</text> }
+                else if (Model.PaymentMethod == "momo") { <text><img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.svg" alt="MoMo" style="height: 16px; width: 16px; border-radius: 3px; object-fit: contain; vertical-align: middle; margin-right: 4px;"/> MoMo</text> }
                 else { @Model.PaymentMethod.ToUpper() }
               </span>
             </div>

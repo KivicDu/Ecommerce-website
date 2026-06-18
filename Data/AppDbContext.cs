@@ -31,6 +31,13 @@ public class AppDbContext : DbContext
     public DbSet<ChatHistory> ChatHistories => Set<ChatHistory>();
     public DbSet<PasswordOtp> PasswordOtps => Set<PasswordOtp>();
 
+    // ── Minigame & Survey ─────────────────────────────────────────────────────
+    public DbSet<SurveyQuestion> SurveyQuestions => Set<SurveyQuestion>();
+    public DbSet<Survey>         Surveys         => Set<Survey>();
+    public DbSet<SurveyResponse> SurveyResponses => Set<SurveyResponse>();
+    public DbSet<LuckyWheelPrize> LuckyWheelPrizes => Set<LuckyWheelPrize>();
+    public DbSet<LuckyWheelPlay> LuckyWheelPlays => Set<LuckyWheelPlay>();
+
     protected override void OnModelCreating(ModelBuilder mb)
     {
         base.OnModelCreating(mb);
@@ -141,5 +148,22 @@ public class AppDbContext : DbContext
 
         // ── PasswordOtp ───────────────────────────────────────────────────────
         mb.Entity<PasswordOtp>().HasIndex(p => p.Email);
+
+        // ── Survey & Minigame ─────────────────────────────────────────────────
+        mb.Entity<Survey>()
+          .HasOne(s => s.User).WithMany()
+          .HasForeignKey(s => s.UserId).OnDelete(DeleteBehavior.SetNull);
+
+        mb.Entity<SurveyResponse>()
+          .HasOne(sr => sr.Survey).WithMany(s => s.Responses)
+          .HasForeignKey(sr => sr.SurveyId).OnDelete(DeleteBehavior.Cascade);
+
+        mb.Entity<SurveyResponse>()
+          .HasOne(sr => sr.Question).WithMany()
+          .HasForeignKey(sr => sr.QuestionId).OnDelete(DeleteBehavior.Cascade);
+
+        mb.Entity<LuckyWheelPlay>()
+          .HasOne(p => p.User).WithMany()
+          .HasForeignKey(p => p.UserId).OnDelete(DeleteBehavior.SetNull);
     }
 }
