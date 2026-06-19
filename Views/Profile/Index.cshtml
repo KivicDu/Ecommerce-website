@@ -74,7 +74,7 @@
                 <label class="form-label fw-semibold">Email</label>
                 <input type="text" class="form-control"
                        value="@Context.Session.GetString("UserEmail")"
-                       readonly style="background:#f8f9fa"/>
+                       readonly style="background:var(--ivory-warm)"/>
                 <div class="small text-muted mt-1">Email không thể thay đổi</div>
               </div>
               <div class="col-md-6">
@@ -131,13 +131,13 @@
 
 @section Styles {
 <style>
-  .profile-sidebar { background:#fff; border-radius:12px; border:1px solid var(--border-color); padding:1.5rem; position:sticky; top:80px; }
-  .profile-avatar { width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid var(--border-color); }
-  .profile-avatar-placeholder { width:80px; height:80px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:800; margin:0 auto; }
+  .profile-sidebar { background: var(--ivory-pure); border-radius:12px; border:1px solid rgba(194, 178, 128, 0.15); padding:1.5rem; position:sticky; top:80px; }
+  .profile-avatar { width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid rgba(194, 178, 128, 0.15); }
+  .profile-avatar-placeholder { width:80px; height:80px; border-radius:50%; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:800; margin:0 auto; }
   .profile-nav { display:flex; flex-direction:column; gap:2px; margin-top:.5rem; }
   .profile-nav-link { padding:.6rem .75rem; border-radius:8px; color:var(--text-main); font-size:.9rem; transition:all .2s; text-decoration:none; display:flex; align-items:center; }
-  .profile-nav-link:hover, .profile-nav-link.active { background:var(--primary-light); color:var(--primary); }
-  .profile-card { background:#fff; border-radius:12px; border:1px solid var(--border-color); padding:1.75rem; }
+  .profile-nav-link:hover, .profile-nav-link.active { background:var(--ivory-warm); color:var(--navy); }
+  .profile-card { background: var(--ivory-pure); border-radius:12px; border:1px solid rgba(194, 178, 128, 0.15); padding:1.75rem; }
 </style>
 }
 

@@ -1,0 +1,386 @@
+@model List<HutechStore.Models.SurveyQuestion>
+@{
+  ViewData["Title"] = "Vòng Xoay May Mắn & Khảo Sát - HUTECHSTORE";
+  var prizes = ViewBag.Prizes as List<HutechStore.Models.LuckyWheelPrize> ?? new List<HutechStore.Models.LuckyWheelPrize>();
+  var played = ViewBag.Played == true;
+}
+
+<div class="container py-5 text-navy">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 text-center mb-5">
+      <span class="editorial-tag">HUTECHSTORE SPECIAL EVENT</span>
+      <h1 class="font-serif fw-bold text-navy mt-2 fs-2">Vòng Xoay May Mắn</h1>
+      <p class="text-muted mx-auto mb-0" style="max-width: 600px;">Hoàn thành khảo sát ngắn 5 câu hỏi để mở khóa Vòng Xoay May Mắn và nhận các phần quà Coupon đặc quyền giới hạn trong 24h.</p>
+    </div>
+  </div>
+
+  @if (played)
+  {
+    <div class="row justify-content-center">
+      <div class="col-md-6 text-center py-5 rounded-4 shadow-sm" style="background: #ffffff; border: 1px solid rgba(194, 178, 128, 0.2);">
+        <div class="mb-4">
+          <i class="fas fa-history fa-4x text-camel"></i>
+        </div>
+        <h4 class="font-serif fw-bold text-navy mb-3">Bạn Đã Quay Hôm Nay Rồi</h4>
+        <p class="text-muted mb-4" style="font-size: 15px;">Chương trình giới hạn tối đa <strong>1 lượt quay mỗi ngày</strong> cho mỗi khách hàng để đảm bảo tính công bằng.</p>
+        <p class="text-camel fw-semibold mb-4">Hãy quay lại vào ngày mai để tiếp tục thử vận may!</p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-navy px-4 py-2" style="border-radius: 30px;">
+          Quay lại trang chủ
+        </a>
+      </div>
+    </div>
+  }
+  else
+  {
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        
+        @* ── PHASE 1: SURVEY FORM ── *@
+        <div id="surveyContainer" class="p-4 p-md-5 rounded-4 shadow-sm" style="background: #ffffff; border: 1px solid rgba(194, 178, 128, 0.15);">
+          <h3 class="font-serif fw-bold text-navy mb-4 text-center border-bottom pb-3">Bước 1: Khảo Sát Khách Hàng</h3>
+          
+          <form id="surveyForm" onsubmit="submitSurvey(event)">
+            @* Age and Gender *@
+            <div class="row g-4 mb-4">
+              <div class="col-md-6">
+                <label for="surveyAge" class="form-label fw-semibold text-navy">Độ tuổi của bạn <span class="text-danger">*</span></label>
+                <input type="number" id="surveyAge" class="form-control" required min="10" max="100" placeholder="Nhập độ tuổi (ví dụ: 25)" style="border-radius: 10px; border: 1px solid rgba(194,178,128,0.3); padding: 10px 15px;">
+              </div>
+              <div class="col-md-6">
+                <label for="surveyGender" class="form-label fw-semibold text-navy">Giới tính <span class="text-danger">*</span></label>
+                <select id="surveyGender" class="form-select" required style="border-radius: 10px; border: 1px solid rgba(194,178,128,0.3); padding: 10px 15px;">
+                  <option value="" disabled selected>Chọn giới tính</option>
+                  <option value="Male">Nam</option>
+                  <option value="Female">Nữ</option>
+                  <option value="Other">Khác</option>
+                </select>
+              </div>
+            </div>
+
+            <hr class="my-4" style="border-color: rgba(194,178,128,0.15);">
+
+            @* Dynamic Questions *@
+            @for (int idx = 0; idx < Model.Count; idx++)
+            {
+              var q = Model[idx];
+              var options = q.Options.Split(',', StringSplitOptions.RemoveEmptyEntries);
+              
+              <div class="survey-q-block mb-4" data-q-id="@q.Id">
+                <h6 class="fw-bold text-navy mb-3">Câu @(idx + 1): @q.QuestionText <span class="text-danger">*</span></h6>
+                
+                <div class="d-flex flex-column gap-2">
+                  @foreach (var opt in options)
+                  {
+                    var cleanOpt = opt.Trim();
+                    <label class="survey-opt-card d-flex align-items-center gap-3 p-3 rounded-3" style="border: 1px solid rgba(10,30,51,0.08); cursor: pointer; transition: all 0.2s ease; background: var(--ivory-pure);">
+                      <input type="radio" name="q-@q.Id" value="@cleanOpt" required class="form-check-input" style="cursor: pointer; width: 18px; height: 18px;">
+                      <span class="text-navy" style="font-size: 14px;">@cleanOpt</span>
+                    </label>
+                  }
+                </div>
+              </div>
+            }
+
+            <div class="text-center mt-5">
+              <button type="submit" class="btn btn-camel-gold px-5 py-3 fs-5 shadow-sm" style="border-radius: 30px; font-weight: 600; min-width: 250px;">
+                Nộp khảo sát & Quay thưởng
+              </button>
+            </div>
+          </form>
+        </div>
+
+        @* ── PHASE 2: LUCKY WHEEL (HIDDEN INITIALLY) ── *@
+        <div id="wheelContainer" class="p-4 p-md-5 rounded-4 shadow-sm d-none text-center" style="background: #ffffff; border: 1px solid rgba(194, 178, 128, 0.15);">
+          <h3 class="font-serif fw-bold text-navy mb-3">Bước 2: Quay Vòng Xoay May Mắn</h3>
+          <p class="text-muted small mb-5">Vui lòng bấm nút quay ở giữa để bắt đầu. Chúc bạn may mắn!</p>
+          
+          @* Canvas Wheel Wrapper *@
+          <div class="position-relative mx-auto mb-4" style="width: 380px; height: 380px;">
+            @* Wheel Canvas *@
+            <canvas id="wheelCanvas" width="380" height="380" style="border-radius: 50%; box-shadow: 0 10px 30px rgba(10,30,51,0.15); border: 8px solid #c2b29c;"></canvas>
+            
+            @* Spin Button in the center *@
+            <button id="spinBtn" onclick="startSpin()" class="position-absolute translate-middle shadow-lg" style="top: 50%; left: 50%; width: 70px; height: 70px; border-radius: 50%; border: 4px solid #ffffff; background: var(--camel); color: #ffffff; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; font-family: 'Inter', sans-serif;">
+              QUAY
+            </button>
+
+            @* Pointer arrow pointing downwards from top *@
+            <div class="position-absolute" style="top: -15px; left: calc(50% - 15px); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #d03a3a; z-index: 12; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));"></div>
+          </div>
+          
+          <div id="spinStatus" class="text-muted font-monospace mt-3" style="font-size: 13px;">Sẵn sàng quay thưởng!</div>
+        </div>
+
+      </div>
+    </div>
+  }
+</div>
+
+@* Modal to display prize results *@
+<div class="modal fade" id="prizeResultModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="prizeResultModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-navy text-center" style="border-radius: 20px; border: 1px solid rgba(194, 178, 128, 0.25); background: var(--ivory-pure); box-shadow: 0 15px 35px rgba(0,0,0,0.15);">
+      <div class="modal-body py-5 px-4">
+        <div class="mb-4">
+          <i class="fas fa-gift fa-4x text-camel animate-bounce"></i>
+        </div>
+        <h3 class="font-serif fw-bold text-navy mb-2 fs-4" id="prizeResultModalLabel">Chúc Mừng Bạn!</h3>
+        <p class="text-muted small mb-4">Bạn đã trúng giải thưởng đặc quyền từ HUTECHSTORE:</p>
+        
+        <h4 id="prizeNameDisplay" class="fw-bold text-camel fs-3 mb-4">Mã giảm giá 10%</h4>
+        
+        <div id="couponCodeWrapper" class="p-3 rounded-3 mb-4 d-none" style="background: #ffffff; border: 1.5px dashed var(--camel);">
+          <span class="text-muted small d-block mb-1">Mã Coupon của bạn:</span>
+          <span id="couponCodeDisplay" class="fs-4 fw-bold font-monospace text-navy" style="letter-spacing: 2px;">WHEEL-123456</span>
+          
+          <button type="button" class="btn btn-sm btn-outline-navy mt-2" onclick="copyCouponCode()" style="border-radius: 20px;">
+            <i class="far fa-copy"></i> Sao chép mã
+          </button>
+        </div>
+
+        <div id="guestMessage" class="alert alert-warning small text-start d-none" role="alert">
+          <i class="fas fa-info-circle me-1"></i> Bạn đang quay với tư cách Khách. Mã coupon này được lưu tạm thời và sẽ hết hạn sau 24 giờ. <strong>Hãy đăng ký tài khoản</strong> để nhận ưu đãi vĩnh viễn và dễ dàng áp dụng!
+        </div>
+
+        <p class="text-muted small mb-0">Hạn sử dụng: <strong>24 giờ</strong> kể từ thời điểm quay.</p>
+      </div>
+      <div class="modal-footer border-0 pt-0 justify-content-center pb-4">
+        <a asp-controller="Product" asp-action="Index" class="btn btn-navy px-4 py-2" style="border-radius: 30px;">
+          Mua sắm ngay
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+@* Styling *@
+<style>
+  .survey-opt-card:hover {
+    border-color: var(--camel) !important;
+    background: rgba(194, 178, 128, 0.05) !important;
+    box-shadow: 0 2px 8px rgba(194, 178, 128, 0.1);
+  }
+  .survey-opt-card input[type="radio"]:checked + span {
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .survey-opt-card:has(input[type="radio"]:checked) {
+    border-color: var(--camel) !important;
+    background: rgba(194, 178, 128, 0.08) !important;
+  }
+  
+  /* Simple bounce keyframe for modal gift */
+  .animate-bounce {
+    animation: bounce 2s infinite;
+  }
+  @@keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+</style>
+
+@section Scripts {
+<script>
+  // Global data from backend
+  const prizes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(prizes.Select(p => new { p.Name, p.ColorHex })));
+  let surveyData = null;
+  let isSpinning = false;
+
+  // Render Canvas Lucky Wheel on load if prizes exist
+  document.addEventListener('DOMContentLoaded', () => {
+    if (prizes.length > 0) {
+      drawWheel(0);
+    }
+  });
+
+  // Handle survey submission
+  function submitSurvey(e) {
+    e.preventDefault();
+
+    const age = parseInt(document.getElementById('surveyAge').value);
+    const gender = document.getElementById('surveyGender').value;
+
+    const responses = [];
+    document.querySelectorAll('.survey-q-block').forEach(block => {
+      const qId = parseInt(block.getAttribute('data-q-id'));
+      const checkedOpt = block.querySelector(`input[name="q-${qId}"]:checked`);
+      if (checkedOpt) {
+        responses.push({
+          questionId: qId,
+          answerText: checkedOpt.value
+        });
+      }
+    });
+
+    surveyData = {
+      age: age,
+      gender: gender,
+      responses: responses
+    };
+
+    // Transition from survey container to wheel container
+    document.getElementById('surveyContainer').classList.add('d-none');
+    document.getElementById('wheelContainer').classList.remove('d-none');
+  }
+
+  // Draw the Canvas lucky wheel
+  function drawWheel(currentAngle) {
+    const canvas = document.getElementById('wheelCanvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const cx = width / 2;
+    const cy = height / 2;
+    const radius = Math.min(cx, cy) - 10;
+
+    ctx.clearRect(0, 0, width, height);
+
+    const numSlices = prizes.length;
+    const sliceAngle = (2 * Math.PI) / numSlices;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(currentAngle);
+
+    for (let i = 0; i < numSlices; i++) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, radius, i * sliceAngle, (i + 1) * sliceAngle);
+      ctx.closePath();
+
+      // Alternate color or use specific database prize colors
+      ctx.fillStyle = prizes[i].ColorHex || (i % 2 === 0 ? "#0a1e33" : "#c2b29c");
+      ctx.fill();
+      
+      // Border lines
+      ctx.strokeStyle = "rgba(255,255,255,0.25)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Draw text
+      ctx.save();
+      ctx.rotate(i * sliceAngle + sliceAngle / 2);
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px 'Inter', sans-serif";
+      
+      // Shadow effect for text readability
+      ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+      ctx.shadowBlur = 4;
+      
+      ctx.fillText(prizes[i].Name, radius - 25, 4);
+      ctx.restore();
+    }
+
+    ctx.restore();
+
+    // Outer premium circle accent
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  // Start spinning the wheel
+  function startSpin() {
+    if (isSpinning) return;
+    isSpinning = true;
+
+    document.getElementById('spinBtn').setAttribute('disabled', 'true');
+    document.getElementById('spinStatus').textContent = "Đang gửi câu trả lời khảo sát và chuẩn bị quay...";
+
+    // Call backend to submit survey and determine winning index
+    fetch('/Minigame/SubmitSurveyAndSpin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(surveyData)
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (!res.success) {
+        alert(res.message);
+        window.location.reload();
+        return;
+      }
+
+      const winIdx = res.prizeIndex;
+      const numSlices = prizes.length;
+      const sliceSizeDeg = 360 / numSlices;
+
+      // Pointer is at 270 degrees (top).
+      // A clockwise rotation by R degrees maps point A to A + R.
+      // We want the center of the winning slice (winIdx + 0.5) * sliceSizeDeg to stop at 270 degrees.
+      // formula: targetRotation = 360 * rotations + (270 - (winIdx + 0.5) * sliceSizeDeg)
+      const rotations = 8; // Number of complete spins
+      const targetRotationDeg = 360 * rotations + (270 - (winIdx + 0.5) * sliceSizeDeg);
+
+      // Perform a 5-second smooth rotation animation using CSS transition
+      const canvas = document.getElementById('wheelCanvas');
+      canvas.style.transition = 'transform 5000ms cubic-bezier(0.1, 0.8, 0.1, 1)';
+      canvas.style.transform = `rotate(${targetRotationDeg}deg)`;
+
+      document.getElementById('spinStatus').textContent = "Vòng xoay đang quay... Hãy chờ đợi điều bất ngờ!";
+
+      // Wait 5000ms for rotation to finish
+      setTimeout(() => {
+        showPrizeResult(res);
+      }, 5000);
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.");
+      isSpinning = false;
+      document.getElementById('spinBtn').removeAttribute('disabled');
+      document.getElementById('spinStatus').textContent = "Có lỗi xảy ra. Hãy thử lại.";
+    });
+  }
+
+  // Show prize results inside the popup modal
+  function showPrizeResult(res) {
+    isSpinning = false;
+    document.getElementById('spinStatus').textContent = "Quay hoàn tất!";
+    
+    // Display results in modal
+    document.getElementById('prizeNameDisplay').textContent = res.prizeName;
+    
+    const wrapper = document.getElementById('couponCodeWrapper');
+    const msgAlert = document.getElementById('guestMessage');
+    
+    if (res.couponCode) {
+      document.getElementById('couponCodeDisplay').textContent = res.couponCode;
+      wrapper.classList.remove('d-none');
+      
+      if (!res.isLoggedIn) {
+        msgAlert.classList.remove('d-none');
+      } else {
+        msgAlert.classList.add('d-none');
+      }
+    } else {
+      wrapper.classList.add('d-none');
+      msgAlert.classList.add('d-none');
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('prizeResultModal'));
+    modal.show();
+  }
+
+  // Copy coupon code to clipboard
+  function copyCouponCode() {
+    const code = document.getElementById('couponCodeDisplay').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      alert("Đã sao chép mã coupon: " + code);
+    }).catch(err => {
+      console.error("Lỗi khi sao chép:", err);
+    });
+  }
+</script>
+}

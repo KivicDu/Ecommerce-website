@@ -19,7 +19,7 @@
         }
       }
     </select>
-    <button class="btn btn-sm btn-danger">Lọc</button>
+    <button class="btn btn-sm btn-primary">Lọc</button>
     @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()) || ViewBag.Rating != null)
     {
       <a href="/Admin/Reviews" class="btn btn-sm btn-outline-secondary">Xóa lọc</a>
@@ -60,10 +60,10 @@
               <small class="text-muted">@r.User?.Email</small>
             </td>
             <td class="text-center">
-              <span class="text-warning fw-bold">
+              <span class="text-warning fw-bold" style="letter-spacing: 2px;">
                 @for (int i = 1; i <= 5; i++)
                 {
-                  <i class="@(i <= r.Rating ? "fas" : "far") fa-star" style="font-size:.8rem"></i>
+                  <span>@(i <= r.Rating ? "★" : "☆")</span>
                 }
               </span>
               <div class="small text-muted">@r.Rating/5</div>
@@ -76,7 +76,7 @@
               <button class="btn btn-sm btn-outline-danger"
                       onclick="deleteReview(@r.Id, this)"
                       title="Xóa đánh giá">
-                <i class="fas fa-trash-alt"></i>
+                XÓA
               </button>
             </td>
           </tr>
@@ -106,7 +106,7 @@
 async function deleteReview(id, btn) {
   if (!confirm('Xóa đánh giá này?')) return;
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  btn.innerHTML = 'ĐANG XÓA...';
   try {
     const res  = await fetch('/Admin/DeleteReview', {
       method:  'POST',
@@ -123,12 +123,12 @@ async function deleteReview(id, btn) {
     } else {
       showToast('Xóa thất bại', 'error');
       btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+      btn.innerHTML = 'XÓA';
     }
   } catch {
     showToast('Lỗi kết nối', 'error');
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+    btn.innerHTML = 'XÓA';
   }
 }
 </script>

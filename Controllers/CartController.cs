@@ -13,9 +13,10 @@ public class CartController : Controller
     private readonly AppDbContext   _db;
     private readonly CartService    _cart;
     private readonly IConfiguration _config;
+    private readonly MailService    _mail;
 
-    public CartController(AppDbContext db, CartService cart, IConfiguration config)
-    { _db = db; _cart = cart; _config = config; }
+    public CartController(AppDbContext db, CartService cart, IConfiguration config, MailService mail)
+    { _db = db; _cart = cart; _config = config; _mail = mail; }
 
     // GET /Cart
     public async Task<IActionResult> Index()
@@ -283,6 +284,24 @@ public class CartController : Controller
         HttpContext.Session.SetInt32("CartCount", 0);
         await _db.SaveChangesAsync();
 
+        // Gửi email xác nhận đặt hàng (chạy nền bất đồng bộ)
+        var userRecord = await _db.Users.FindAsync(userId);
+        if (userRecord != null && !string.IsNullOrEmpty(userRecord.Email))
+        {
+            var orderItemsList = await _db.OrderItems.Where(oi => oi.OrderId == order.Id).ToListAsync();
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _mail.SendOrderConfirmationEmailAsync(userRecord.Email, order, orderItemsList);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Lỗi gửi email xác nhận đặt hàng: " + ex.Message);
+                }
+            });
+        }
+
         TempData["Success"] = $"Đặt hàng thành công! Mã đơn: {orderNumber}";
         return RedirectToAction("Success", new { id = order.Id });
     }
@@ -334,6 +353,25 @@ public class CartController : Controller
             return Json(new { success = false, message = "Mã coupon đã hết lượt sử dụng" });
         if (total < coupon.MinOrder)
             return Json(new { success = false, message = $"Đơn hàng tối thiểu {coupon.MinOrder:N0}đ" });
+
+        // Brand-based restrictions (e.g. iphone200k cannot be applied to Samsung)
+        var codeLower = req.Code.ToLowerInvariant();
+        if (codeLower.Contains("iphone") || codeLower.Contains("apple"))
+        {
+            var hasAppleProduct = items.Any(i => i.Product != null && i.Product.Brand.Equals("Apple", StringComparison.OrdinalIgnoreCase));
+            if (!hasAppleProduct)
+            {
+                return Json(new { success = false, message = "Mã giảm giá này chỉ áp dụng cho các sản phẩm Apple (iPhone)." });
+            }
+        }
+        else if (codeLower.Contains("samsung") || codeLower.Contains("galaxy"))
+        {
+            var hasSamsungProduct = items.Any(i => i.Product != null && i.Product.Brand.Equals("Samsung", StringComparison.OrdinalIgnoreCase));
+            if (!hasSamsungProduct)
+            {
+                return Json(new { success = false, message = "Mã giảm giá này chỉ áp dụng cho các sản phẩm Samsung." });
+            }
+        }
 
         decimal discount = coupon.Type == "percent"
             ? total * coupon.Value / 100

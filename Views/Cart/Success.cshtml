@@ -217,10 +217,10 @@
             </div>
             <div class="order-info-row">
               <span>Thanh toán</span>
-              <span>
-                @if (Model.PaymentMethod == "cod") { <text>💵 Thanh toán khi nhận hàng (COD)</text> }
-                else if (Model.PaymentMethod == "vnpay") { <text>🏦 VNPay</text> }
-                else if (Model.PaymentMethod == "momo") { <text>💜 MoMo</text> }
+              <span class="d-flex align-items-center gap-1">
+                @if (Model.PaymentMethod == "cod") { <text><i class="fas fa-money-bill-wave text-success me-1"></i> Thanh toán khi nhận hàng (COD)</text> }
+                else if (Model.PaymentMethod == "vnpay") { <text><img src="https://sandbox.vnpayment.vn/paymentv2/Images/brands/logo-vnpay.svg" alt="VNPay" style="height: 16px; width: auto; object-fit: contain; vertical-align: middle; margin-right: 4px;"/> VNPay</text> }
+                else if (Model.PaymentMethod == "momo") { <text><img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.svg" alt="MoMo" style="height: 16px; width: 16px; border-radius: 3px; object-fit: contain; vertical-align: middle; margin-right: 4px;"/> MoMo</text> }
                 else { @Model.PaymentMethod.ToUpper() }
               </span>
             </div>
@@ -289,29 +289,29 @@
 @section Styles {
 <style>
   /* ── Common ── */
-  .success-card { background:#fff; border-radius:16px; border:1px solid var(--border-color); padding:2.5rem; box-shadow:0 4px 24px rgba(0,0,0,.08); }
+  .success-card { background: var(--ivory-pure); border-radius:16px; border:1px solid rgba(194, 178, 128, 0.15); padding:2.5rem; box-shadow:0 4px 24px rgba(0,0,0,.08); }
   .success-icon { width:80px; height:80px; background:#d4edda; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:2.5rem; color:#28a745; }
-  .order-info-box { background:#f8f9fa; border-radius:10px; padding:1rem 1.25rem; text-align:left; }
-  .order-info-row { display:flex; justify-content:space-between; padding:.4rem 0; font-size:.9rem; border-bottom:1px solid #f0f0f0; }
+  .order-info-box { background:var(--ivory-warm); border-radius:10px; padding:1rem 1.25rem; text-align:left; }
+  .order-info-row { display:flex; justify-content:space-between; padding:.4rem 0; font-size:.9rem; border-bottom:1px solid rgba(194, 178, 128, 0.1); }
   .order-info-row:last-child { border-bottom:none; }
   .order-items-list { text-align:left; }
   .success-item { display:flex; align-items:center; gap:.75rem; padding:.5rem 0; border-bottom:1px solid #f5f5f5; }
-  .success-item img { width:48px; height:48px; border-radius:8px; object-fit:contain; background:#f8f9fa; padding:4px; border:1px solid #eee; }
+  .success-item img { width:48px; height:48px; border-radius:8px; object-fit:contain; background:var(--ivory-warm); padding:4px; border:1px solid #eee; }
   .success-item-info { flex:1; }
   .order-timeline { display:flex; align-items:center; justify-content:center; }
   .timeline-step { display:flex; flex-direction:column; align-items:center; gap:4px; }
   .timeline-dot { width:36px; height:36px; border-radius:50%; background:#dee2e6; color:#fff; display:flex; align-items:center; justify-content:center; font-size:.85rem; }
-  .timeline-step.active .timeline-dot { background:var(--primary); }
+  .timeline-step.active .timeline-dot { background:var(--navy); }
   .timeline-label { font-size:.7rem; color:var(--text-muted); white-space:nowrap; }
   .timeline-line { flex:1; height:2px; background:#dee2e6; max-width:60px; }
 
   /* ── QR Payment Card ── */
-  .qr-payment-card { background:#fff; border-radius:16px; border:2px solid #e8f0fe; padding:1.75rem; box-shadow:0 4px 24px rgba(66,133,244,.12); height:100%; }
+  .qr-payment-card { background: var(--ivory-pure); border-radius:16px; border:2px solid #e8f0fe; padding:1.75rem; box-shadow:0 4px 24px rgba(66,133,244,.12); height:100%; }
   .qr-card-header { font-weight:700; font-size:1rem; color:#1a3c8b; padding-bottom:.75rem; border-bottom:1px solid #e8f0fe; margin-bottom:1rem; }
   .qr-amount-display { text-align:center; margin-bottom:1.25rem; }
-  .qr-amount { font-size:2rem; font-weight:800; color:#dc3545; letter-spacing:-.5px; }
+  .qr-amount { font-size:2rem; font-weight:800; color:var(--navy); letter-spacing:-.5px; }
   .qr-image-wrap { display:flex; flex-direction:column; align-items:center; margin-bottom:1.25rem; }
-  .qr-image { width:220px; height:220px; object-fit:contain; border-radius:12px; border:3px solid #e8f0fe; padding:6px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,.08); }
+  .qr-image { width:220px; height:220px; object-fit:contain; border-radius:12px; border:3px solid #e8f0fe; padding:6px; background: var(--ivory-pure); box-shadow:0 2px 12px rgba(0,0,0,.08); }
   .qr-scan-hint { font-size:.75rem; color:#6c757d; margin-top:.5rem; }
   .qr-error { text-align:center; padding:2rem; color:#6c757d; }
   .qr-bank-info { background:#f8faff; border-radius:10px; padding:.875rem 1rem; margin-bottom:1rem; }
@@ -326,8 +326,8 @@
   .qr-notice { display:flex; align-items:flex-start; gap:.5rem; background:#e8f4fd; border-radius:8px; padding:.75rem 1rem; font-size:.83rem; }
   /* Payment status box */
   .payment-status-box { border-radius:10px; padding:.85rem 1rem; font-size:.88rem; font-weight:500; }
-  .status-waiting { display:flex; align-items:center; background:#fff8e1; border:1px solid #ffe082; border-radius:10px; padding:.85rem 1rem; color:#7a6000; }
-  .status-timeout { display:flex; align-items:center; background:#fff3e0; border:1px solid #ffcc80; border-radius:10px; padding:.85rem 1rem; color:#7a3b00; }
+  .status-waiting { display:flex; align-items:center; background: var(--ivory-pure)8e1; border:1px solid #ffe082; border-radius:10px; padding:.85rem 1rem; color:#7a6000; }
+  .status-timeout { display:flex; align-items:center; background: var(--ivory-pure)3e0; border:1px solid #ffcc80; border-radius:10px; padding:.85rem 1rem; color:#7a3b00; }
   .status-success { display:flex; align-items:center; background:#e8f5e9; border:1px solid #a5d6a7; border-radius:10px; padding:.85rem 1rem; color:#1b5e20; font-size:.95rem; animation: fadeInGreen .5s ease; }
   @@keyframes fadeInGreen { from { opacity:0; transform:scale(.97); } to { opacity:1; transform:scale(1); } }
 </style>

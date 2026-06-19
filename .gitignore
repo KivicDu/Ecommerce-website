@@ -423,3 +423,5 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+appsettings.json
+database_setup_v3.sql

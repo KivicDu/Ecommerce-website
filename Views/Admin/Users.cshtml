@@ -12,7 +12,7 @@
   <form method="get" class="d-flex gap-2">
     <input type="text" name="search" class="form-control form-control-sm"
            placeholder="Tìm tên / email..." value="@ViewBag.Search" style="max-width:240px"/>
-    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-search"></i></button>
+    <button type="submit" class="btn btn-primary btn-sm">TÌM</button>
   </form>
 </div>
 
@@ -54,7 +54,7 @@
             <td>
               @if (u.AuthProvider == "google")
               {
-                <span class="badge bg-light text-dark border"><i class="fab fa-google text-danger me-1"></i>Google</span>
+                <span class="badge bg-light text-dark border">Google</span>
               }
               else
               {
@@ -64,11 +64,11 @@
             <td>
               @if (u.Role == "admin")
               {
-                <span class="badge bg-danger">Admin</span>
+                <span class="status-badge status-confirmed">Admin</span>
               }
               else
               {
-                <span class="badge bg-success">User</span>
+                <span class="status-badge status-pending">User</span>
               }
             </td>
             <td class="text-muted small">@u.CreatedAt.ToString("dd/MM/yyyy")</td>

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 using HutechStore.Data;
 using HutechStore.Helpers;
 using HutechStore.Models;
@@ -181,7 +182,10 @@ public class AuthController : Controller
         if (!ModelState.IsValid) return View(vm);
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == vm.Email);
         if (user == null) return RedirectToAction("Login");
-        user.Password = vm.NewPassword;
+
+        var hasher = new PasswordHasher<User>();
+        user.Password = hasher.HashPassword(user, vm.NewPassword);
+
         _db.PasswordOtps.RemoveRange(_db.PasswordOtps.Where(p => p.Email == vm.Email));
         await _db.SaveChangesAsync();
         TempData["Success"] = "Đổi mật khẩu thành công!";

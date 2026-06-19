@@ -36,7 +36,7 @@ public class HomeController : Controller
             .Include(p => p.ProductVariants.Where(v => v.Status == 1))
             .Where(p => p.Status == 1 && p.Brand == "Apple")
             .OrderByDescending(p => p.Price)
-            .Take(4)
+            .Take(10)
             .ToListAsync();
 
         var samsungs = await _db.Products
@@ -45,7 +45,7 @@ public class HomeController : Controller
             .Include(p => p.ProductVariants.Where(v => v.Status == 1))
             .Where(p => p.Status == 1 && p.Brand == "Samsung")
             .OrderByDescending(p => p.Price)
-            .Take(4)
+            .Take(10)
             .ToListAsync();
 
         ViewBag.Featured = featured;

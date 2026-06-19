@@ -473,3 +473,89 @@ public class ErrorViewModel
     public string? RequestId { get; set; }
     public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  MINIGAME & SURVEY MODELS
+// ══════════════════════════════════════════════════════════════════════════════
+public class SurveyQuestion
+{
+    public int Id { get; set; }
+
+    [Required, MaxLength(500)]
+    public string QuestionText { get; set; } = string.Empty;
+
+    // Các lựa chọn trả lời, phân tách bằng dấu phẩy
+    [MaxLength(500)]
+    public string Options { get; set; } = string.Empty;
+
+    public bool IsActive { get; set; } = true;
+    public int DisplayOrder { get; set; } = 0;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+public class Survey
+{
+    public int Id { get; set; }
+
+    public int? UserId { get; set; }
+
+    [MaxLength(50)]
+    public string? IpAddress { get; set; }
+
+    public int Age { get; set; }
+
+    [Required, MaxLength(10)]
+    public string Gender { get; set; } = "Other"; // Male | Female | Other
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public User? User { get; set; }
+    public ICollection<SurveyResponse> Responses { get; set; } = new List<SurveyResponse>();
+}
+
+public class SurveyResponse
+{
+    public int Id { get; set; }
+    public int SurveyId { get; set; }
+    public int QuestionId { get; set; }
+
+    [Required, MaxLength(255)]
+    public string AnswerText { get; set; } = string.Empty;
+
+    public Survey? Survey { get; set; }
+    public SurveyQuestion? Question { get; set; }
+}
+
+public class LuckyWheelPrize
+{
+    public int Id { get; set; }
+
+    [Required, MaxLength(100)]
+    public string Name { get; set; } = string.Empty; // e.g. "Giảm 10%", "Free Ship"
+
+    [MaxLength(20)]
+    public string CouponType { get; set; } = "percent"; // percent | fixed | none
+
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal CouponValue { get; set; } = 0; // value of discount
+
+    public int Weight { get; set; } = 10; // Probability weight (higher = more likely)
+
+    [MaxLength(7)]
+    public string ColorHex { get; set; } = "#BEB280"; // Draw color on canvas
+
+    public int Status { get; set; } = 1;
+}
+
+public class LuckyWheelPlay
+{
+    public int Id { get; set; }
+    public int? UserId { get; set; }
+
+    [MaxLength(50)]
+    public string? IpAddress { get; set; }
+
+    public DateTime PlayedAt { get; set; } = DateTime.UtcNow;
+    
+    public User? User { get; set; }
+}
