@@ -10,6 +10,7 @@ using HutechStore.Helpers;
 using HutechStore.Models;
 using HutechStore.Services;
 using HutechStore.ViewModels;
+using BCrypt.Net;
 
 namespace HutechStore.Controllers;
 
@@ -35,43 +36,18 @@ public class AuthController : Controller
     {
         if (!ModelState.IsValid) return View(vm);
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == vm.Email);
+
         if (user == null)
         {
-            ModelState.AddModelError("", "Email hoặc mật khẩu không đúng");
+            ModelState.AddModelError("", "Email không tồn tại");
             return View(vm);
         }
 
-        var hasher = new PasswordHasher<User>();
-        bool isValid = false;
-
-        if (!string.IsNullOrEmpty(user.Password))
+        bool isPasswordCorrect = BCrypt.Net.BCrypt.Verify(vm.Password, user.Password);
+        
+        if (!isPasswordCorrect)
         {
-            PasswordVerificationResult result;
-            try
-            {
-                result = hasher.VerifyHashedPassword(user, user.Password, vm.Password);
-            }
-            catch (FormatException)
-            {
-                result = PasswordVerificationResult.Failed;
-            }
-
-            if (result == PasswordVerificationResult.Success || result == PasswordVerificationResult.SuccessRehashNeeded)
-            {
-                isValid = true;
-            }
-            else if (user.Password == vm.Password) // Fallback for legacy plaintext password
-            {
-                isValid = true;
-                // Auto-migrate plaintext password to hashed format
-                user.Password = hasher.HashPassword(user, vm.Password);
-                await _db.SaveChangesAsync();
-            }
-        }
-
-        if (!isValid)
-        {
-            ModelState.AddModelError("", "Email hoặc mật khẩu không đúng");
+            ModelState.AddModelError("", "Mật khẩu không chính xác");
             return View(vm);
         }
 
@@ -143,10 +119,9 @@ public class AuthController : Controller
             return View(vm);
         }
 
-        var user = new User { Name = vm.Name, Email = vm.Email, Phone = vm.Phone, Address = vm.Address };
-        var hasher = new PasswordHasher<User>();
-        user.Password = hasher.HashPassword(user, vm.Password);
+        string hashPassword = BCrypt.Net.BCrypt.HashPassword(vm.Password);
 
+        var user = new User { Name = vm.Name, Email = vm.Email, Password = hashPassword, Phone = vm.Phone, Address = vm.Address };
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
         TempData["Success"] = "Đăng ký thành công! Vui lòng đăng nhập.";
