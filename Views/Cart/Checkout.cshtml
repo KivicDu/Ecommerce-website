@@ -83,7 +83,7 @@
               <input type="radio" name="PaymentMethod" value="vnpay" class="d-none"
                      onchange="selectPayment(this)"/>
               <div class="payment-option-icon d-flex align-items-center justify-content-center">
-                <img src="https://sandbox.vnpayment.vn/paymentv2/Images/brands/logo-vnpay.svg" alt="VNPay" style="height: 20px; width: auto; object-fit: contain;"/>
+                <img src="/images/logo-vnpay.svg" alt="VNPay" style="height: 20px; width: auto; object-fit: contain;"/>
               </div>
               <div>
                 <div class="fw-semibold">VNPay</div>
@@ -96,7 +96,7 @@
               <input type="radio" name="PaymentMethod" value="momo" class="d-none"
                      onchange="selectPayment(this)"/>
               <div class="payment-option-icon d-flex align-items-center justify-content-center">
-                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.svg" alt="MoMo" style="height: 24px; width: 24px; border-radius: 4px; object-fit: contain;"/>
+                <img src="/images/logo-momo.svg" alt="MoMo" style="height: 24px; width: 24px; border-radius: 4px; object-fit: contain;"/>
               </div>
               <div>
                 <div class="fw-semibold">MoMo</div>
@@ -171,8 +171,8 @@
           <hr/>
 
           @* Totals *@
-          <div class="summary-row"><span>Tạm tính</span><span>@cartTotal.ToString("N0")₫</span></div>
-          <div class="summary-row"><span>Phí vận chuyển</span><span class="text-success">Miễn phí</span></div>
+          <div class="summary-row"><span>Tạm tính </span><span>@cartTotal.ToString("N0")₫</span></div>
+          <div class="summary-row"><span>Phí vận chuyển </span><span class="text-success">Miễn phí</span></div>
           @if (discount > 0)
           {
             <div class="summary-row text-success">

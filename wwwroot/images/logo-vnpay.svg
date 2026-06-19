@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 30" width="100%" height="100%">
+  <g transform="translate(5, 5)">
+    <!-- Stylized Checkmark V icon -->
+    <path d="M 2 8 L 10 18 L 22 4" fill="none" stroke="#E51F27" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="28" y="18" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="900" font-style="italic" fill="#005BAA">VN<tspan fill="#00AEEF">PAY</tspan></text>
+  </g>
+</svg>
