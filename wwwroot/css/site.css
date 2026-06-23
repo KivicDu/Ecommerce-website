@@ -4116,3 +4116,29 @@ h4, h5, h6 {
   border-color: var(--camel) !important;
   box-shadow: 0 4px 15px rgba(194, 178, 128, 0.25) !important;
 }
+
+/* ── PREMIUM USER DROPDOWN ITEM CUSTOM CONTRAST STYLING ── */
+.dropdown-menu-user .dropdown-item.admin-link {
+  color: var(--camel) !important;
+  font-weight: 600 !important;
+  border-left: 2px solid transparent !important;
+  transition: all 0.25s var(--ease-luxury) !important;
+}
+.dropdown-menu-user .dropdown-item.admin-link:hover {
+  color: var(--ivory-pure) !important;
+  background: rgba(194, 178, 128, 0.12) !important;
+  border-left-color: var(--camel) !important;
+  padding-left: 1.75rem !important;
+}
+
+.dropdown-menu-user .dropdown-item.logout-link {
+  color: rgba(250, 249, 245, 0.6) !important;
+  border-left: 2px solid transparent !important;
+  transition: all 0.25s var(--ease-luxury) !important;
+}
+.dropdown-menu-user .dropdown-item.logout-link:hover {
+  color: #ff4d4d !important; /* Soft crimson warning color for logout */
+  background: rgba(255, 77, 77, 0.08) !important;
+  border-left-color: #ff4d4d !important;
+  padding-left: 1.75rem !important;
+}
