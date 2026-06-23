@@ -23,14 +23,14 @@
           @* Cột trái: Chi tiết đơn hàng *@
           <div class="col-lg-6">
             <div class="success-card">
-              <div class="success-icon"><i class="fas fa-check-circle"></i></div>
-              <h2 class="fw-bold mt-3 mb-1">Đặt hàng thành công!</h2>
-              <p class="text-muted mb-4">Vui lòng chuyển khoản để hoàn tất đơn hàng.</p>
+              <div class="success-icon"><i class="fas fa-check"></i></div>
+              <h2 class="success-title">Đặt hàng thành công!</h2>
+              <p class="text-muted text-center mb-4" style="font-size: 0.88rem;">Vui lòng chuyển khoản để hoàn tất đơn hàng.</p>
 
               <div class="order-info-box mb-4">
                 <div class="order-info-row">
                   <span>Mã đơn hàng</span>
-                  <span class="fw-bold text-danger">#@Model.OrderNumber</span>
+                  <span class="fw-bold" style="color: var(--navy);">#@Model.OrderNumber</span>
                 </div>
                 <div class="order-info-row">
                   <span>Ngày đặt</span>
@@ -50,13 +50,13 @@
                 </div>
                 <div class="order-info-row">
                   <span>Thanh toán</span>
-                  <span class="text-warning fw-semibold"><i class="fas fa-clock me-1"></i>Chờ chuyển khoản</span>
+                  <span class="fw-semibold" style="color: var(--camel-dark);"><i class="far fa-clock me-1"></i>Chờ chuyển khoản</span>
                 </div>
               </div>
 
               @* Items *@
-              <div class="order-items-list mb-3">
-                <div class="fw-bold mb-2 text-start small text-uppercase text-muted">Chi tiết đơn hàng</div>
+              <div class="order-items-list mb-4">
+                <div class="fw-bold mb-2 text-start small text-uppercase text-muted" style="letter-spacing: 0.05em;">Sản phẩm đã đặt</div>
                 @foreach (var item in Model.OrderItems)
                 {
                   <div class="success-item">
@@ -64,24 +64,24 @@
                          alt="@item.ProductName"
                          onerror="this.onerror=null;this.src='/images/no-image.png'"/>
                     <div class="success-item-info">
-                      <div class="fw-semibold small">@item.ProductName</div>
-                      <div class="text-muted" style="font-size:.78rem">x@item.Quantity · @item.Price.ToString("N0")₫/máy</div>
+                      <div class="fw-semibold small" style="color: var(--navy);">@item.ProductName</div>
+                      <div class="text-muted" style="font-size:.78rem">x@item.Quantity · @item.Price.ToString("N0")₫</div>
                     </div>
-                    <div class="fw-bold text-danger small">@item.Total.ToString("N0")₫</div>
+                    <div class="fw-bold small" style="color: var(--navy);">@item.Total.ToString("N0")₫</div>
                   </div>
                 }
-                <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2">
-                  <span>Tổng cộng</span>
-                  <span class="text-danger">@Model.TotalAmount.ToString("N0")₫</span>
+                <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2" style="border-color: rgba(194,178,128,0.15) !important;">
+                  <span style="font-family: var(--font-serif); color: var(--navy);">Tổng thanh toán</span>
+                  <span style="color: var(--navy);">@Model.TotalAmount.ToString("N0")₫</span>
                 </div>
               </div>
 
               <div class="d-grid gap-2">
-                <a asp-controller="Order" asp-action="History" class="btn btn-outline-danger btn-sm">
-                  <i class="fas fa-list me-2"></i>Lịch sử đơn hàng
+                <a asp-controller="Order" asp-action="History" class="btn btn-luxury-outline btn-sm">
+                  Lịch sử đơn hàng
                 </a>
-                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm">
-                  <i class="fas fa-store me-2"></i>Tiếp tục mua sắm
+                <a asp-controller="Home" asp-action="Index" class="btn btn-luxury-primary btn-sm">
+                  Tiếp tục mua sắm
                 </a>
               </div>
             </div>
@@ -91,11 +91,11 @@
           <div class="col-lg-6">
             <div class="qr-payment-card">
               <div class="qr-card-header">
-                <i class="fas fa-mobile-alt me-2"></i>Quét QR để thanh toán
+                Quét QR để thanh toán
               </div>
 
               <div class="qr-amount-display">
-                <div class="small text-muted mb-1">Số tiền cần chuyển</div>
+                <div class="small text-muted mb-1" style="font-size: 0.78rem; letter-spacing: 0.02em;">SỐ TIỀN CẦN CHUYỂN</div>
                 <div class="qr-amount">@Model.TotalAmount.ToString("N0")₫</div>
               </div>
 
@@ -109,62 +109,61 @@
 
               <div class="qr-bank-info">
                 <div class="bank-info-row">
-                  <span class="bank-info-label"><i class="fas fa-university me-1"></i>Ngân hàng</span>
-                  <span class="bank-info-val fw-bold">@bankCode</span>
+                  <span class="bank-info-label">Ngân hàng</span>
+                  <span class="bank-info-val fw-bold" style="color: var(--navy);">@bankCode</span>
                 </div>
                 <div class="bank-info-row">
-                  <span class="bank-info-label"><i class="fas fa-hashtag me-1"></i>Số tài khoản</span>
+                  <span class="bank-info-label">Số tài khoản</span>
                   <div class="d-flex align-items-center gap-2">
-                    <span class="bank-info-val fw-bold font-monospace" id="accNum">@accountNumber</span>
-                    <button type="button" class="btn btn-outline-secondary btn-xs copy-btn" onclick="copyText('@accountNumber', this)" title="Sao chép">
-                      <i class="fas fa-copy fa-xs"></i>
+                    <span class="bank-info-val fw-semibold font-monospace" style="color: var(--navy);">@accountNumber</span>
+                    <button type="button" class="btn-luxury-copy" onclick="copyText('@accountNumber', this)" title="Sao chép">
+                      <i class="far fa-copy"></i>
                     </button>
                   </div>
                 </div>
                 <div class="bank-info-row">
-                  <span class="bank-info-label"><i class="fas fa-user me-1"></i>Chủ tài khoản</span>
-                  <span class="bank-info-val fw-bold text-uppercase">@accountName</span>
+                  <span class="bank-info-label">Chủ tài khoản</span>
+                  <span class="bank-info-val fw-bold text-uppercase" style="color: var(--navy);">@accountName</span>
                 </div>
                 <div class="bank-info-row">
-                  <span class="bank-info-label"><i class="fas fa-money-bill me-1"></i>Số tiền</span>
+                  <span class="bank-info-label">Số tiền</span>
                   <div class="d-flex align-items-center gap-2">
-                    <span class="bank-info-val fw-bold text-danger">@Model.TotalAmount.ToString("N0")₫</span>
-                    <button type="button" class="btn btn-outline-secondary btn-xs copy-btn" onclick="copyText('@amountInt', this)" title="Sao chép">
-                      <i class="fas fa-copy fa-xs"></i>
+                    <span class="bank-info-val fw-bold" style="color: var(--navy);">@Model.TotalAmount.ToString("N0")₫</span>
+                    <button type="button" class="btn-luxury-copy" onclick="copyText('@amountInt', this)" title="Sao chép">
+                      <i class="far fa-copy"></i>
                     </button>
                   </div>
                 </div>
                 <div class="bank-info-row">
-                  <span class="bank-info-label"><i class="fas fa-comment me-1"></i>Nội dung CK</span>
+                  <span class="bank-info-label">Nội dung CK</span>
                   <div class="d-flex align-items-center gap-2">
-                    <span class="bank-info-val fw-semibold text-primary font-monospace" id="transferContent">@Model.OrderNumber</span>
-                    <button type="button" class="btn btn-outline-secondary btn-xs copy-btn" onclick="copyText('@Model.OrderNumber', this)" title="Sao chép">
-                      <i class="fas fa-copy fa-xs"></i>
+                    <span class="bank-info-val fw-semibold font-monospace" style="color: var(--camel-dark);">@Model.OrderNumber</span>
+                    <button type="button" class="btn-luxury-copy" onclick="copyText('@Model.OrderNumber', this)" title="Sao chép">
+                      <i class="far fa-copy"></i>
                     </button>
                   </div>
                 </div>
               </div>
 
               <div class="qr-notice">
-                <i class="fas fa-info-circle text-primary me-2"></i>
+                <i class="fas fa-info-circle me-2" style="color: var(--camel-dark); margin-top: 2px;"></i>
                 <div class="small">
-                  Nhập <strong>đúng nội dung chuyển khoản</strong> để đơn hàng được xác nhận tự động.
-                  Sau khi chuyển, đơn sẽ được xác nhận trong vòng <strong>15 phút</strong>.
+                  Vui lòng điền <strong>đúng nội dung chuyển khoản</strong> để giao dịch được xử lý tự động trong vòng <strong>15 phút</strong>.
                 </div>
               </div>
 
               @* ── Trạng thái thanh toán realtime ── *@
               <div id="paymentStatusBox" class="payment-status-box mt-3">
                 <div id="statusWaiting" class="status-waiting">
-                  <span class="spinner-border spinner-border-sm text-warning me-2" role="status"></span>
+                  <span class="spinner-border spinner-border-sm me-2" role="status" style="color: var(--camel-dark); width: 14px; height: 14px;"></span>
                   <span>Đang chờ xác nhận chuyển khoản...</span>
                 </div>
                 <div id="statusTimeout" class="status-timeout d-none">
-                  <i class="fas fa-clock me-2"></i>
-                  <span>Chưa nhận được xác nhận. Admin sẽ kiểm tra và xác nhận thủ công.</span>
+                  <i class="far fa-clock me-2"></i>
+                  <span>Hệ thống chưa nhận được xác nhận. Chúng tôi sẽ kiểm tra thủ công.</span>
                 </div>
                 <div id="statusSuccess" class="status-success d-none">
-                  <i class="fas fa-check-circle me-2"></i>
+                  <i class="far fa-check-circle me-2"></i>
                   <span>Thanh toán thành công! Đơn hàng đã được xác nhận.</span>
                 </div>
               </div>
@@ -172,10 +171,10 @@
               @* Nút test thủ công – chỉ hiện khi môi trường Development *@
               @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
               {
-                <div class="mt-2 text-center">
-                  <button type="button" class="btn btn-outline-success btn-sm"
-                          onclick="simulatePaid(@Model.Id)">
-                    🧪 [Dev] Giả lập thanh toán thành công
+                <div class="mt-3 text-center">
+                  <button type="button" class="btn btn-luxury-outline btn-xs"
+                          onclick="simulatePaid(@Model.Id)" style="font-size: 0.72rem; padding: 4px 12px !important;">
+                    🧪 Giả lập thanh toán thành công
                   </button>
                 </div>
               }
@@ -187,17 +186,17 @@
       else
       {
         @* ── LAYOUT THƯỜNG CHO COD / VNPAY / MOMO ── *@
-        <div class="success-card text-center">
-          <div class="success-icon"><i class="fas fa-check-circle"></i></div>
-          <h2 class="fw-bold mt-3 mb-1">Đặt hàng thành công!</h2>
-          <p class="text-muted mb-4">
-            Cảm ơn bạn đã mua hàng. Chúng tôi sẽ liên hệ xác nhận và giao hàng sớm nhất.
+        <div class="success-card text-center" style="max-width: 600px; margin: 0 auto;">
+          <div class="success-icon"><i class="fas fa-check"></i></div>
+          <h2 class="success-title">Đặt hàng thành công!</h2>
+          <p class="text-muted mb-4" style="font-size: 0.88rem;">
+            Cảm ơn bạn đã mua sắm tại HutechStore. Chúng tôi sẽ liên hệ xác nhận và giao hàng sớm nhất.
           </p>
 
           <div class="order-info-box mb-4">
             <div class="order-info-row">
               <span>Mã đơn hàng</span>
-              <span class="fw-bold text-danger">#@Model.OrderNumber</span>
+              <span class="fw-bold" style="color: var(--navy);">#@Model.OrderNumber</span>
             </div>
             <div class="order-info-row">
               <span>Ngày đặt</span>
@@ -218,17 +217,25 @@
             <div class="order-info-row">
               <span>Thanh toán</span>
               <span class="d-flex align-items-center gap-1">
-                @if (Model.PaymentMethod == "cod") { <text><i class="fas fa-money-bill-wave text-success me-1"></i> Thanh toán khi nhận hàng (COD)</text> }
-                else if (Model.PaymentMethod == "vnpay") { <text><img src="/images/logo-vnpay.svg" alt="VNPay" style="height: 16px; width: auto; object-fit: contain; vertical-align: middle; margin-right: 4px;"/> VNPay</text> }
-                else if (Model.PaymentMethod == "momo") { <text><img src="/images/logo-momo.svg" alt="MoMo" style="height: 16px; width: 16px; border-radius: 3px; object-fit: contain; vertical-align: middle; margin-right: 4px;"/> MoMo</text> }
-                else { @Model.PaymentMethod.ToUpper() }
+                @if (Model.PaymentMethod == "cod") { 
+                  <text>Thanh toán khi nhận hàng (COD)</text> 
+                }
+                else if (Model.PaymentMethod == "vnpay") { 
+                  <text><img src="/images/logo-vnpay.svg" alt="VNPay" class="payment-logo-muted"/> VNPay</text> 
+                }
+                else if (Model.PaymentMethod == "momo") { 
+                  <text><img src="/images/logo-momo.svg" alt="MoMo" class="payment-logo-muted" style="border-radius: 2px;"/> MoMo</text> 
+                }
+                else { 
+                  @Model.PaymentMethod.ToUpper() 
+                }
               </span>
             </div>
           </div>
 
           @* Items *@
           <div class="order-items-list mb-4">
-            <div class="fw-bold mb-2 text-start">Chi tiết đơn hàng</div>
+            <div class="fw-bold mb-2 text-start small text-uppercase text-muted" style="letter-spacing: 0.05em;">Sản phẩm đã đặt</div>
             @foreach (var item in Model.OrderItems)
             {
               <div class="success-item">
@@ -236,47 +243,47 @@
                      alt="@item.ProductName"
                      onerror="this.onerror=null;this.src='/images/no-image.png'"/>
                 <div class="success-item-info">
-                  <div class="fw-semibold">@item.ProductName</div>
-                  <div class="text-muted small">x@item.Quantity · @item.Price.ToString("N0")₫/máy</div>
+                  <div class="fw-semibold small" style="color: var(--navy);">@item.ProductName</div>
+                  <div class="text-muted small">x@item.Quantity · @item.Price.ToString("N0")₫</div>
                 </div>
-                <div class="fw-bold text-danger">@item.Total.ToString("N0")₫</div>
+                <div class="fw-bold small" style="color: var(--navy);">@item.Total.ToString("N0")₫</div>
               </div>
             }
-            <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2">
-              <span>Tổng cộng</span>
-              <span class="text-danger fs-5">@Model.TotalAmount.ToString("N0")₫</span>
+            <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2" style="border-color: rgba(194,178,128,0.15) !important;">
+              <span style="font-family: var(--font-serif); color: var(--navy);">Tổng cộng</span>
+              <span style="color: var(--navy);">@Model.TotalAmount.ToString("N0")₫</span>
             </div>
           </div>
 
-          @* Trạng thái timeline *@
-          <div class="order-timeline mb-4">
-            <div class="timeline-step active">
-              <div class="timeline-dot"><i class="fas fa-check"></i></div>
-              <div class="timeline-label">Đã đặt hàng</div>
-            </div>
-            <div class="timeline-line"></div>
-            <div class="timeline-step">
-              <div class="timeline-dot"><i class="fas fa-box"></i></div>
-              <div class="timeline-label">Xác nhận</div>
-            </div>
-            <div class="timeline-line"></div>
-            <div class="timeline-step">
-              <div class="timeline-dot"><i class="fas fa-truck"></i></div>
-              <div class="timeline-label">Đang giao</div>
-            </div>
-            <div class="timeline-line"></div>
-            <div class="timeline-step">
-              <div class="timeline-dot"><i class="fas fa-home"></i></div>
-              <div class="timeline-label">Đã nhận</div>
-            </div>
+          @* Trạng thái timeline (Golden Thread Style) *@
+          <div class="order-timeline-h mb-5">
+            @{
+              var steps = new[] { ("pending","Đặt hàng","fas fa-shopping-cart"), ("confirmed","Xác nhận","fas fa-check"), ("shipping","Đang giao","fas fa-truck"), ("delivered","Đã nhận","fas fa-home") };
+              var statusOrder = new[] { "pending","confirmed","shipping","delivered" };
+              var currentIdx  = Array.IndexOf(statusOrder, Model.Status);
+            }
+            @foreach (var (sv, sl, icon) in steps)
+            {
+              var idx    = Array.IndexOf(statusOrder, sv);
+              var done   = Model.Status != "cancelled" && idx <= currentIdx;
+              var active = sv == Model.Status;
+              <div class="tl-step @(done?"done":"") @(active?"active":"")">
+                <div class="tl-dot"><i class="@icon"></i></div>
+                <div class="tl-label">@sl</div>
+              </div>
+              @if (sv != "delivered")
+              {
+                <div class="tl-line @(done && !active ? "done" : "")"></div>
+              }
+            }
           </div>
 
           <div class="d-flex gap-3 justify-content-center flex-wrap">
-            <a asp-controller="Order" asp-action="History" class="btn btn-outline-danger">
-              <i class="fas fa-list me-2"></i>Lịch sử đơn hàng
+            <a asp-controller="Order" asp-action="History" class="btn btn-luxury-outline" style="width: auto;">
+              Lịch sử đơn hàng
             </a>
-            <a asp-controller="Home" asp-action="Index" class="btn btn-danger">
-              <i class="fas fa-store me-2"></i>Tiếp tục mua sắm
+            <a asp-controller="Home" asp-action="Index" class="btn btn-luxury-primary" style="width: auto;">
+              Tiếp tục mua sắm
             </a>
           </div>
         </div>
@@ -288,48 +295,292 @@
 
 @section Styles {
 <style>
-  /* ── Common ── */
-  .success-card { background: var(--ivory-pure); border-radius:16px; border:1px solid rgba(194, 178, 128, 0.15); padding:2.5rem; box-shadow:0 4px 24px rgba(0,0,0,.08); }
-  .success-icon { width:80px; height:80px; background:#d4edda; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:2.5rem; color:#28a745; }
-  .order-info-box { background:var(--ivory-warm); border-radius:10px; padding:1rem 1.25rem; text-align:left; }
-  .order-info-row { display:flex; justify-content:space-between; padding:.4rem 0; font-size:.9rem; border-bottom:1px solid rgba(194, 178, 128, 0.1); }
-  .order-info-row:last-child { border-bottom:none; }
-  .order-items-list { text-align:left; }
-  .success-item { display:flex; align-items:center; gap:.75rem; padding:.5rem 0; border-bottom:1px solid #f5f5f5; }
-  .success-item img { width:48px; height:48px; border-radius:8px; object-fit:contain; background:var(--ivory-warm); padding:4px; border:1px solid #eee; }
-  .success-item-info { flex:1; }
-  .order-timeline { display:flex; align-items:center; justify-content:center; }
-  .timeline-step { display:flex; flex-direction:column; align-items:center; gap:4px; }
-  .timeline-dot { width:36px; height:36px; border-radius:50%; background:#dee2e6; color:#fff; display:flex; align-items:center; justify-content:center; font-size:.85rem; }
-  .timeline-step.active .timeline-dot { background:var(--navy); }
-  .timeline-label { font-size:.7rem; color:var(--text-muted); white-space:nowrap; }
-  .timeline-line { flex:1; height:2px; background:#dee2e6; max-width:60px; }
+  /* ── Common success components ── */
+  .success-card { 
+    background: var(--ivory-pure); 
+    border-radius: 12px; 
+    border: 1px solid rgba(194, 178, 128, 0.15); 
+    padding: 2.25rem; 
+    box-shadow: 0 4px 20px rgba(15, 42, 68, 0.02); 
+  }
+  .success-icon { 
+    width: 60px; 
+    height: 60px; 
+    background: rgba(194, 178, 128, 0.08); 
+    border: 1px solid rgba(194, 178, 128, 0.3); 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin: 0 auto 1.25rem; 
+    font-size: 1.35rem; 
+    color: var(--camel-dark); 
+  }
+  .success-title {
+    font-family: var(--font-serif);
+    color: var(--navy);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-align: center;
+    margin-bottom: 0.25rem;
+  }
+  .order-info-box { 
+    background: var(--ivory-warm); 
+    border-radius: 8px; 
+    padding: 1rem 1.25rem; 
+    text-align: left; 
+    border: 1px solid rgba(194, 178, 128, 0.08);
+  }
+  .order-info-row { 
+    display: flex; 
+    justify-content: space-between; 
+    padding: 0.5rem 0; 
+    font-size: 0.85rem; 
+    border-bottom: 1px solid rgba(194, 178, 128, 0.08); 
+    color: var(--text-secondary);
+  }
+  .order-info-row:last-child { 
+    border-bottom: none; 
+  }
+  .order-items-list { 
+    text-align: left; 
+  }
+  .success-item { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.875rem; 
+    padding: 0.65rem 0; 
+    border-bottom: 1px solid rgba(194, 178, 128, 0.08); 
+  }
+  .success-item img { 
+    width: 44px; 
+    height: 44px; 
+    border-radius: 6px; 
+    object-fit: contain; 
+    background: var(--ivory-warm); 
+    padding: 3px; 
+    border: 1px solid rgba(194, 178, 128, 0.1); 
+  }
+  .success-item-info { 
+    flex: 1; 
+  }
+
+  /* ── Golden Thread Timeline ── */
+  .order-timeline-h { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 1.25rem 0.5rem; 
+  }
+  .tl-step { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 6px; 
+  }
+  .tl-dot { 
+    width: 32px; 
+    height: 32px; 
+    border-radius: 50%; 
+    background: var(--ivory); 
+    color: var(--text-tertiary); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 0.75rem; 
+    transition: all 0.3s; 
+  }
+  .tl-label { 
+    font-size: 0.68rem; 
+    color: var(--text-muted); 
+    white-space: nowrap; 
+  }
+  .tl-step.done .tl-dot  { 
+    background: rgba(194, 178, 128, 0.12); 
+    border: 1px solid rgba(194, 178, 128, 0.4); 
+    color: var(--camel-dark); 
+  }
+  .tl-step.active .tl-dot { 
+    background: var(--navy); 
+    color: #fff; 
+    box-shadow: 0 0 0 4px rgba(15, 42, 68, 0.1); 
+  }
+  .tl-step.active .tl-label { 
+    color: var(--navy); 
+    font-weight: 600; 
+  }
+  .tl-line { 
+    flex: 1; 
+    height: 2px; 
+    background: var(--ivory); 
+    margin: 0 4px; 
+    margin-bottom: 16px; 
+    transition: background 0.3s; 
+    max-width: 60px;
+  }
+  .tl-line.done { 
+    background: var(--camel); 
+  }
 
   /* ── QR Payment Card ── */
-  .qr-payment-card { background: var(--ivory-pure); border-radius:16px; border:2px solid #e8f0fe; padding:1.75rem; box-shadow:0 4px 24px rgba(66,133,244,.12); height:100%; }
-  .qr-card-header { font-weight:700; font-size:1rem; color:#1a3c8b; padding-bottom:.75rem; border-bottom:1px solid #e8f0fe; margin-bottom:1rem; }
-  .qr-amount-display { text-align:center; margin-bottom:1.25rem; }
-  .qr-amount { font-size:2rem; font-weight:800; color:var(--navy); letter-spacing:-.5px; }
-  .qr-image-wrap { display:flex; flex-direction:column; align-items:center; margin-bottom:1.25rem; }
-  .qr-image { width:220px; height:220px; object-fit:contain; border-radius:12px; border:3px solid #e8f0fe; padding:6px; background: var(--ivory-pure); box-shadow:0 2px 12px rgba(0,0,0,.08); }
-  .qr-scan-hint { font-size:.75rem; color:#6c757d; margin-top:.5rem; }
-  .qr-error { text-align:center; padding:2rem; color:#6c757d; }
-  .qr-bank-info { background:#f8faff; border-radius:10px; padding:.875rem 1rem; margin-bottom:1rem; }
-  .bank-info-row { display:flex; justify-content:space-between; align-items:center; padding:.35rem 0; border-bottom:1px solid #e8f0fe; font-size:.88rem; }
-  .bank-info-row:last-child { border-bottom:none; }
-  .bank-info-label { color:#6c757d; }
-  .bank-info-val { }
-  .btn-xs { padding:2px 7px; font-size:.72rem; }
-  .copy-btn { border-color:#dee2e6; color:#6c757d; transition:all .15s; }
-  .copy-btn:hover { background:#198754; color:#fff; border-color:#198754; }
-  .copy-btn.copied { background:#198754; color:#fff; border-color:#198754; }
-  .qr-notice { display:flex; align-items:flex-start; gap:.5rem; background:#e8f4fd; border-radius:8px; padding:.75rem 1rem; font-size:.83rem; }
+  .qr-payment-card { 
+    background: var(--ivory-pure); 
+    border-radius: 12px; 
+    border: 1px solid rgba(194, 178, 128, 0.15); 
+    padding: 1.75rem; 
+    box-shadow: 0 4px 20px rgba(15, 42, 68, 0.02); 
+    height: 100%; 
+  }
+  .qr-card-header { 
+    font-family: var(--font-serif);
+    font-weight: 500; 
+    font-size: 1.1rem; 
+    color: var(--navy); 
+    text-align: center;
+    padding-bottom: 0.75rem; 
+    border-bottom: 1px solid rgba(194, 178, 128, 0.1); 
+    margin-bottom: 1.25rem; 
+  }
+  .qr-amount-display { 
+    text-align: center; 
+    margin-bottom: 1.25rem; 
+  }
+  .qr-amount { 
+    font-size: 1.75rem; 
+    font-weight: 700; 
+    color: var(--navy); 
+    letter-spacing: -0.5px; 
+  }
+  .qr-image-wrap { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    margin-bottom: 1.25rem; 
+  }
+  .qr-image { 
+    width: 200px; 
+    height: 200px; 
+    object-fit: contain; 
+    border-radius: 8px; 
+    border: 1px solid rgba(194, 178, 128, 0.15); 
+    padding: 6px; 
+    background: var(--ivory-pure); 
+    box-shadow: 0 2px 12px rgba(15, 42, 68, 0.02); 
+  }
+  .qr-scan-hint { 
+    font-size: 0.72rem; 
+    color: var(--text-muted); 
+    margin-top: 0.5rem; 
+  }
+  .qr-error { 
+    text-align: center; 
+    padding: 2rem; 
+    color: var(--text-muted); 
+  }
+  .qr-bank-info { 
+    background: var(--ivory-warm); 
+    border-radius: 8px; 
+    padding: 0.75rem 1rem; 
+    margin-bottom: 1rem; 
+    border: 1px solid rgba(194, 178, 128, 0.08);
+  }
+  .bank-info-row { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 0.45rem 0; 
+    border-bottom: 1px solid rgba(194, 178, 128, 0.08); 
+    font-size: 0.83rem; 
+  }
+  .bank-info-row:last-child { 
+    border-bottom: none; 
+  }
+  .bank-info-label { 
+    color: var(--text-muted); 
+  }
+  
+  /* Copy buttons */
+  .btn-luxury-copy { 
+    background: transparent;
+    border: 1px solid rgba(15, 42, 68, 0.1); 
+    color: var(--text-muted); 
+    padding: 2px 7px;
+    font-size: 0.7rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-luxury); 
+  }
+  .btn-luxury-copy:hover { 
+    border-color: var(--camel-dark);
+    color: var(--camel-dark);
+  }
+  .btn-luxury-copy.copied { 
+    background: var(--camel); 
+    color: var(--navy-deep); 
+    border-color: var(--camel); 
+  }
+
+  .qr-notice { 
+    display: flex; 
+    align-items: flex-start; 
+    gap: 0.5rem; 
+    background: rgba(194, 178, 128, 0.06); 
+    border-radius: 8px; 
+    padding: 0.75rem 1rem; 
+    font-size: 0.78rem; 
+    border: 1px solid rgba(194, 178, 128, 0.12);
+    color: var(--text-secondary);
+  }
+
   /* Payment status box */
-  .payment-status-box { border-radius:10px; padding:.85rem 1rem; font-size:.88rem; font-weight:500; }
-  .status-waiting { display:flex; align-items:center; background: var(--ivory-pure)8e1; border:1px solid #ffe082; border-radius:10px; padding:.85rem 1rem; color:#7a6000; }
-  .status-timeout { display:flex; align-items:center; background: var(--ivory-pure)3e0; border:1px solid #ffcc80; border-radius:10px; padding:.85rem 1rem; color:#7a3b00; }
-  .status-success { display:flex; align-items:center; background:#e8f5e9; border:1px solid #a5d6a7; border-radius:10px; padding:.85rem 1rem; color:#1b5e20; font-size:.95rem; animation: fadeInGreen .5s ease; }
-  @@keyframes fadeInGreen { from { opacity:0; transform:scale(.97); } to { opacity:1; transform:scale(1); } }
+  .payment-status-box { 
+    font-size: 0.83rem; 
+  }
+  .status-waiting { 
+    display: flex; 
+    align-items: center; 
+    background: var(--ivory-pure); 
+    border: 1px solid rgba(194, 178, 128, 0.2); 
+    border-radius: 8px; 
+    padding: 0.75rem 1rem; 
+    color: var(--text-secondary); 
+  }
+  .status-timeout { 
+    display: flex; 
+    align-items: center; 
+    background: var(--ivory-pure); 
+    border: 1px solid rgba(220, 53, 69, 0.2); 
+    border-radius: 8px; 
+    padding: 0.75rem 1rem; 
+    color: #dc3545; 
+  }
+  .status-success { 
+    display: flex; 
+    align-items: center; 
+    background: var(--ivory-pure); 
+    border: 1px solid rgba(40, 167, 69, 0.25); 
+    border-radius: 8px; 
+    padding: 0.75rem 1rem; 
+    color: #28a745; 
+    animation: fadeInGreen .5s ease; 
+  }
+  @@keyframes fadeInGreen { 
+    from { opacity:0; transform:scale(.97); } 
+    to { opacity:1; transform:scale(1); } 
+  }
+
+  /* Gray scaled payment logos */
+  .payment-logo-muted {
+    filter: grayscale(1) opacity(0.7);
+    transition: all 0.3s var(--ease-luxury);
+    max-height: 14px;
+    width: auto;
+    object-fit: contain;
+    vertical-align: middle;
+  }
+  .payment-logo-muted:hover {
+    filter: grayscale(0.2) opacity(0.9);
+  }
 </style>
 }
 
@@ -360,9 +611,9 @@
       document.getElementById('statusTimeout').classList.add('d-none');
       document.getElementById('statusSuccess').classList.remove('d-none');
       // Cập nhật dòng "Thanh toán" trên bảng thông tin đơn hàng
-      const paymentRow = document.querySelector('.order-info-row .text-warning');
+      const paymentRow = document.querySelector('.order-info-row .fw-semibold');
       if (paymentRow) {
-        paymentRow.className = 'text-success fw-semibold';
+        paymentRow.className = 'fw-semibold text-success';
         paymentRow.innerHTML = '<i class="fas fa-check-circle me-1"></i>Đã thanh toán';
       }
     }

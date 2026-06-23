@@ -236,7 +236,9 @@ public class CartController : Controller
             PaymentMethod   = vm.PaymentMethod,
             Note            = vm.Note,
             CouponCode      = couponCode,
-            DiscountAmount  = discountAmt
+            DiscountAmount  = discountAmt,
+            Latitude        = vm.Latitude,
+            Longitude       = vm.Longitude
         };
         _db.Orders.Add(order);
         await _db.SaveChangesAsync();

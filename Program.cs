@@ -324,6 +324,28 @@ using (var scope = app.Services.CreateScope())
 
     // Call variant and price sync on startup
     SyncProductVariantsAndPrices(db);
+
+    // 4. Auto-add Map Tracking & Shipper Review columns to Orders table
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            IF COL_LENGTH('Orders', 'Latitude') IS NULL
+                ALTER TABLE Orders ADD Latitude FLOAT NULL;
+            IF COL_LENGTH('Orders', 'Longitude') IS NULL
+                ALTER TABLE Orders ADD Longitude FLOAT NULL;
+            IF COL_LENGTH('Orders', 'ProofOfDeliveryImage') IS NULL
+                ALTER TABLE Orders ADD ProofOfDeliveryImage NVARCHAR(500) NULL;
+            IF COL_LENGTH('Orders', 'ShipperRating') IS NULL
+                ALTER TABLE Orders ADD ShipperRating INT NULL;
+            IF COL_LENGTH('Orders', 'ShipperFeedback') IS NULL
+                ALTER TABLE Orders ADD ShipperFeedback NVARCHAR(500) NULL;
+        ");
+        Console.WriteLine("Map Tracking columns verified/added successfully.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Error adding Map Tracking columns: " + ex.Message);
+    }
 }
 
 app.Run();

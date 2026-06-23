@@ -12,6 +12,19 @@
   var isHeaderTransparent = ViewData["HeaderTransparent"] as bool? ?? false;
 }
 
+@* ── PROMO BAR ── *@
+<div class="promo-bar">
+  <div class="container text-center">
+    <small>
+      <span>Miễn phí vận chuyển đơn từ 5 triệu</span>
+      <span class="mx-3">|</span>
+      <span>Bảo hành chính hãng 12 tháng</span>
+      <span class="mx-3">|</span>
+      <span>Đổi trả 30 ngày</span>
+    </small>
+  </div>
+</div>
+
 <header class="site-header sticky-top shadow-sm @(isHeaderTransparent ? "header-transparent" : "")">
   <nav class="navbar navbar-expand-lg navbar-custom">
     <div class="container-fluid px-lg-5">
@@ -48,25 +61,23 @@
                 <div class="row g-4">
                   <!-- Cột 1: Apple iPhone -->
                   <div class="col-md-4 mega-menu-col">
-                    <div class="mega-menu-brand-header d-flex align-items-center mb-3">
-                      <svg class="brand-svg-apple me-2" viewBox="0 0 24 24" style="width:20px; height:20px; fill:var(--ivory);"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.82M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.57 2.95-1.39z"/></svg>
-                      <span class="fw-bold text-uppercase tracking-wider fs-6" style="color: var(--ivory); font-family: var(--font-sans);">Apple iPhone</span>
+                    <div class="mega-menu-brand-header mb-3">
+                      <span class="mega-menu-header-title">Apple iPhone</span>
                     </div>
                     <ul class="list-unstyled mega-menu-list">
-                      <li><a class="mega-menu-item" asp-controller="Product" asp-action="Detail" asp-route-id="iphone-air">iPhone Air (Mới)</a></li>
+                      <li><a class="mega-menu-item" asp-controller="Product" asp-action="Detail" asp-route-id="iphone-air">iPhone Air</a></li>
                       <li><a class="mega-menu-item" asp-controller="Product" asp-action="Index" asp-route-brand="Apple" asp-route-search="iPhone 17">iPhone 17 Series</a></li>
                       <li><a class="mega-menu-item" asp-controller="Product" asp-action="Index" asp-route-brand="Apple" asp-route-search="iPhone 16">iPhone 16 Series</a></li>
                       <li><a class="mega-menu-item" asp-controller="Product" asp-action="Index" asp-route-brand="Apple" asp-route-search="iPhone 15">iPhone 15 Series</a></li>
                       <li><hr class="dropdown-divider opacity-20 my-2" /></li>
-                      <li><a class="mega-menu-item fw-bold text-gradient-gold" asp-controller="Product" asp-action="Index" asp-route-brand="Apple">Xem tất cả iPhone →</a></li>
+                      <li><a class="mega-menu-all-link" asp-controller="Product" asp-action="Index" asp-route-brand="Apple">Tất cả iPhone</a></li>
                     </ul>
                   </div>
                   
                   <!-- Cột 2: Samsung Galaxy -->
                   <div class="col-md-4 mega-menu-col">
-                    <div class="mega-menu-brand-header d-flex align-items-center mb-3">
-                      <svg class="brand-svg-samsung me-2" viewBox="0 0 450 75" style="width:60px; height:12px; fill:var(--ivory);"><path d="M37.8 21.6c-4.4-3-8.8-4.5-13.8-4.5-5.9 0-9.8 2.5-9.8 6.5 0 4.1 4.1 5.9 11.2 7.7 11.4 2.8 21.7 6.4 21.7 18.2 0 13-10.9 20.3-25.7 20.3-10 0-19.8-3.4-25.2-7.8l5.2-11.2c4.7 3.5 11.8 6.4 18.4 6.4 6.7 0 11-2.7 11-7.1 0-4.8-4.6-6.4-12.8-8.4C11 38.4 2 34.6 2 23.5 2 11 12.8 5 26.6 5c9.2 0 17 2.4 21.7 5.7l-10.5 10.9zM73 68.6L98.5 5.8h12L136 68.6h-13.5l-16-41.5-16 41.5H73zM148 68.6V5.8h13.2l17.4 34.2L196 5.8h13.2v62.8h-11.8V21.4L180 55.6h-5.2l-17.4-34.2v47.2H148zM218.8 51.6c4.4 3 8.8 4.5 13.8 4.5 5.9 0 9.8-2.5 9.8-6.5 0-4.1-4.1-5.9-11.2-7.7-11.4-2.8-21.7-6.4-21.7-18.2 0-13 10.9-20.3 25.7-20.3 10 0 19.8 3.4 25.2 7.8l-5.2 11.2c-4.7-3.5-11.8-6.4-18.4-6.4-6.7 0-11 2.7-11 7.1 0 4.8 4.6 6.4 12.8 8.4 13.2 3.2 22.2 7 22.2 18.1 0 12.5-10.8 18.5-24.6 18.5-9.2 0-17-2.4-21.7-5.7l10.5-10.9zM281 5.8v41.5c0 7.8 4.4 11.2 10.8 11.2 6.4 0 10.8-3.4 10.8-11.2V5.8h12.2v41.5c0 14.8-10 22.3-23 22.3s-23-7.5-23-22.3V5.8H281zM345.8 68.6V5.8h13.2l24.4 43.4V5.8h12.2v62.8h-11.8L358 24.4v44.2h-12.2zM435.6 37.8v22c-5.8 6-13.8 9.8-23.6 9.8-18.4 0-31-13-31-31.4S393.6 7 412 7c9.2 0 17 3.4 22.4 8.8l-8.4 8.8c-3.6-3.8-8.8-6-14-6-11.4 0-19.2 8.4-19.2 19.8s7.8 19.8 19.2 19.8c4.6 0 8.8-1.6 11.8-4V48.6h-12.8v-10.8h24.6z"/></svg>
-                      <span class="fw-bold text-uppercase tracking-wider fs-6" style="color: var(--ivory); font-family: var(--font-sans);">Samsung Galaxy</span>
+                    <div class="mega-menu-brand-header mb-3">
+                      <span class="mega-menu-header-title">Samsung Galaxy</span>
                     </div>
                     <ul class="list-unstyled mega-menu-list">
                       <li><a class="mega-menu-item" asp-controller="Product" asp-action="Index" asp-route-brand="Samsung" asp-route-search="S25">Galaxy S25 Series</a></li>
@@ -74,20 +85,20 @@
                       <li><a class="mega-menu-item" asp-controller="Product" asp-action="Index" asp-route-brand="Samsung" asp-route-search="S24">Galaxy S24 Series</a></li>
                       <li><a class="mega-menu-item" asp-controller="Product" asp-action="Index" asp-route-brand="Samsung" asp-route-search="Galaxy A">Galaxy A Series (A35/A55)</a></li>
                       <li><hr class="dropdown-divider opacity-20 my-2" /></li>
-                      <li><a class="mega-menu-item fw-bold text-gradient-gold" asp-controller="Product" asp-action="Index" asp-route-brand="Samsung">Xem tất cả Samsung →</a></li>
+                      <li><a class="mega-menu-all-link" asp-controller="Product" asp-action="Index" asp-route-brand="Samsung">Tất cả Samsung</a></li>
                     </ul>
                   </div>
   
                   <!-- Cột 3: Curated Services & AI -->
                   <div class="col-md-4 mega-menu-col">
-                    <div class="mega-menu-brand-header d-flex align-items-center mb-3">
-                      <span class="fw-bold text-uppercase tracking-wider fs-6" style="color: var(--gold); font-family: var(--font-sans);">Đặc Quyền HutechStore</span>
+                    <div class="mega-menu-brand-header mb-3">
+                      <span class="mega-menu-header-title">Đặc Quyền HutechStore</span>
                     </div>
                     <ul class="list-unstyled mega-menu-list">
-                      <li><a class="mega-menu-item d-flex align-items-center" asp-controller="Product" asp-action="Index"><i class="fas fa-th-large me-2"></i>Tất cả điện thoại</a></li>
-                      <li><a class="mega-menu-item d-flex align-items-center" href="#" onclick="toggleChat(); return false;"><i class="fas fa-robot me-2"></i>Tư vấn AI Trực tuyến</a></li>
-                      <li><a class="mega-menu-item d-flex align-items-center" href="#" onclick="return false;"><i class="fas fa-gift me-2"></i>Khuyến mãi & Quà tặng</a></li>
-                      <li><a class="mega-menu-item d-flex align-items-center" href="#" onclick="return false;"><i class="fas fa-shield-alt me-2"></i>Chính sách bảo hành vàng</a></li>
+                      <li><a class="mega-menu-item" asp-controller="Product" asp-action="Index">Tất cả điện thoại</a></li>
+                      <li><a class="mega-menu-item" href="#" onclick="toggleChat(); return false;">Tư vấn AI Trực tuyến</a></li>
+                      <li><a class="mega-menu-item" href="#" onclick="return false;">Khuyến mãi & Quà tặng</a></li>
+                      <li><a class="mega-menu-item" href="#" onclick="return false;">Chính sách bảo hành vàng</a></li>
                     </ul>
                   </div>
                 </div>
@@ -157,7 +168,7 @@
                 }
                 <span class="d-none d-lg-inline ms-1 user-name-truncate">@userName</span>
               </a>
-              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-user">
+               <ul class="dropdown-menu dropdown-menu-end dropdown-menu-user">
                 <li class="dropdown-header user-info-header">
                   <div class="fw-bold">@userName</div>
                   <div class="small text-muted">@Context.Session.GetString("UserEmail")</div>
@@ -165,17 +176,17 @@
                 <li><hr class="dropdown-divider"/></li>
                 <li>
                   <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
-                    Tài khoản của tôi
+                    <i class="far fa-user-circle me-2"></i>Tài khoản của tôi
                   </a>
                 </li>
                 <li>
                   <a class="dropdown-item" asp-controller="Order" asp-action="History">
-                    Lịch sử đơn hàng
+                    <i class="fas fa-history me-2"></i>Lịch sử đơn hàng
                   </a>
                 </li>
                 <li>
                   <a class="dropdown-item" asp-controller="Wishlist" asp-action="Index">
-                    Sản phẩm yêu thích
+                    <i class="far fa-heart me-2"></i>Sản phẩm yêu thích
                   </a>
                 </li>
                 @if (userRole == "admin")
@@ -183,14 +194,14 @@
                   <li><hr class="dropdown-divider"/></li>
                   <li>
                     <a class="dropdown-item text-danger fw-bold" asp-controller="Admin" asp-action="Index">
-                      Quản trị hệ thống
+                      <i class="fas fa-sliders-h me-2"></i>Quản trị hệ thống
                     </a>
                   </li>
                 }
                 <li><hr class="dropdown-divider"/></li>
                 <li>
                   <a class="dropdown-item text-muted" asp-controller="Auth" asp-action="Logout">
-                    Đăng xuất
+                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
                   </a>
                 </li>
               </ul>
@@ -213,18 +224,4 @@
         </ul>
       </div>
     </div>
-  </nav>
-
-  @* ── PROMO BAR ── *@
-  <div class="promo-bar">
-    <div class="container text-center">
-      <small>
-        <span>Miễn phí vận chuyển đơn từ 5 triệu</span>
-        <span class="mx-3">|</span>
-        <span>Bảo hành chính hãng 12 tháng</span>
-        <span class="mx-3">|</span>
-        <span>Đổi trả 30 ngày</span>
-      </small>
-    </div>
-  </div>
-</header>
+  </nav></header>

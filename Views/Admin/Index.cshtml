@@ -94,12 +94,12 @@
         @foreach (var (tp, i) in Model.TopProducts.Select((t, i) => (t, i + 1)))
         {
           <div class="d-flex align-items-center gap-3 px-3 py-2 border-bottom">
-            <span class="top-rank top-rank-@(i <= 3 ? i.ToString() : "other")">@i</span>
+            <span class="top-rank top-rank-@(i <= 3 ? i.ToString() : "other")" style="flex-shrink: 0;">@i</span>
             <div class="flex-grow-1 min-width-0">
-              <div class="fw-semibold text-truncate small">@tp.Name</div>
+              <div class="fw-semibold small" style="word-break: break-word; line-height: 1.2;">@tp.Name</div>
               <div class="text-muted" style="font-size:.75rem">Đã bán: @tp.Sold</div>
             </div>
-            <div class="fw-bold text-danger text-nowrap small">@tp.Revenue.ToString("N0")₫</div>
+            <div class="fw-bold text-danger text-nowrap small ms-2" style="width: 110px; text-align: right; flex-shrink: 0;">@tp.Revenue.ToString("N0")₫</div>
           </div>
         }
         @if (!Model.TopProducts.Any())
