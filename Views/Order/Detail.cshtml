@@ -9,14 +9,16 @@
     ["cancelled"] =("Đã hủy","danger"),
   };
   var (statusLabel, statusCls) = statusMap.GetValueOrDefault(Model.Status, ("Không rõ","secondary"));
+  var hasCoords = Model.Latitude.HasValue && Model.Longitude.HasValue;
+  var isShippingOrDelivered = Model.Status == "shipping" || Model.Status == "delivered";
 }
 
 <div class="container py-4">
   <div class="d-flex align-items-center gap-3 mb-4">
-    <a asp-action="History" class="btn btn-outline-secondary btn-sm">
+    <a asp-action="History" class="btn btn-luxury-outline btn-sm px-3" style="width: auto;">
       <i class="fas fa-arrow-left"></i>
     </a>
-    <h4 class="fw-bold mb-0">Đơn hàng <span class="text-danger">#@Model.OrderNumber</span></h4>
+    <h4 style="font-family: var(--font-serif); color: var(--navy); font-weight: 500; letter-spacing: -0.01em; margin-bottom: 0;">Đơn hàng <span style="color: var(--camel-dark)">#@Model.OrderNumber</span></h4>
     <span class="badge bg-@statusCls fs-6">@statusLabel</span>
   </div>
 
@@ -25,7 +27,7 @@
 
       @* Timeline *@
       <div class="order-detail-card mb-4">
-        <div class="odc-title"><i class="fas fa-truck me-2 text-primary"></i>Tiến trình đơn hàng</div>
+        <div class="odc-title"><i class="fas fa-truck me-2" style="color: var(--camel-dark)"></i>Tiến trình đơn hàng</div>
         <div class="order-timeline-h">
           @{
             var steps = new[] { ("pending","Đặt hàng","fas fa-shopping-cart"), ("confirmed","Xác nhận","fas fa-check"), ("shipping","Đang giao","fas fa-truck"), ("delivered","Đã nhận","fas fa-home") };
@@ -49,9 +51,142 @@
         </div>
       </div>
 
+      @* ══════════════════════════════════════════════════════════════════
+         MAP TRACKING & LIVE CHAT SHIPPER
+         ══════════════════════════════════════════════════════════════════ *@
+      @if (hasCoords && Model.Status != "cancelled")
+      {
+        <div class="order-detail-card mb-4 tracking-section">
+          <div class="odc-title">
+            <i class="fas fa-map-marked-alt me-2" style="color: var(--camel-dark)"></i>Theo dõi hành trình giao hàng
+            <span class="badge bg-success ms-2 tracking-live-badge" style="display:none">
+              <i class="fas fa-circle fa-xs me-1 blink-dot"></i>LIVE
+            </span>
+          </div>
+
+          <div class="row g-3 p-3">
+            @* Map *@
+            <div class="col-12">
+              <div id="trackingMap" class="tracking-map-container"></div>
+              <div class="tracking-info-bar mt-2">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <i class="fas fa-motorcycle text-primary me-1"></i>
+                    <span id="shipperSpeed" class="fw-semibold small">0 km/h</span>
+                  </div>
+                  <div>
+                    <i class="fas fa-road text-muted me-1"></i>
+                    <span id="distanceLeft" class="fw-semibold small">-- km</span>
+                  </div>
+                  <div>
+                    <i class="fas fa-clock text-warning me-1"></i>
+                    <span id="etaDisplay" class="fw-semibold small">--:--</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          @* Nút giả lập *@
+          @if (Model.Status == "pending" || Model.Status == "confirmed")
+          {
+            <div class="text-center p-3 pt-0">
+              <button type="button" class="btn btn-luxury-outline btn-sm px-4" id="btnStartSimulation" style="width: auto;"
+                      onclick="startShipperSimulation()">
+                <i class="fas fa-play me-2"></i>Bắt đầu giả lập giao hàng
+              </button>
+            </div>
+          }
+        </div>
+
+      }
+
+      @* ── Proof of Delivery ── *@
+      @if (Model.Status == "delivered" && !string.IsNullOrEmpty(Model.ProofOfDeliveryImage))
+      {
+        <div class="order-detail-card mb-4">
+          <div class="odc-title"><i class="fas fa-camera me-2" style="color: var(--camel-dark)"></i>Bằng chứng giao hàng (POD)</div>
+          <div class="p-3 text-center">
+            <img src="@Model.ProofOfDeliveryImage" alt="Proof of Delivery"
+              class="img-fluid rounded-3" style="max-height:300px"
+              onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\'text-muted small\'><i class=\'fas fa-image fa-2x mb-2 d-block\'></i>Ảnh xác nhận giao hàng</div>'"/>
+          </div>
+        </div>
+      }
+
+      @* ── Dual Review Form ── *@
+      @if (Model.Status == "delivered" && !Model.ShipperRating.HasValue)
+      {
+        <div class="order-detail-card mb-4" id="reviewSection">
+          <div class="odc-title"><i class="fas fa-star me-2" style="color: var(--camel-dark)"></i>Đánh giá đơn hàng</div>
+          <div class="p-3">
+            <div class="row g-4">
+              @* Đánh giá sản phẩm *@
+              <div class="col-md-6">
+                <div class="review-card">
+                  <div class="review-card-icon"><i class="fas fa-box-open"></i></div>
+                  <h6 class="fw-bold">Chất lượng sản phẩm</h6>
+                  <div class="star-rating" id="productStars">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                      <i class="fas fa-star star-btn" data-value="@i" onclick="setRating('product', @i)"></i>
+                    }
+                  </div>
+                  <div id="productRatingText" class="small text-muted mt-1">Chọn số sao</div>
+                  <textarea id="productComment" class="form-control form-control-sm mt-2"
+                            rows="2" placeholder="Nhận xét về sản phẩm..."></textarea>
+                </div>
+              </div>
+              @* Đánh giá shipper *@
+              <div class="col-md-6">
+                <div class="review-card">
+                  <div class="review-card-icon shipper"><i class="fas fa-motorcycle"></i></div>
+                  <h6 class="fw-bold">Dịch vụ Shipper</h6>
+                  <div class="star-rating" id="shipperStars">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                      <i class="fas fa-star star-btn" data-value="@i" onclick="setRating('shipper', @i)"></i>
+                    }
+                  </div>
+                  <div id="shipperRatingText" class="small text-muted mt-1">Chọn số sao</div>
+                  <textarea id="shipperFeedback" class="form-control form-control-sm mt-2"
+                            rows="2" placeholder="Nhận xét về shipper..."></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="text-center mt-3">
+              <button type="button" class="btn btn-luxury-primary px-5" onclick="submitReview()">
+                Gửi đánh giá
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      @* ── Already Reviewed ── *@
+      @if (Model.Status == "delivered" && Model.ShipperRating.HasValue)
+      {
+        <div class="order-detail-card mb-4">
+          <div class="odc-title"><i class="fas fa-star me-2" style="color: var(--camel-dark)"></i>Đánh giá của bạn</div>
+          <div class="p-3">
+            <div class="d-flex align-items-center gap-3 mb-2">
+              <span class="fw-semibold">Shipper:</span>
+              @for (int i = 1; i <= 5; i++)
+              {
+                <i class="fas fa-star @(i <= Model.ShipperRating ? "text-warning" : "text-muted")" style="font-size:.9rem"></i>
+              }
+            </div>
+            @if (!string.IsNullOrEmpty(Model.ShipperFeedback))
+            {
+              <div class="text-muted small"><i class="fas fa-quote-left me-1"></i>@Model.ShipperFeedback</div>
+            }
+          </div>
+        </div>
+      }
+
       @* Products *@
       <div class="order-detail-card mb-4">
-        <div class="odc-title"><i class="fas fa-box me-2 text-danger"></i>Sản phẩm đã đặt</div>
+        <div class="odc-title"><i class="fas fa-box me-2" style="color: var(--camel-dark)"></i>Sản phẩm đã đặt</div>
         @foreach (var item in Model.OrderItems)
         {
           <div class="od-item">
@@ -85,8 +220,8 @@
             </div>
           }
           <div class="d-flex justify-content-between fw-bold fs-5 mt-2">
-            <span>Tổng thanh toán</span>
-            <span class="text-danger">@Model.TotalAmount.ToString("N0")₫</span>
+            <span style="color: var(--navy); font-family: var(--font-serif)">Tổng thanh toán</span>
+            <span style="color: var(--navy); font-weight: 700;">@Model.TotalAmount.ToString("N0")₫</span>
           </div>
         </div>
       </div>
@@ -97,7 +232,7 @@
 
       @* Shipping info *@
       <div class="order-detail-card mb-3">
-        <div class="odc-title"><i class="fas fa-map-marker-alt me-2 text-danger"></i>Thông tin giao hàng</div>
+        <div class="odc-title"><i class="fas fa-map-marker-alt me-2" style="color: var(--camel-dark)"></i>Thông tin giao hàng</div>
         <div class="od-info-row"><i class="fas fa-user"></i><span>@Model.ShippingName</span></div>
         <div class="od-info-row"><i class="fas fa-phone"></i><span>@Model.ShippingPhone</span></div>
         <div class="od-info-row"><i class="fas fa-home"></i><span>@Model.ShippingAddress</span></div>
@@ -109,7 +244,7 @@
 
       @* Payment + date *@
       <div class="order-detail-card mb-3">
-        <div class="odc-title"><i class="fas fa-credit-card me-2 text-primary"></i>Thanh toán</div>
+        <div class="odc-title"><i class="fas fa-credit-card me-2" style="color: var(--camel-dark)"></i>Thanh toán</div>
         <div class="od-info-row"><i class="fas fa-wallet"></i><span>@Model.PaymentMethod.ToUpper()</span></div>
         <div class="od-info-row"><i class="fas fa-calendar"></i><span>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span></div>
       </div>
@@ -121,21 +256,27 @@
           <form asp-controller="Order" asp-action="Cancel" method="post">
             @Html.AntiForgeryToken()
             <input type="hidden" name="id" value="@Model.Id"/>
-            <button type="submit" class="btn btn-outline-danger w-100"
+            <button type="submit" class="btn btn-luxury-outline w-100" style="border-color: rgba(220, 53, 69, 0.4) !important; color: #dc3545 !important;"
                     onclick="return confirm('Xác nhận hủy đơn hàng này?')">
-              <i class="fas fa-times me-2"></i>Hủy đơn hàng
+              Hủy đơn hàng
             </button>
           </form>
         }
-        <a asp-controller="Product" asp-action="Index" class="btn btn-danger">
-          <i class="fas fa-store me-2"></i>Tiếp tục mua sắm
+        <a asp-controller="Product" asp-action="Index" class="btn btn-luxury-primary">
+          Tiếp tục mua sắm
         </a>
       </div>
     </div>
   </div>
 </div>
+@if (hasCoords && Model.Status == "shipping")
+{
+  @await Html.PartialAsync("_ShipperChatWidget", Model)
+}
 
 @section Styles {
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
   .order-detail-card { background: var(--ivory-pure); border-radius:12px; border:1px solid rgba(194, 178, 128, 0.15); overflow:hidden; }
   .odc-title { font-weight:700; padding:.875rem 1.25rem; background:var(--ivory-warm); border-bottom:1px solid rgba(194, 178, 128, 0.1); font-size:.95rem; }
@@ -156,5 +297,747 @@
   .od-info-row { display:flex; align-items:flex-start; gap:.75rem; padding:.5rem 1.25rem; font-size:.88rem; border-bottom:1px solid #f8f8f8; }
   .od-info-row:last-child { border:none; }
   .od-info-row i { width:16px; color:var(--navy); margin-top:2px; flex-shrink:0; }
+
+  /* Map Styles */
+  .tracking-map-container {
+    width: 100%;
+    height: 500px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(194, 178, 128, 0.2);
+    box-shadow: 0 4px 20px rgba(15, 42, 68, 0.05);
+  }
+  .tracking-info-bar {
+    background: var(--ivory-warm);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(194, 178, 128, 0.15);
+  }
+  .tracking-live-badge {
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+  .blink-dot {
+    animation: blink-anim 1s infinite;
+  }
+  @@keyframes blink-anim {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Shipper Chat UI override inside widget */
+  .shipper-chat-window .chat-msg {
+    display: flex;
+    flex-direction: column;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    max-width: 80%;
+    margin-bottom: 0.25rem;
+    box-shadow: 0 2px 6px rgba(15,42,68,0.03);
+    word-break: break-word;
+  }
+  .shipper-chat-window .chat-msg.shipper {
+    align-self: flex-start;
+    background: var(--ivory-warm);
+    border: 1px solid rgba(15,42,68,0.08);
+    color: var(--text-primary);
+    border-radius: 4px 12px 12px 12px;
+  }
+  .shipper-chat-window .chat-msg.customer {
+    align-self: flex-end;
+    background: var(--navy);
+    color: var(--ivory-pure);
+    border-radius: 12px 4px 12px 12px;
+    border: none;
+  }
+  .shipper-chat-window .chat-msg.system {
+    align-self: center;
+    background: rgba(194,178,128,0.08);
+    color: var(--camel-dark);
+    border: 1px solid rgba(194,178,128,0.2);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.75rem;
+    max-width: 90%;
+    padding: 0.4rem 0.8rem;
+  }
+  .shipper-chat-window .chat-time {
+    font-size: 0.65rem;
+    opacity: 0.6;
+    margin-top: 4px;
+    display: block;
+    text-align: right;
+  }
+  .shipper-chat-window .chat-msg.customer .chat-time {
+    color: rgba(255,255,255,0.7);
+  }
+  .shipper-chat-window .chat-msg.shipper .chat-time {
+    color: var(--text-secondary);
+  }
+
+  .chat-action-btn.urgent {
+    border-color:#dc3545; color:#dc3545;
+  }
+  .chat-action-btn.urgent:hover { background:#dc3545; color:#fff; }
+  .chat-action-btn.chill {
+    border-color:#28a745; color:#28a745;
+  }
+  .chat-action-btn.chill:hover { background:#28a745; color:#fff; }
+
+  .shipper-action-btn {
+    padding: 8px 18px !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    border-radius: 20px !important;
+    background-color: transparent !important;
+    border: 1px solid rgba(15, 42, 68, 0.15) !important;
+    color: var(--navy) !important;
+    cursor: pointer !important;
+    transition: all 0.3s var(--ease-luxury) !important;
+    display: inline-block !important;
+    white-space: nowrap !important;
+    text-decoration: none !important;
+  }
+
+  .shipper-action-btn.urgent {
+    border-color: #dc3545 !important;
+    color: #dc3545 !important;
+  }
+  .shipper-action-btn.urgent:hover {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2) !important;
+  }
+
+  .shipper-action-btn.chill {
+    border-color: #28a745 !important;
+    color: #28a745 !important;
+  }
+  .shipper-action-btn.chill:hover {
+    background-color: #28a745 !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2) !important;
+  }
+
+  /* ── Review ── */
+  .review-card {
+    background:var(--ivory-warm); border-radius:12px; padding:1.25rem;
+    text-align:center; border:1px solid rgba(194,178,128,.1);
+    transition:transform .2s;
+  }
+  .review-card:hover { transform:translateY(-2px); }
+  .review-card-icon {
+    width:48px; height:48px; border-radius:50%; margin:0 auto .75rem;
+    background:linear-gradient(135deg, var(--navy), #1b365d);
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:1.2rem;
+  }
+  .review-card-icon.shipper { background:linear-gradient(135deg, #28a745, #20c997); }
+  .star-rating { display:flex; justify-content:center; gap:4px; }
+  .star-btn {
+    font-size:1.5rem; color:#dee2e6; cursor:pointer;
+    transition:color .15s, transform .15s;
+  }
+  .star-btn:hover { transform:scale(1.2); }
+  .star-btn.active { color:#ffc107; }
 </style>
+}
+
+@section Scripts {
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"
+        integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ=="
+        crossorigin="anonymous"></script>
+<script>
+  const ORDER_ID = @Model.Id;
+  const ORDER_STATUS = '@Model.Status';
+  const HAS_COORDS = @(hasCoords ? "true" : "false");
+
+  // ── AES Decryption Helper (CryptoJS) ──
+  let decryptKeyHex = null, decryptSaltHex = null;
+
+  async function loadDecryptKey() {
+    try {
+      const resp = await fetch('/api/order/decrypt-key/' + ORDER_ID);
+      const data = await resp.json();
+      decryptKeyHex = data.keyHex;
+      decryptSaltHex = data.saltHex;
+    } catch (e) { console.warn('Cannot load decrypt key:', e); }
+  }
+
+  function decryptAES(cipherB64) {
+    if (!decryptKeyHex || !cipherB64) return cipherB64;
+    try {
+      const raw = CryptoJS.enc.Base64.parse(cipherB64);
+      const rawBytes = [];
+      for (let i = 0; i < raw.sigBytes; i++) rawBytes.push((raw.words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff);
+      const iv = CryptoJS.lib.WordArray.create(new Uint8Array(rawBytes.slice(0, 16)));
+      const ct = CryptoJS.lib.WordArray.create(new Uint8Array(rawBytes.slice(16)));
+      const key = CryptoJS.enc.Hex.parse(decryptKeyHex);
+      const decrypted = CryptoJS.AES.decrypt(
+        { ciphertext: ct },
+        key,
+        { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
+      );
+      return decrypted.toString(CryptoJS.enc.Utf8);
+    } catch (e) { console.warn('Decrypt failed:', e); return cipherB64; }
+  }
+
+  // ── Map & Chat State ──
+  let map, routeLine, shipperMarker, storeMarker, customerMarker;
+  let routeCoords = [];
+  let currentStep = 0;
+  let animTimer = null;
+  let trafficJamTriggered = false;
+  let alternativeRoute = null;
+
+  const STORE_LAT = 10.8018, STORE_LNG = 106.7118;
+  const STORE_NAME = 'HutechStore - HUTECH Bình Thạnh';
+
+  // Leaflet icons
+  const storeIcon = L.divIcon({
+    html: '<div style="background:#dc3545;color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(220,53,69,.4);border:2px solid #fff"><i class="fas fa-store"></i></div>',
+    iconSize: [32, 32], iconAnchor: [16, 16], className: ''
+  });
+  const customerIcon = L.divIcon({
+    html: '<div style="background:#0d6efd;color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(13,110,253,.4);border:2px solid #fff"><i class="fas fa-home"></i></div>',
+    iconSize: [32, 32], iconAnchor: [16, 16], className: ''
+  });
+  const shipperIcon = L.divIcon({
+    html: '<div id="shipperIconEl" style="background:#28a745;color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 12px rgba(40,167,69,.5);border:2px solid #fff;transition:all .3s"><i class="fas fa-motorcycle"></i></div>',
+    iconSize: [36, 36], iconAnchor: [18, 18], className: ''
+  });
+  const trafficIcon = L.divIcon({
+    html: '<div style="background:#ffc107;color:#000;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 2px 8px rgba(255,193,7,.5);border:2px solid #fff;animation:pulse-badge 1.5s infinite"><i class="fas fa-exclamation-triangle"></i></div>',
+    iconSize: [28, 28], iconAnchor: [14, 14], className: ''
+  });
+
+  // ── Chat Functions ──
+  function toggleShipperChat() {
+    const chatWin = document.getElementById('shipperChatWindow');
+    const badgeDot = document.getElementById('shipperChatDot');
+    const openIcon = document.querySelector('.shipper-chat-icon-open');
+    const closeIcon = document.querySelector('.shipper-chat-icon-close');
+
+    if (!chatWin.classList.contains('show-chat')) {
+      chatWin.classList.add('show-chat');
+      openIcon.classList.add('d-none');
+      closeIcon.classList.remove('d-none');
+      badgeDot.style.display = 'none';
+      const msgs = document.getElementById('shipperChatMessages');
+      msgs.scrollTop = msgs.scrollHeight;
+    } else {
+      chatWin.classList.remove('show-chat');
+      openIcon.classList.remove('d-none');
+      closeIcon.classList.add('d-none');
+    }
+  }
+
+  function openShipperChat() {
+    const chatWin = document.getElementById('shipperChatWindow');
+    const badgeDot = document.getElementById('shipperChatDot');
+    const openIcon = document.querySelector('.shipper-chat-icon-open');
+    const closeIcon = document.querySelector('.shipper-chat-icon-close');
+
+    if (chatWin && !chatWin.classList.contains('show-chat')) {
+      chatWin.classList.add('show-chat');
+      openIcon.classList.add('d-none');
+      closeIcon.classList.remove('d-none');
+      badgeDot.style.display = 'none';
+      const msgs = document.getElementById('shipperChatMessages');
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+  }
+
+  function addChatMsg(text, type, time) {
+    const el = document.getElementById('shipperChatMessages');
+    if (!el) return;
+    const t = time || new Date().toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' });
+    const div = document.createElement('div');
+    div.className = 'chat-msg ' + type;
+    div.innerHTML = text + '<span class="chat-time">' + t + '</span>';
+    el.appendChild(div);
+    el.scrollTop = el.scrollHeight;
+
+    const chatWin = document.getElementById('shipperChatWindow');
+    if (chatWin && !chatWin.classList.contains('show-chat')) {
+      const badgeDot = document.getElementById('shipperChatDot');
+      if (badgeDot) {
+        badgeDot.style.display = 'block';
+      }
+    }
+  }
+
+  function showChatActions(actions) {
+    const el = document.getElementById('shipperChatActions');
+    if (!el) return;
+    el.style.display = 'flex';
+    el.innerHTML = actions.map(a =>
+      `<button class="shipper-action-btn ${a.cls}" onclick="${a.onclick}">${a.text}</button>`
+    ).join('');
+  }
+
+  function hideChatActions() {
+    const el = document.getElementById('shipperChatActions');
+    if (el) el.style.display = 'none';
+  }
+
+  // ── Rating Functions ──
+  let productRating = 0, shipperRating = 0;
+  function setRating(type, val) {
+    if (type === 'product') {
+      productRating = val;
+      document.querySelectorAll('#productStars .star-btn').forEach((s, i) => {
+        s.classList.toggle('active', i < val);
+      });
+      const labels = ['', 'Rất tệ 😞', 'Tệ 😕', 'Bình thường 😐', 'Tốt 😊', 'Tuyệt vời 🤩'];
+      document.getElementById('productRatingText').textContent = labels[val];
+    } else {
+      shipperRating = val;
+      document.querySelectorAll('#shipperStars .star-btn').forEach((s, i) => {
+        s.classList.toggle('active', i < val);
+      });
+      const labels = ['', 'Rất tệ 😞', 'Tệ 😕', 'Bình thường 😐', 'Tốt 😊', 'Tuyệt vời 🤩'];
+      document.getElementById('shipperRatingText').textContent = labels[val];
+    }
+  }
+
+  async function submitReview() {
+    if (!productRating && !shipperRating) { alert('Vui lòng chọn số sao!'); return; }
+    const body = {
+      productRating: productRating || null,
+      productComment: document.getElementById('productComment')?.value || null,
+      shipperRating: shipperRating || null,
+      shipperFeedback: document.getElementById('shipperFeedback')?.value || null
+    };
+    try {
+      const resp = await fetch('/api/order/submit-review/' + ORDER_ID, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await resp.json();
+      if (data.success) {
+        document.getElementById('reviewSection').innerHTML =
+          '<div class="p-4 text-center"><div style="font-size:3rem">🎉</div><h5 class="fw-bold mt-2">Cảm ơn bạn đã đánh giá!</h5><p class="text-muted">Phản hồi của bạn giúp chúng tôi cải thiện dịch vụ.</p></div>';
+      }
+    } catch (e) { alert('Lỗi gửi đánh giá'); }
+  }
+
+  // ── Helper: Clear existing map elements ──
+  function clearMapElements() {
+    if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
+    if (shipperMarker) { map.removeLayer(shipperMarker); shipperMarker = null; }
+    if (storeMarker) { map.removeLayer(storeMarker); storeMarker = null; }
+    if (customerMarker) { map.removeLayer(customerMarker); customerMarker = null; }
+  }
+
+  // ── Helper: Draw route line safely ──
+  function setRouteLine(coords, options) {
+    if (routeLine) {
+      map.removeLayer(routeLine);
+    }
+    routeLine = L.polyline(coords, options).addTo(map);
+  }
+
+  // ── Unified Routing Fetcher (with fallback) ──
+  async function fetchRoute(lon1, lat1, lon2, lat2) {
+    // 1. Try OSM Germany OSRM
+    try {
+      const url = `https://routing.openstreetmap.de/routed-car/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson&alternatives=true`;
+      const resp = await fetch(url);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.routes && data.routes.length > 0) {
+          let alt = null;
+          if (data.routes.length > 1) {
+            alt = data.routes[1].geometry.coordinates.map(c => [c[1], c[0]]);
+          }
+          return {
+            coordinates: data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]),
+            distance: data.routes[0].distance,
+            alternative: alt
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch route from OSM Germany:', e);
+    }
+
+    // 2. Try Project OSRM Demo
+    try {
+      const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson&alternatives=true`;
+      const resp = await fetch(url);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.routes && data.routes.length > 0) {
+          let alt = null;
+          if (data.routes.length > 1) {
+            alt = data.routes[1].geometry.coordinates.map(c => [c[1], c[0]]);
+          }
+          return {
+            coordinates: data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]),
+            distance: data.routes[0].distance,
+            alternative: alt
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch route from Project OSRM:', e);
+    }
+
+    // 3. Try BRouter (reliable fallback)
+    try {
+      const url = `https://brouter.de/brouter?lonlats=${lon1},${lat1}|${lon2},${lat2}&profile=car-fast&alternativeidx=0&format=geojson`;
+      const resp = await fetch(url);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.features && data.features.length > 0 && data.features[0].geometry) {
+          const coords = data.features[0].geometry.coordinates.map(c => [c[1], c[0]]);
+          const lengthStr = data.features[0].properties["track-length"] || "0";
+          const distance = parseFloat(lengthStr); // in meters
+          return {
+            coordinates: coords,
+            distance: distance,
+            alternative: null
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch route from BRouter:', e);
+    }
+
+    throw new Error('All routing servers failed');
+  }
+
+  // ── Shipper Simulation Engine ──
+  async function startShipperSimulation() {
+    const btn = document.getElementById('btnStartSimulation');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang khởi tạo...'; }
+
+    // 1. Trigger shipping status
+    await fetch('/api/order/shipper-simulate/' + ORDER_ID, { method: 'POST' });
+
+    // 2. Load decrypt key
+    await loadDecryptKey();
+
+    // 3. Get tracking data
+    const resp = await fetch('/api/order/tracking/' + ORDER_ID);
+    const tracking = await resp.json();
+
+    const custLat = parseFloat(decryptAES(tracking.customerLat)) || 10.7769;
+    const custLng = parseFloat(decryptAES(tracking.customerLng)) || 106.7009;
+
+    // 4. Show live badge
+    document.querySelector('.tracking-live-badge').style.display = 'inline-flex';
+    if (btn) btn.style.display = 'none';
+    openShipperChat();
+
+    // Update timeline to "shipping" visually
+    document.querySelectorAll('.tl-step').forEach((step, i) => {
+      if (i <= 2) { step.classList.add('done'); step.classList.remove('active'); }
+      if (i === 2) step.classList.add('active');
+    });
+    document.querySelectorAll('.tl-line').forEach((line, i) => { if (i <= 1) line.classList.add('done'); });
+
+    // Clear any previous elements first
+    clearMapElements();
+
+    // 5. Fetch route from routing servers
+    try {
+      const routeData = await fetchRoute(STORE_LNG, STORE_LAT, custLng, custLat);
+
+      routeCoords = routeData.coordinates;
+      alternativeRoute = routeData.alternative;
+
+      // Draw route
+      setRouteLine(routeCoords, {
+        color: '#0d6efd', weight: 4, opacity: 0.7,
+        dashArray: '8 4'
+      });
+
+      // Place markers
+      storeMarker = L.marker([STORE_LAT, STORE_LNG], { icon: storeIcon })
+        .addTo(map).bindPopup('<b>' + STORE_NAME + '</b>');
+      customerMarker = L.marker([custLat, custLng], { icon: customerIcon })
+        .addTo(map).bindPopup('<b>Địa chỉ giao hàng</b><br>' + tracking.address);
+
+      shipperMarker = L.marker(routeCoords[0], { icon: shipperIcon }).addTo(map);
+
+      map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+
+      // Distance
+      const totalDist = routeData.distance / 1000;
+      document.getElementById('distanceLeft').textContent = totalDist.toFixed(1) + ' km';
+
+      // 6. Start animation
+      setTimeout(() => {
+        addChatMsg('Chào anh/chị! Em là Shipper Huy, em nhận đơn hàng <b>#' + tracking.orderNumber + '</b> rồi nha. Em đang sửa soạn xe chạy từ HUTECH Bình Thạnh qua bên anh/chị ngay ạ! 🏍️', 'shipper');
+      }, 1000);
+      setTimeout(() => {
+        addChatMsg('Đơn hàng của anh/chị đang trên đường giao nhé! ✨', 'shipper');
+        startShipperMovement(routeCoords, totalDist);
+      }, 3000);
+    } catch (e) {
+      console.warn('Routing failed, using direct line:', e);
+      routeCoords = generateInterpolatedRoute(STORE_LAT, STORE_LNG, custLat, custLng, 60);
+      setRouteLine(routeCoords, { color:'#0d6efd', weight:4, opacity:.7 });
+      storeMarker = L.marker([STORE_LAT, STORE_LNG], { icon: storeIcon }).addTo(map);
+      customerMarker = L.marker([custLat, custLng], { icon: customerIcon }).addTo(map);
+      shipperMarker = L.marker(routeCoords[0], { icon: shipperIcon }).addTo(map);
+      map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+      setTimeout(() => {
+        addChatMsg('Em nhận đơn rồi nha. Chạy qua bên anh/chị ngay ạ! 🏍️', 'shipper');
+        startShipperMovement(routeCoords, 5);
+      }, 2000);
+    }
+  }
+
+  function generateInterpolatedRoute(lat1, lng1, lat2, lng2, steps) {
+    const pts = [];
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      pts.push([lat1 + (lat2 - lat1) * t, lng1 + (lng2 - lng1) * t]);
+    }
+    return pts;
+  }
+
+  function interpolateAndAnimate(custLat, custLng, tracking) {
+    routeCoords = generateInterpolatedRoute(STORE_LAT, STORE_LNG, custLat, custLng, 60);
+    setRouteLine(routeCoords, { color:'#0d6efd', weight:4, opacity:.7 });
+    storeMarker = L.marker([STORE_LAT, STORE_LNG], { icon: storeIcon }).addTo(map);
+    customerMarker = L.marker([custLat, custLng], { icon: customerIcon }).addTo(map);
+    shipperMarker = L.marker(routeCoords[0], { icon: shipperIcon }).addTo(map);
+    map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+    startShipperMovement(routeCoords, 5);
+  }
+
+  function startShipperMovement(coords, totalDistKm, startIndex = 0) {
+    // Defensively clear any existing interval timer to prevent overlap/marker jumping
+    if (animTimer) {
+      clearInterval(animTimer);
+      animTimer = null;
+    }
+    
+    currentStep = startIndex;
+    const totalSteps = coords.length;
+    const trafficJamStep = Math.floor(totalSteps * 0.5);
+    const stepInterval = 200; // ms between each step
+
+    animTimer = setInterval(() => {
+      if (currentStep >= totalSteps - 1) {
+        clearInterval(animTimer);
+        onDeliveryComplete();
+        return;
+      }
+
+      // Traffic jam at ~50%
+      if (currentStep === trafficJamStep && !trafficJamTriggered) {
+        trafficJamTriggered = true;
+        clearInterval(animTimer);
+        triggerTrafficJam(coords, trafficJamStep, totalDistKm);
+        return;
+      }
+
+      currentStep++;
+      const pos = coords[currentStep];
+      shipperMarker.setLatLng(pos);
+      map.panTo(pos, { animate: true, duration: 0.2 });
+      
+      // Dynamic path slicing (path behind driver disappears in real time)
+      if (routeLine) {
+        routeLine.setLatLngs(coords.slice(currentStep));
+      }
+
+      // Update stats
+      const remaining = ((totalSteps - currentStep) / totalSteps) * totalDistKm;
+      const speed = 25 + Math.random() * 15;
+      const eta = (remaining / speed) * 60;
+      document.getElementById('distanceLeft').textContent = remaining.toFixed(1) + ' km';
+      document.getElementById('shipperSpeed').textContent = Math.round(speed) + ' km/h';
+      document.getElementById('etaDisplay').textContent = Math.ceil(eta) + ' phút';
+    }, stepInterval);
+  }
+
+  function triggerTrafficJam(coords, jamStep, totalDistKm) {
+    const jamPos = coords[jamStep];
+
+    // Add traffic marker
+    const trafficMarker = L.marker(jamPos, { icon: trafficIcon }).addTo(map);
+    trafficMarker.bindPopup('<b>⚠️ Kẹt xe</b><br>Đoạn đường đang tắc nghẽn').openPopup();
+
+    // Draw red zone
+    const trafficCircle = L.circle(jamPos, { radius: 200, color:'#dc3545', fillColor:'#dc354550', fillOpacity:.3 }).addTo(map);
+
+    // Update speed to 0
+    document.getElementById('shipperSpeed').textContent = '0 km/h';
+
+    // Auto open shipper chat
+    openShipperChat();
+
+    // Shipper sends message
+    setTimeout(() => {
+      addChatMsg('Anh/chị ơi, đoạn này kẹt xe quá trời luôn 😰 Anh/chị có cần nhận máy gấp không để em lách đường tránh chạy nhanh hơn ạ?', 'shipper');
+
+      showChatActions([
+        { text: '🚀 Gấp, giao nhanh giúp em!', cls: 'urgent', onclick: 'handleUrgent()' },
+        { text: '😌 Không gấp, thong thả đi em', cls: 'chill', onclick: 'handleChill()' }
+      ]);
+    }, 800);
+
+    // Store references for handlers
+    window._trafficState = { coords, jamStep, totalDistKm, trafficMarker, trafficCircle };
+  }
+
+  // ── Customer responds: URGENT ──
+  window.handleUrgent = function () {
+    hideChatActions();
+    addChatMsg('Gấp, giao nhanh giúp em! 🚀', 'customer');
+
+    const st = window._trafficState;
+    if (st.trafficMarker) st.trafficMarker.remove();
+    if (st.trafficCircle) st.trafficCircle.remove();
+
+    addChatMsg('Đang tính toán lại lộ trình tránh kẹt xe... 🗺️', 'system');
+
+    setTimeout(async () => {
+      addChatMsg('Em lách đường tránh chạy nhanh hơn cho anh/chị nhé. Tới liền! 💨', 'shipper');
+      
+      const currentLoc = st.coords[st.jamStep]; // [lat, lng]
+      const custLatLng = customerMarker.getLatLng();
+
+      try {
+        // Fetch new route dynamically from current location to customer destination
+        const newRouteData = await fetchRoute(currentLoc[1], currentLoc[0], custLatLng.lng, custLatLng.lat);
+        routeCoords = newRouteData.coordinates;
+        setRouteLine(routeCoords, { color: '#28a745', weight: 4, opacity: 0.8 });
+        currentStep = 0;
+        startShipperMovement(routeCoords, newRouteData.distance / 1000);
+      } catch (e) {
+        console.warn('Detour routing failed, using mathematical sinus-detour:', e);
+        const remaining = st.coords.slice(st.jamStep);
+        const offset = 0.0025; // ~250m
+        const detour = remaining.map((c, i) => {
+          const factor = Math.sin((i / remaining.length) * Math.PI) * offset;
+          return [c[0] + factor, c[1] + factor];
+        });
+        setRouteLine(detour, { color: '#28a745', weight: 4, opacity: 0.8 });
+        routeCoords = detour;
+        currentStep = 0;
+        startShipperMovement(routeCoords, st.totalDistKm * 0.5);
+      }
+    }, 1200);
+  };
+
+  // ── Customer responds: NOT URGENT ──
+  window.handleChill = function () {
+    hideChatActions();
+    addChatMsg('Không gấp đâu, cứ thong thả đi em 😌', 'customer');
+
+    const st = window._trafficState;
+    if (st.trafficMarker) st.trafficMarker.remove();
+    if (st.trafficCircle) st.trafficCircle.remove();
+
+    setTimeout(() => {
+      addChatMsg('Dạ em cảm ơn anh/chị thông cảm! Em đợi thoáng xe rồi chạy tiếp nhé 🙏', 'shipper');
+    }, 800);
+
+    // Wait 8 seconds (simulate waiting for traffic)
+    setTimeout(() => {
+      addChatMsg('Thông đường rồi ạ, em chạy tiếp nhé! 🏍️💨', 'shipper');
+
+      startShipperMovement(st.coords, st.totalDistKm, st.jamStep);
+    }, 8000);
+  };
+
+  // ── Delivery Complete ──
+  async function onDeliveryComplete() {
+    document.getElementById('shipperSpeed').textContent = '0 km/h';
+    openShipperChat();
+    document.getElementById('distanceLeft').textContent = '0 km';
+    document.getElementById('etaDisplay').textContent = 'Đã tới!';
+    document.querySelector('.tracking-live-badge').innerHTML = '<i class="fas fa-check-circle fa-xs me-1"></i>HOÀN THÀNH';
+
+    // Shipper messages
+    addChatMsg('Em tới nơi rồi ạ! Anh/chị ra nhận máy giúp em nhé 📦', 'shipper');
+
+    setTimeout(() => {
+      addChatMsg('Em xin phép chụp một tấm hình xác nhận giao hàng thành công nha! 📸', 'shipper');
+    }, 1500);
+
+    setTimeout(async () => {
+      addChatMsg('<div style="background:#f8f9fa;border-radius:8px;padding:8px;text-align:center"><i class="fas fa-camera" style="font-size:2rem;color:#6c757d"></i><div class="small mt-1 text-muted">📸 Ảnh xác nhận giao hàng</div><div class="small fw-semibold mt-1">Gói hàng đã được giao thành công</div></div>', 'shipper');
+
+      showChatActions([
+        { text: 'Xác nhận đã nhận hàng', cls: 'chill', onclick: 'confirmDelivery()' }
+      ]);
+    }, 3500);
+  }
+
+  window.confirmDelivery = async function () {
+    hideChatActions();
+    addChatMsg('Đã nhận hàng, cảm ơn em!', 'customer');
+
+    await fetch('/api/order/complete-delivery/' + ORDER_ID, { method: 'POST' });
+
+    setTimeout(() => {
+      addChatMsg('Cảm ơn anh/chị đã mua hàng tại HutechStore! Chúc anh/chị một ngày tốt lành nha 🎉', 'shipper');
+      addChatMsg('Đơn hàng đã hoàn thành. Vui lòng đánh giá bên dưới ⭐', 'system');
+
+      // Update timeline
+      document.querySelectorAll('.tl-step').forEach(s => { s.classList.add('done'); s.classList.remove('active'); });
+      document.querySelectorAll('.tl-step').forEach((s, i) => { if (i === 3) s.classList.add('active'); });
+      document.querySelectorAll('.tl-line').forEach(l => l.classList.add('done'));
+
+      // Reload to show review form
+      setTimeout(() => location.reload(), 2000);
+    }, 1000);
+  };
+
+  // ── Initialize Map ──
+  if (HAS_COORDS) {
+    map = L.map('trackingMap').setView([STORE_LAT, STORE_LNG], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap', maxZoom: 19
+    }).addTo(map);
+
+    // If already shipping or delivered, load route immediately
+    if (ORDER_STATUS === 'shipping') {
+      startShipperSimulation();
+    } else if (ORDER_STATUS === 'delivered') {
+      // Show completed route
+      loadDecryptKey().then(async () => {
+        const resp = await fetch('/api/order/tracking/' + ORDER_ID);
+        const tracking = await resp.json();
+        const custLat = parseFloat(decryptAES(tracking.customerLat)) || 10.7769;
+        const custLng = parseFloat(decryptAES(tracking.customerLng)) || 106.7009;
+        L.marker([STORE_LAT, STORE_LNG], { icon: storeIcon }).addTo(map).bindPopup('<b>' + STORE_NAME + '</b>');
+        L.marker([custLat, custLng], { icon: customerIcon }).addTo(map).bindPopup('<b>Đã giao thành công ✅</b>');
+
+        try {
+          const routeData = await fetchRoute(STORE_LNG, STORE_LAT, custLng, custLat);
+          const coords = routeData.coordinates;
+          const line = L.polyline(coords, { color: '#0F2A44', weight: 4, opacity: 0.8 }).addTo(map);
+          map.fitBounds(line.getBounds(), { padding: [30, 30] });
+        } catch (e) {
+          console.warn('Failed to load actual route for delivered order, drawing straight line:', e);
+          drawFallbackLine();
+        }
+
+        function drawFallbackLine() {
+           const line = L.polyline([[STORE_LAT, STORE_LNG], [custLat, custLng]], { color: '#0F2A44', weight: 3, dashArray: '6 3' }).addTo(map);
+          map.fitBounds(line.getBounds(), { padding: [30, 30] });
+        }
+      });
+    } else {
+      // pending / confirmed - just show store
+      L.marker([STORE_LAT, STORE_LNG], { icon: storeIcon }).addTo(map).bindPopup('<b>' + STORE_NAME + '</b>').openPopup();
+    }
+
+    setTimeout(() => map.invalidateSize(), 300);
+  }
+</script>
 }

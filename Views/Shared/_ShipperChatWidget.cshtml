@@ -1,0 +1,32 @@
+@* ════════════════════════════════════════════════════════════════
+   _ShipperChatWidget.cshtml — Khung chat nổi độc lập với Shipper
+   ════════════════════════════════════════════════════════════════ *@
+@model HutechStore.Models.Order
+
+<div id="shipperChatWidget" class="shipper-chat-widget">
+  <button id="shipperChatToggle" class="shipper-chat-toggle-btn" onclick="toggleShipperChat()" title="Chat với Shipper">
+    <div class="shipper-chat-icon-wrap">
+      <i class="fas fa-comments shipper-chat-icon-open"></i>
+      <i class="fas fa-times shipper-chat-icon-close d-none"></i>
+    </div>
+    <span class="shipper-chat-badge-dot" id="shipperChatDot" style="display:none;"></span>
+  </button>
+  <div id="shipperChatWindow" class="shipper-chat-window">
+    <div class="chat-header" style="background: var(--navy-deep); padding: 0.75rem 1rem; border-bottom: 1px solid rgba(194, 178, 128, 0.2);">
+      <div class="d-flex align-items-center gap-2">
+        <div class="shipper-avatar" style="width: 30px; height: 30px; border-radius: 50%; background: var(--camel); color: var(--navy-deep); display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">
+          <i class="fas fa-motorcycle"></i>
+        </div>
+        <div>
+          <div class="fw-semibold text-white" style="font-size: 0.82rem; font-family: var(--font-sans); letter-spacing: 0.02em;">Shipper Huy</div>
+          <div class="chat-status-dot d-flex align-items-center gap-1">
+            <span class="status-dot online" style="width: 6px; height: 6px; background-color: #27AE60; border-radius: 50%; display: inline-block;"></span>
+            <span class="text-white-50" style="font-size: .65rem; letter-spacing: 0.02em;">Đang hoạt động</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="shipperChatMessages" class="chat-messages" style="flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; background: var(--ivory-pure);"></div>
+    <div id="shipperChatActions" class="chat-actions" style="display:none; padding: 0.75rem 1rem; background: var(--ivory-warm); border-top: 1px solid rgba(15,42,68,0.06); gap: 8px; justify-content: center;"></div>
+  </div>
+</div>

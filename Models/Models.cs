@@ -387,6 +387,23 @@ public class Order
     [MaxLength(100)]
     public string? SepayTransactionId { get; set; }
 
+    // ── Map Tracking & Shipping ──────────────────────────────────────────
+    // Tọa độ địa chỉ giao hàng (Geocoded từ Nominatim)
+    public double? Latitude  { get; set; }
+    public double? Longitude { get; set; }
+
+    // Ảnh chụp xác nhận giao hàng (Proof of Delivery)
+    [MaxLength(500)]
+    public string? ProofOfDeliveryImage { get; set; }
+
+    // Đánh giá shipper (1-5 sao)
+    [Range(1, 5)]
+    public int? ShipperRating { get; set; }
+
+    // Bình luận về shipper
+    [MaxLength(500)]
+    public string? ShipperFeedback { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public User? User { get; set; }

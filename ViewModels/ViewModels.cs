@@ -173,6 +173,10 @@ public class CheckoutViewModel
     [Required(ErrorMessage = "Vui lòng nhập địa chỉ")]
     public string Address { get; set; } = string.Empty;
 
+    // Tọa độ địa chỉ giao hàng (từ Nominatim Geocoding)
+    public double? Latitude  { get; set; }
+    public double? Longitude { get; set; }
+
     public string  PaymentMethod { get; set; } = "cod";
     public string? Note          { get; set; }
     public string? CouponCode    { get; set; }

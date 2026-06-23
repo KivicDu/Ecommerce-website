@@ -8,7 +8,7 @@
 }
 
 <div class="container py-4">
-  <h2 class="section-title mb-4"><i class="fas fa-lock me-2"></i>Thanh toán</h2>
+  <h2 class="section-title mb-4">Thanh toán</h2>
 
   <form asp-action="PlaceOrder" method="post">
     @Html.AntiForgeryToken()
@@ -44,11 +44,31 @@
                      style="background:var(--ivory-warm)"/>
             </div>
             <div class="col-12">
-              <label asp-for="Address" class="form-label fw-semibold">Địa chỉ giao hàng</label>
-              <input asp-for="Address" class="form-control"
-                     placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành"/>
+              <label asp-for="Address" class="form-label fw-semibold">
+                Địa chỉ giao hàng
+                <small class="text-muted ms-1"><i class="fas fa-search"></i> Gõ để tìm địa chỉ thật</small>
+              </label>
+              <div class="position-relative">
+                <input asp-for="Address" class="form-control" id="addressInput"
+                       placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành"
+                       autocomplete="off"/>
+                <div id="addressSuggestions" class="address-suggestions"></div>
+              </div>
               <span asp-validation-for="Address" class="text-danger small"></span>
+              <span id="deliveryFenceError" class="text-danger small d-block mt-1" style="display:none; font-weight:600;"></span>
+              <input type="hidden" asp-for="Latitude"  id="latInput"/>
+              <input type="hidden" asp-for="Longitude" id="lngInput"/>
             </div>
+
+            @* Bản đồ xác nhận vị trí *@
+            <div class="col-12">
+              <div id="checkoutMap" class="checkout-map-container"></div>
+              <div class="d-flex align-items-center gap-2 mt-1">
+                <i class="fas fa-info-circle text-primary small"></i>
+                <small class="text-muted">Kéo ghim đỏ để điều chỉnh chính xác vị trí giao hàng</small>
+              </div>
+            </div>
+
             <div class="col-12">
               <label asp-for="Note" class="form-label fw-semibold">
                 Ghi chú <small class="text-muted">(tuỳ chọn)</small>
@@ -187,7 +207,7 @@
           </div>
 
           <button type="submit" class="btn btn-danger w-100 btn-lg fw-bold mt-3">
-            <i class="fas fa-check me-2"></i>Xác nhận đặt hàng
+            Xác nhận đặt hàng
           </button>
 
           <a asp-controller="Cart" asp-action="Index"
@@ -202,6 +222,8 @@
 </div>
 
 @section Styles {
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
   .checkout-card { background: var(--ivory-pure); border-radius:12px; border:1px solid rgba(194, 178, 128, 0.15); padding:1.5rem; }
   .checkout-card-title { font-weight:700; font-size:1rem; margin-bottom:1.25rem; padding-bottom:.75rem; border-bottom:1px solid rgba(194, 178, 128, 0.1); }
@@ -231,18 +253,449 @@
 
   /* Bank QR preview */
   .bank-qr-preview-box { background: var(--ivory-pure)9f0; border:1.5px solid #f0c06a; border-radius:10px; padding:1rem; }
+
+  /* ── Address Autocomplete ── */
+  .address-suggestions {
+    position:absolute; top:100%; left:0; right:0; z-index:1050;
+    background:#fff; border:1px solid #dee2e6; border-top:none;
+    border-radius:0 0 10px 10px; max-height:240px; overflow-y:auto;
+    box-shadow:0 8px 24px rgba(0,0,0,.12); display:none;
+  }
+  .address-suggestions .suggestion-item {
+    padding:.65rem 1rem; cursor:pointer; font-size:.88rem;
+    border-bottom:1px solid #f5f5f5; transition:background .15s;
+    display:flex; align-items:center; gap:.5rem;
+  }
+  .address-suggestions .suggestion-item:last-child { border-bottom:none; }
+  .address-suggestions .suggestion-item:hover:not(.disabled) { background:#e8f4fd; }
+  .address-suggestions .suggestion-item.disabled { cursor:not-allowed; opacity:0.7; }
+  .address-suggestions .suggestion-item i { color:var(--navy); font-size:.75rem; flex-shrink:0; }
+  .address-suggestions .suggestion-loading {
+    padding:.75rem 1rem; text-align:center; color:#6c757d; font-size:.85rem;
+  }
+
+  /* ── Checkout Map ── */
+  .checkout-map-container {
+    width:100%; height:220px; border-radius:12px; overflow:hidden;
+    border:2px solid rgba(194, 178, 128, 0.2);
+    box-shadow:0 2px 12px rgba(0,0,0,.06);
+  }
 </style>
 }
 
 @section Scripts {
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
+  // ── Payment selection ──
   function selectPayment(radio) {
     document.querySelectorAll('.payment-option').forEach(el => {
       el.classList.toggle('active', el.querySelector('input') === radio);
     });
-    // Show/hide bank QR preview
     const preview = document.getElementById('bankQrPreview');
     if (preview) preview.style.display = radio.value === 'bank_transfer' ? 'block' : 'none';
   }
+
+  // ── Leaflet Map + Nominatim Autocomplete ──
+  (function () {
+    // Default center: TP.HCM
+    const defaultLat = 10.7769, defaultLng = 106.7009;
+    let map, marker;
+    let debounceTimer = null;
+
+    // Initialize map
+    map = L.map('checkoutMap').setView([defaultLat, defaultLng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+      maxZoom: 19
+    }).addTo(map);
+
+    // Custom red pin icon
+    const redIcon = L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+      iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+    });
+
+    // Draggable marker
+    marker = L.marker([defaultLat, defaultLng], { icon: redIcon, draggable: true }).addTo(map);
+    marker.bindPopup('<b>Vị trí giao hàng</b><br>Kéo ghim để điều chỉnh').openPopup();
+
+    marker.on('dragend', function (e) {
+      const pos = e.target.getLatLng();
+      document.getElementById('latInput').value = pos.lat.toFixed(7);
+      document.getElementById('lngInput').value = pos.lng.toFixed(7);
+      reverseGeocode(pos.lat, pos.lng);
+    });
+
+    map.on('click', function (e) {
+      const pos = e.latlng;
+      marker.setLatLng(pos);
+      document.getElementById('latInput').value = pos.lat.toFixed(7);
+      document.getElementById('lngInput').value = pos.lng.toFixed(7);
+      reverseGeocode(pos.lat, pos.lng);
+    });
+
+    // Helper: check if coordinates lie within the delivery fencing box (HCM, Thu Duc, Binh Duong, Dong Nai)
+    function isInsideDeliveryFence(lat, lng) {
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
+      if (isNaN(latitude) || isNaN(longitude)) return false;
+      return (latitude >= 10.30 && latitude <= 11.50 && longitude >= 106.30 && longitude <= 107.50);
+    }
+
+    // Helper to format clean, standardized Vietnamese address (formula: [House] [Road], [Ward], [District], [City])
+    function formatCleanAddress(address, lat, lon) {
+      if (!address) return '';
+      let house = address.house_number || address.building || address.amenity || '';
+      let road = address.road || address.pedestrian || address.path || '';
+      let ward = address.ward || address.subdistrict || address.quarter || address.neighbourhood || '';
+      let district = address.city_district || address.district || address.county || '';
+      let city = address.city || address.province || address.state || '';
+
+      // Fix Nominatim's Ho Chi Minh City / Thu Duc hierarchy mismatch
+      if (city === 'Thành phố Thủ Đức') {
+        city = 'Thành phố Hồ Chí Minh';
+        if (!district) {
+          district = 'Thành phố Thủ Đức';
+        }
+      }
+
+      // Check coordinates to verify if the location is geographically outside TP. Thủ Đức (West of Saigon River)
+      if (lat && lon) {
+        const longitude = parseFloat(lon);
+        if (!isNaN(longitude) && longitude < 106.715) {
+          if (district === 'Thành phố Thủ Đức' || district === 'Thủ Đức') {
+            district = '';
+          }
+          if (city === 'Thành phố Thủ Đức' || city === 'Thủ Đức') {
+            city = 'Thành phố Hồ Chí Minh';
+          }
+        }
+      }
+
+      if (!ward && address.suburb && (address.suburb.includes('Phường') || address.suburb.includes('Xã') || address.suburb.includes('Thị trấn'))) {
+        ward = address.suburb;
+      }
+      if (!district && address.suburb && (address.suburb.includes('Quận') || address.suburb.includes('Huyện') || address.suburb.includes('Thủ Đức'))) {
+        district = address.suburb;
+      }
+
+      if (road && ward && road.toLowerCase() === ward.toLowerCase()) road = '';
+      if (ward && district && ward.toLowerCase() === district.toLowerCase()) ward = '';
+      if (district && city && district.toLowerCase() === city.toLowerCase()) district = '';
+      if (city && city.toLowerCase().includes('hồ chí minh')) city = 'Thành phố Hồ Chí Minh';
+
+      const components = [];
+      let streetAddress = road;
+      if (house && road) {
+        streetAddress = house + ' ' + road;
+      } else if (house) {
+        streetAddress = house;
+      }
+
+      if (streetAddress) components.push(streetAddress);
+      if (ward) components.push(ward);
+      if (district) components.push(district);
+      if (city) components.push(city);
+
+      return components.map(c => c.trim()).filter(c => c.length > 0).join(', ');
+    }
+
+    function reverseGeocode(lat, lng) {
+      const currentAddress = document.getElementById('addressInput').value;
+      const { houseNum } = extractHouseNumber(currentAddress);
+
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&accept-language=vi`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.address) {
+            const cleanAddr = formatCleanAddress(data.address, lat, lng);
+            const fullAddress = houseNum ? `${houseNum} ${cleanAddr}` : cleanAddr;
+            document.getElementById('addressInput').value = fullAddress;
+            marker.setPopupContent('<b>Vị trí giao hàng</b><br>' + fullAddress).openPopup();
+            
+            // Validate geofence immediately on manual marker placement
+            validateGeofence(lat, lng);
+          }
+        }).catch(() => {});
+    }
+
+    function setMapPosition(lat, lng, label) {
+      map.setView([lat, lng], 17); // Zoom level 17 for detail view
+      marker.setLatLng([lat, lng]);
+      marker.setPopupContent('<b>' + (label || 'Vị trí giao hàng') + '</b>').openPopup();
+      document.getElementById('latInput').value = lat.toFixed(7);
+      document.getElementById('lngInput').value = lng.toFixed(7);
+      
+      validateGeofence(lat, lng);
+    }
+
+    function validateGeofence(lat, lng) {
+      const fenceError = document.getElementById('deliveryFenceError');
+      if (isInsideDeliveryFence(lat, lng)) {
+        fenceError.style.display = 'none';
+        fenceError.textContent = '';
+        return true;
+      } else {
+        fenceError.style.display = 'block';
+        fenceError.textContent = 'Địa chỉ này đã vượt qua phạm vi giao hàng ước tính (Chỉ hỗ trợ TP.HCM, Thủ Đức, Bình Dương, Đồng Nai)';
+        return false;
+      }
+    }
+
+    // Helper to extract house number and prefix patterns (Số, Hẻm, Ngõ, Ngách, Kiệt)
+    function extractHouseNumber(query) {
+      query = query.trim();
+      const regex = /^(?:(?:Số\s*nhà|Số|Hẻm|Ngõ|Ngách|Kiệt)\s+)?(\d+[a-zA-Z]?(?:[\/\-]\d+[a-zA-Z]?)*)/i;
+      const match = query.match(regex);
+      if (match) {
+        const houseNum = match[0].trim();
+        const rest = query.substring(match[0].length).replace(/^[\s,]+/, '').trim();
+        return { houseNum, rest };
+      }
+      return { houseNum: '', rest: query };
+    }
+
+    // ── Nominatim Address Autocomplete ──
+    const addrInput    = document.getElementById('addressInput');
+    const suggestions  = document.getElementById('addressSuggestions');
+
+    addrInput.addEventListener('input', function () {
+      clearTimeout(debounceTimer);
+      // Clear coordinates & error to force re-geocoding/validation if user edits address manually
+      document.getElementById('latInput').value = '';
+      document.getElementById('lngInput').value = '';
+      document.getElementById('deliveryFenceError').style.display = 'none';
+
+      const q = this.value.trim();
+      if (q.length < 3) { suggestions.style.display = 'none'; return; }
+
+      const { houseNum, rest } = extractHouseNumber(q);
+      const searchStr = rest.length >= 3 ? rest : q;
+
+      debounceTimer = setTimeout(() => {
+        suggestions.innerHTML = '<div class="suggestion-loading"><i class="fas fa-spinner fa-spin me-2"></i>Đang tìm...</div>';
+        suggestions.style.display = 'block';
+
+        // 1. Try search with full query (includes house number)
+        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&countrycodes=vn&addressdetails=1&accept-language=vi&viewbox=106.30,11.50,107.50,10.30&bounded=0`)
+          .then(r => r.json())
+          .then(results => {
+            if (results && results.length > 0) return results;
+            // 2. Fallback to street search (without house number)
+            return fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchStr)}&format=json&limit=6&countrycodes=vn&addressdetails=1&accept-language=vi&viewbox=106.30,11.50,107.50,10.30&bounded=0`)
+              .then(r => r.json());
+          })
+          .then(results => {
+            if (!results.length) {
+              suggestions.innerHTML = '<div class="suggestion-loading">Không tìm thấy địa chỉ</div>';
+              return;
+            }
+
+            // Auto-pan map to the first valid (in-fence) suggestion immediately
+            const firstValid = results.find(r => isInsideDeliveryFence(r.lat, r.lon)) || results[0];
+            if (firstValid) {
+              const lat = parseFloat(firstValid.lat);
+              const lng = parseFloat(firstValid.lon);
+              const cleanName = formatCleanAddress(firstValid.address, firstValid.lat, firstValid.lon) || firstValid.display_name;
+              let fullAddress = cleanName;
+              if (houseNum && !/^\d+/.test(cleanName)) {
+                fullAddress = `${houseNum} ${cleanName}`;
+              }
+              map.setView([lat, lng], 17);
+              marker.setLatLng([lat, lng]);
+              marker.setPopupContent('<b>Vị trí gợi ý</b><br>' + fullAddress);
+              document.getElementById('latInput').value = lat.toFixed(7);
+              document.getElementById('lngInput').value = lng.toFixed(7);
+              validateGeofence(lat, lng);
+            }
+
+            suggestions.innerHTML = results.map(r => {
+              const cleanName = formatCleanAddress(r.address, r.lat, r.lon) || r.display_name;
+              const inside = isInsideDeliveryFence(r.lat, r.lon);
+              
+              if (inside) {
+                return `<div class="suggestion-item" data-lat="${r.lat}" data-lng="${r.lon}" data-name="${cleanName}">
+                  <i class="fas fa-map-marker-alt text-primary"></i>
+                  <span>${cleanName}</span>
+                </div>`;
+              } else {
+                return `<div class="suggestion-item disabled" data-lat="${r.lat}" data-lng="${r.lon}" data-name="${cleanName}">
+                  <i class="fas fa-exclamation-triangle text-danger"></i>
+                  <span><del class="text-muted">${cleanName}</del> <span class="badge bg-danger ms-2" style="font-size:0.65rem;">Đã vượt quá phạm vi giao hàng</span></span>
+                </div>`;
+              }
+            }).join('');
+
+            suggestions.querySelectorAll('.suggestion-item').forEach(item => {
+              // Click handler only for active (in-fence) suggestions
+              if (item.classList.contains('disabled')) return;
+              item.addEventListener('click', function () {
+                const lat  = parseFloat(this.dataset.lat);
+                const lng  = parseFloat(this.dataset.lng);
+                const name = this.dataset.name;
+                let fullAddress = name;
+                if (houseNum && !/^\d+/.test(name)) {
+                  fullAddress = `${houseNum} ${name}`;
+                }
+                addrInput.value = fullAddress;
+                setMapPosition(lat, lng, fullAddress);
+                suggestions.style.display = 'none';
+              });
+            });
+          })
+          .catch(() => {
+            suggestions.innerHTML = '<div class="suggestion-loading">Lỗi kết nối</div>';
+          });
+      }, 400);
+    });
+
+    // Autocomplete on Enter key
+    addrInput.addEventListener('keydown', function (e) {
+      if (e.keyCode === 13) {
+        e.preventDefault(); // Prevent default form submission
+        
+        // Find the first non-disabled suggestion item
+        const firstActiveItem = suggestions.querySelector('.suggestion-item:not(.disabled)');
+        if (firstActiveItem) {
+          const lat = parseFloat(firstActiveItem.dataset.lat);
+          const lng = parseFloat(firstActiveItem.dataset.lng);
+          const name = firstActiveItem.dataset.name;
+          const { houseNum } = extractHouseNumber(addrInput.value);
+          
+          let fullAddress = name;
+          if (houseNum && !/^\d+/.test(name)) {
+            fullAddress = `${houseNum} ${name}`;
+          }
+          addrInput.value = fullAddress;
+          setMapPosition(lat, lng, fullAddress);
+          suggestions.style.display = 'none';
+        }
+      }
+    });
+
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function (e) {
+      if (!addrInput.contains(e.target) && !suggestions.contains(e.target)) {
+        suggestions.style.display = 'none';
+      }
+    });
+
+    // Submit form background geocoding fallback for manual text input and geofence verification
+    const form = document.querySelector('form[asp-action="PlaceOrder"]') || document.querySelector('form');
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        const latVal = document.getElementById('latInput').value;
+        const lngVal = document.getElementById('lngInput').value;
+
+        // If coordinates already present, check geofence directly
+        if (latVal && lngVal && parseFloat(latVal) !== 0 && parseFloat(lngVal) !== 0) {
+          if (!isInsideDeliveryFence(latVal, lngVal)) {
+            e.preventDefault();
+            validateGeofence(latVal, lngVal);
+            document.getElementById('deliveryFenceError').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+          }
+          return; // Let submission proceed
+        }
+
+        // If coordinates not present, perform geocoding first
+        e.preventDefault();
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnHtml = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xác thực địa chỉ...';
+
+        const q = addrInput.value.trim();
+        if (q.length < 3) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+          validateGeofence(0, 0); // Trigger the geofence error message for invalid/empty location
+          document.getElementById('deliveryFenceError').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+
+        const { houseNum, rest } = extractHouseNumber(q);
+        const searchStr = rest.length >= 3 ? rest : q;
+
+        // 1. Try search with full query (includes house number)
+        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=vn&addressdetails=1&accept-language=vi&viewbox=106.30,11.50,107.50,10.30&bounded=0`)
+          .then(r => r.json())
+          .then(results => {
+            if (results && results.length > 0) return results;
+            // 2. Fallback to street search
+            return fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchStr)}&format=json&limit=1&countrycodes=vn&addressdetails=1&accept-language=vi&viewbox=106.30,11.50,107.50,10.30&bounded=0`)
+              .then(r => r.json());
+          })
+          .then(results => {
+            if (results && results.length > 0) {
+              const lat = parseFloat(results[0].lat);
+              const lng = parseFloat(results[0].lon);
+              
+              if (isInsideDeliveryFence(lat, lng)) {
+                document.getElementById('latInput').value = lat.toFixed(7);
+                document.getElementById('lngInput').value = lng.toFixed(7);
+                form.submit(); // Bypasses the event listener to submit successfully
+              } else {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+                validateGeofence(lat, lng);
+                document.getElementById('deliveryFenceError').scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            } else {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = originalBtnHtml;
+              const fenceError = document.getElementById('deliveryFenceError');
+              fenceError.style.display = 'block';
+              fenceError.textContent = 'Không tìm thấy vị trí cho địa chỉ này. Vui lòng chọn từ gợi ý hoặc ghim trên bản đồ.';
+              fenceError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          })
+          .catch(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnHtml;
+            const fenceError = document.getElementById('deliveryFenceError');
+            fenceError.style.display = 'block';
+            fenceError.textContent = 'Lỗi kết nối khi xác thực địa chỉ. Vui lòng thử lại.';
+            fenceError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+      });
+    }
+
+    // Set initial map position on page load if coordinates pre-filled, else geocode
+    const initLat = parseFloat(document.getElementById('latInput').value);
+    const initLng = parseFloat(document.getElementById('lngInput').value);
+    if (!isNaN(initLat) && initLat !== 0 && !isNaN(initLng) && initLng !== 0) {
+      setMapPosition(initLat, initLng, addrInput.value.trim());
+    } else {
+      const initialAddress = addrInput.value.trim();
+      if (initialAddress.length >= 3) {
+        const { houseNum, rest } = extractHouseNumber(initialAddress);
+        const searchStr = rest.length >= 3 ? rest : initialAddress;
+
+        // 1. Try search with full query (includes house number)
+        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(initialAddress)}&format=json&limit=1&countrycodes=vn&addressdetails=1&accept-language=vi&viewbox=106.30,11.50,107.50,10.30&bounded=0`)
+          .then(r => r.json())
+          .then(results => {
+            if (results && results.length > 0) return results;
+            // 2. Fallback to street search
+            return fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchStr)}&format=json&limit=1&countrycodes=vn&addressdetails=1&accept-language=vi&viewbox=106.30,11.50,107.50,10.30&bounded=0`)
+              .then(r => r.json());
+          })
+          .then(results => {
+            if (results && results.length > 0) {
+              const lat = parseFloat(results[0].lat);
+              const lng = parseFloat(results[0].lon);
+              setMapPosition(lat, lng, initialAddress);
+            }
+          }).catch(() => {});
+      }
+    }
+
+    // Fix Leaflet map invalidateSize when container becomes visible
+    setTimeout(() => map.invalidateSize(), 300);
+  })();
 </script>
 }

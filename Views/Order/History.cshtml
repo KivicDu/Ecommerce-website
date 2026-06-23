@@ -1,40 +1,44 @@
 @model List<HutechStore.Models.Order>
-@{ ViewData["Title"] = "Lịch sử đơn hàng"; }
+@{
+  ViewData["Title"] = "Lịch sử đơn hàng";
+}
 
 @{
   var statusMap = new Dictionary<string, (string label, string cls)> {
-    ["pending"]   = ("Chờ xác nhận", "warning"),
-    ["confirmed"] = ("Đã xác nhận",  "info"),
-    ["shipping"]  = ("Đang giao",    "primary"),
-    ["delivered"] = ("Đã nhận",      "success"),
-    ["cancelled"] = ("Đã hủy",       "danger"),
+    ["pending"]   = ("Chờ xác nhận", "pending"),
+    ["confirmed"] = ("Đã xác nhận",  "confirmed"),
+    ["shipping"]  = ("Đang giao",    "shipping"),
+    ["delivered"] = ("Đã nhận",      "delivered"),
+    ["cancelled"] = ("Đã hủy",       "cancelled"),
   };
 }
 
-<div class="container py-4">
-  <h2 class="section-title mb-4"><i class="fas fa-box me-2"></i>Lịch sử đơn hàng</h2>
+<div class="container py-5">
+  <div class="text-center mb-5">
+    <h2 style="font-family: var(--font-serif); color: var(--navy); font-weight: 500; letter-spacing: -0.01em; margin-bottom: 0.5rem;">Lịch sử đơn hàng</h2>
+    <div style="width: 40px; height: 1px; background: var(--camel); margin: 0 auto;"></div>
+  </div>
 
   @if (!Model.Any())
   {
-    <div class="text-center py-5">
-      <i class="fas fa-box-open fa-5x text-muted mb-3 d-block"></i>
-      <h5 class="text-muted">Bạn chưa có đơn hàng nào</h5>
-      <a asp-controller="Product" asp-action="Index" class="btn btn-danger mt-2">Mua sắm ngay</a>
+    <div class="text-center py-5 border rounded-3" style="background: var(--ivory-pure); border-color: rgba(194, 178, 128, 0.15) !important;">
+      <h5 class="text-muted mb-3" style="font-family: var(--font-serif); font-size: 1.1rem;">Bạn chưa có giao dịch nào tại HutechStore</h5>
+      <a asp-controller="Product" asp-action="Index" class="btn btn-luxury-primary px-4" style="width: auto;">Mua sắm ngay</a>
     </div>
   }
   else
   {
-    <div class="d-flex flex-column gap-3">
+    <div class="d-flex flex-column gap-4">
       @foreach (var order in Model)
       {
         var (label, cls) = statusMap.GetValueOrDefault(order.Status, ("Không rõ", "secondary"));
         <div class="order-history-card">
           <div class="order-history-header">
             <div>
-              <span class="fw-bold text-danger">#@order.OrderNumber</span>
-              <span class="ms-3 text-muted small">@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+              <span class="fw-semibold" style="font-size: 0.95rem; color: var(--navy); font-family: var(--font-serif);">Đơn hàng #@order.OrderNumber</span>
+              <span class="ms-3 text-muted small" style="font-size: 0.78rem;">@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
             </div>
-            <span class="badge bg-@cls">@label</span>
+            <span class="badge-luxury-status status-@cls">@label</span>
           </div>
 
           <div class="order-history-items">
@@ -45,8 +49,8 @@
                      alt="@item.ProductName"
                      onerror="this.onerror=null;this.src='/images/no-image.png'"/>
                 <div class="flex-grow-1 min-width-0">
-                  <div class="fw-semibold text-truncate small">@item.ProductName</div>
-                  <div class="text-muted" style="font-size:.75rem">
+                  <div class="fw-semibold text-truncate small" style="color: var(--navy); font-size: 0.88rem;">@item.ProductName</div>
+                  <div class="text-muted" style="font-size:.78rem">
                     x@item.Quantity · @item.Price.ToString("N0")₫
                   </div>
                 </div>
@@ -54,15 +58,15 @@
             }
             @if (order.OrderItems.Count > 3)
             {
-              <div class="text-muted small ps-1">+@(order.OrderItems.Count - 3) sản phẩm khác</div>
+              <div class="text-muted small ps-1" style="font-size: 0.75rem;">+@(order.OrderItems.Count - 3) sản phẩm khác</div>
             }
           </div>
 
           <div class="order-history-footer">
             <div>
-              <span class="text-muted small">Tổng tiền:</span>
-              <span class="fw-bold text-danger ms-2">@order.TotalAmount.ToString("N0")₫</span>
-              <span class="text-muted small ms-2">· @order.PaymentMethod.ToUpper()</span>
+              <span class="text-muted small" style="font-size: 0.78rem;">Tổng thanh toán:</span>
+              <span class="fw-bold ms-2" style="color: var(--navy); font-size: 1.05rem;">@order.TotalAmount.ToString("N0")₫</span>
+              <span class="text-muted small ms-2" style="font-size: 0.75rem;">· @order.PaymentMethod.ToUpper()</span>
             </div>
             <div class="d-flex gap-2">
               @if (order.Status == "pending")
@@ -70,14 +74,14 @@
                 <form asp-action="Cancel" method="post" class="d-inline">
                   @Html.AntiForgeryToken()
                   <input type="hidden" name="id" value="@order.Id"/>
-                  <button type="submit" class="btn btn-outline-danger btn-sm"
-                          onclick="return confirm('Xác nhận hủy đơn hàng?')">
+                  <button type="submit" class="btn-luxury-cancel"
+                          onclick="return confirm('Xác nhận hủy đơn hàng này?')">
                     Hủy đơn
                   </button>
                 </form>
               }
               <a asp-action="Detail" asp-route-id="@order.Id"
-                 class="btn btn-outline-secondary btn-sm">
+                 class="btn btn-luxury-outline btn-sm px-3" style="width: auto;">
                 Xem chi tiết
               </a>
             </div>
@@ -90,11 +94,94 @@
 
 @section Styles {
 <style>
-  .order-history-card { background: var(--ivory-pure); border-radius:12px; border:1px solid rgba(194, 178, 128, 0.15); overflow:hidden; }
-  .order-history-header { display:flex; justify-content:space-between; align-items:center; padding:.875rem 1.25rem; background:var(--ivory-warm); border-bottom:1px solid rgba(194, 178, 128, 0.1); }
-  .order-history-items { padding:.75rem 1.25rem; display:flex; flex-direction:column; gap:.5rem; }
-  .order-history-item { display:flex; align-items:center; gap:.75rem; }
-  .order-history-item img { width:44px; height:44px; border-radius:8px; object-fit:contain; background:var(--ivory-warm); padding:4px; border:1px solid #eee; flex-shrink:0; }
-  .order-history-footer { padding:.875rem 1.25rem; border-top:1px solid rgba(194, 178, 128, 0.1); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.5rem; }
+  .order-history-card { 
+    background: var(--ivory-pure); 
+    border-radius: 12px; 
+    border: 1px solid rgba(194, 178, 128, 0.15); 
+    overflow: hidden; 
+    box-shadow: 0 4px 16px rgba(15, 42, 68, 0.02);
+    transition: transform 0.3s var(--ease-luxury), box-shadow 0.3s var(--ease-luxury);
+  }
+  .order-history-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(15, 42, 68, 0.04);
+  }
+  .order-history-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 1rem 1.25rem; 
+    background: var(--ivory-warm); 
+    border-bottom: 1px solid rgba(194, 178, 128, 0.1); 
+  }
+  .order-history-items { 
+    padding: 1.25rem; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.875rem; 
+  }
+  .order-history-item { 
+    display: flex; 
+    align-items: center; 
+    gap: 1rem; 
+  }
+  .order-history-item img { 
+    width: 48px; 
+    height: 48px; 
+    border-radius: 6px; 
+    object-fit: contain; 
+    background: var(--ivory-warm); 
+    padding: 3px; 
+    border: 1px solid rgba(194, 178, 128, 0.1); 
+    flex-shrink: 0; 
+  }
+  .order-history-footer { 
+    padding: 1rem 1.25rem; 
+    border-top: 1px solid rgba(194, 178, 128, 0.1); 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    flex-wrap: wrap; 
+    gap: .75rem; 
+    background: var(--ivory-pure);
+  }
+
+  /* Status Badges */
+  .badge-luxury-status {
+    padding: 0.35em 0.75em !important;
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-family: var(--font-sans) !important;
+    background: transparent !important;
+    display: inline-block;
+  }
+  .badge-luxury-status.status-pending { border: 1px solid rgba(194, 178, 128, 0.4) !important; color: var(--camel-dark) !important; }
+  .badge-luxury-status.status-confirmed { border: 1px solid rgba(15, 42, 68, 0.2) !important; color: var(--navy) !important; }
+  .badge-luxury-status.status-shipping { border: 1px solid #28a745 !important; color: #28a745 !important; }
+  .badge-luxury-status.status-delivered { border: 1px solid var(--navy) !important; color: var(--navy) !important; }
+  .badge-luxury-status.status-cancelled { border: 1px solid #dc3545 !important; color: #dc3545 !important; }
+
+  /* Cancel Button Style */
+  .btn-luxury-cancel {
+    background: transparent !important;
+    border: 1px solid rgba(220, 53, 69, 0.3) !important;
+    color: #dc3545 !important;
+    font-family: var(--font-sans) !important;
+    font-size: 0.78rem !important;
+    padding: 6px 16px !important;
+    border-radius: 20px !important;
+    cursor: pointer;
+    transition: all 0.3s var(--ease-luxury) !important;
+    display: inline-block;
+  }
+  .btn-luxury-cancel:hover {
+    background: #dc3545 !important;
+    color: #fff !important;
+    border-color: #dc3545 !important;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);
+  }
 </style>
 }

@@ -1,64 +1,538 @@
-@* ── About.cshtml ─────────────────────────────────────────────── *@
-@{ ViewData["Title"] = "Về chúng tôi"; }
+@{
+  ViewData["Title"] = "Về chúng tôi - Di sản & Triết lý HutechStore";
+}
 
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-8 text-center mb-5">
-      <h1 class="section-title text-center">Về <span class="text-danger">HutechStore</span></h1>
-      <p class="lead text-muted">
-        Chuyên cung cấp iPhone & Samsung chính hãng tại TP.HCM.
-        Tư vấn tận tâm, giá minh bạch, bảo hành uy tín.
-      </p>
-    </div>
-  </div>
-
-  <div class="row g-4 mb-5">
-    <div class="col-md-3 col-6 text-center">
-      <div class="about-stat"><div class="about-stat-num">17+</div><div>Dòng máy</div></div>
-    </div>
-    <div class="col-md-3 col-6 text-center">
-      <div class="about-stat"><div class="about-stat-num">100%</div><div>Chính hãng</div></div>
-    </div>
-    <div class="col-md-3 col-6 text-center">
-      <div class="about-stat"><div class="about-stat-num">24/7</div><div>Hỗ trợ AI</div></div>
-    </div>
-    <div class="col-md-3 col-6 text-center">
-      <div class="about-stat"><div class="about-stat-num">12T</div><div>Bảo hành</div></div>
-    </div>
-  </div>
-
-  <div class="row g-4">
-    <div class="col-md-4">
-      <div class="about-card">
-        <div class="about-icon"><i class="fas fa-shield-alt"></i></div>
-        <h5>Chính hãng 100%</h5>
-        <p class="text-muted small">Tất cả sản phẩm đều có hóa đơn VAT, tem chính hãng Apple/Samsung Việt Nam.</p>
+<div class="about-luxury-page py-5">
+  <div class="container">
+    
+    <!-- Hero Banner Segment -->
+    <div class="row justify-content-center text-center mb-5 pb-3 animate-fade-in">
+      <div class="col-lg-10">
+        <span class="section-eyebrow">Nhà Kiến Tạo Di Sản</span>
+        <h1 class="display-title mt-2">HutechStore</h1>
+        <h3 class="display-subtitle mt-3">Nghệ Thuật Thủ Công Anh Quốc Giao Thoa Kỷ Nguyên Số</h3>
+        <div class="luxury-divider my-4"></div>
+        <p class="lead-narrative mx-auto">
+          HutechStore được khai sinh không chỉ để cung cấp thiết bị công nghệ, mà là để kiến tạo một chuẩn mực sống thượng lưu mới. Chúng tôi trân quý từng đường nét thiết kế, từng chất liệu tinh xảo, xem mỗi chiếc điện thoại cao cấp như một tác phẩm nghệ thuật chế tác thủ công độc bản.
+        </p>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="about-card">
-        <div class="about-icon"><i class="fas fa-robot"></i></div>
-        <h5>AI Tư vấn thông minh</h5>
-        <p class="text-muted small">Chatbot AI powered by Gemini, hiểu dữ liệu thực tế của cửa hàng để tư vấn chính xác.</p>
+
+    <!-- Heritage Story Section -->
+    <div class="row align-items-center g-5 mb-5 pb-5">
+      <div class="col-lg-6 order-lg-1 animate-slide-in-left">
+        <div class="about-image-wrapper">
+          <img src="/images/about_heritage.png" alt="Xưởng may đo di sản London" class="img-fluid rounded-luxury shadow-luxury" />
+          <div class="image-caption">Hình ảnh khơi nguồn cảm hứng: Sự tỉ mỉ trong từng đường chỉ khâu tại London.</div>
+        </div>
+      </div>
+      <div class="col-lg-6 order-lg-2 animate-slide-in-right">
+        <div class="narrative-content-box">
+          <span class="text-accent-gold">Khởi nguồn từ Savile Row</span>
+          <h2 class="narrative-title mt-2">Nghệ Thuật Của Sự Hoàn Mỹ</h2>
+          <p class="narrative-text mt-3">
+            Hành trình của HutechStore bắt đầu tại những con phố cổ kính của London, nơi các nghệ nhân may đo Savile Row dành hàng trăm giờ đồng hồ để tạo nên một bộ suit bespoke vừa vặn tuyệt đối. Chúng tôi mang nguyên vẹn triết lý đó vào thế giới số: tỉ mỉ, kiên định và khước từ mọi sự cẩu thả.
+          </p>
+          <p class="narrative-text">
+            Mỗi thiết bị iPhone hay Samsung Galaxy trước khi đến tay Quý khách đều phải trải qua quy trình kiểm tra chất lượng nghiệm ngặt gồm 48 bước, đảm bảo sự hoàn hảo từ độ nhạy màn hình cho đến góc nghiêng của camera, tương tự như cách một chiếc đồng hồ cơ cao cấp được lắp ráp bởi các nghệ nhân Thụy Sĩ.
+          </p>
+        </div>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="about-card">
-        <div class="about-icon"><i class="fas fa-truck"></i></div>
-        <h5>Giao hàng nhanh</h5>
-        <p class="text-muted small">Miễn phí vận chuyển đơn từ 5 triệu. Giao hàng trong ngày nội thành TP.HCM.</p>
+
+    <!-- Second Story Section -->
+    <div class="row align-items-center g-5 mb-5 pb-5">
+      <div class="col-lg-6 order-lg-2 animate-slide-in-right">
+        <div class="about-image-wrapper">
+          <img src="/images/about_boutique.png" alt="Không gian mua sắm HutechStore Boutique" class="img-fluid rounded-luxury shadow-luxury" />
+          <div class="image-caption">Bên trong không gian mua sắm sang trọng HutechStore Boutique.</div>
+        </div>
+      </div>
+      <div class="col-lg-6 order-lg-1 animate-slide-in-left">
+        <div class="narrative-content-box">
+          <span class="text-accent-gold">Quiet Luxury & Smart Boutique</span>
+          <h2 class="narrative-title mt-2">Bản Sắc Thượng Lưu Không Khoa Trương</h2>
+          <p class="narrative-text mt-3">
+            Chúng tôi tin rằng sự sang trọng thực sự nằm ở sự tĩnh lặng và chiều sâu. Tại HutechStore, bạn sẽ không tìm thấy những bảng hiệu giảm giá sặc sỡ hay các khẩu hiệu giục giã mua sắm hối hả. Thay vào đó là một không gian số tĩnh lặng, tôn vinh trải nghiệm khám phá riêng tư.
+          </p>
+          <p class="narrative-text">
+            HutechStore Boutique là sự kết hợp độc đáo giữa nét ấm cúng của một thư viện cổ điển Anh Quốc và sự tinh tế tối giản của phòng trưng bày nghệ thuật đương đại. Từng chi tiết nhỏ nhặt nhất, từ tông màu ấm, giao diện mượt mà cho đến hệ thống âm thanh, đều được chắt lọc kỹ lưỡng để mang đến cho Quý khách cảm giác bình yên, thư thái tuyệt đối.
+          </p>
+        </div>
       </div>
     </div>
+
+    <!-- Philosophy Pillars (4 Columns: Loro Piana, Chanel, Ralph Lauren, Dior) -->
+    <div class="row justify-content-center mb-5 pb-5">
+      <div class="col-lg-12 text-center mb-5">
+        <span class="section-eyebrow">Tứ Trụ Triết Lý</span>
+        <h2 class="display-title-sm mt-2">Những Ngôi Đền Của Cảm Hứng</h2>
+        <div class="luxury-divider-short mx-auto my-3"></div>
+      </div>
+      
+      <div class="col-lg-3 col-md-6 mb-4">
+        <div class="philosophy-card h-100">
+          <div class="card-icon-luxury"><i class="fas fa-hand-paper"></i></div>
+          <h4 class="pillar-name">Loro Piana</h4>
+          <h6 class="pillar-sub">Xúc giác tinh tế & Tuyển chọn</h6>
+          <p class="pillar-desc">
+            Xem trọng cảm nhận trực giác và giá trị xúc giác. Từng sản phẩm công nghệ tại HutechStore đều được tuyển chọn kỹ lưỡng như sợi len cashmere hảo hạng nhất của vùng ngoại ô, mang lại cảm xúc trọn vẹn khi cầm nắm trên tay.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6 mb-4">
+        <div class="philosophy-card h-100">
+          <div class="card-icon-luxury"><i class="fas fa-adjust"></i></div>
+          <h4 class="pillar-name">Chanel</h4>
+          <h6 class="pillar-sub">Đơn sắc tối giản & Độc bản</h6>
+          <p class="pillar-desc">
+            Theo đuổi phong cách tối giản thanh lịch với triết lý "Less is More". Tông màu đen-trắng cổ điển kết hợp cùng sự tỉ mỉ đến từng chi tiết nhỏ nhất tạo nên một tổng thể cuốn hút bền bỉ vượt thời gian.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6 mb-4">
+        <div class="philosophy-card h-100">
+          <div class="card-icon-luxury"><i class="fas fa-chess-king"></i></div>
+          <h4 class="pillar-name">Ralph Lauren</h4>
+          <h6 class="pillar-sub">Đẳng cấp quý tộc & Cổ điển</h6>
+          <p class="pillar-desc">
+            Thừa hưởng phong thái lịch lãm, quý tộc đặc trưng của văn hóa Anh Quốc. Chúng tôi chú trọng sự hài hòa giữa yếu tố cổ điển sang trọng và nhịp sống hiện đại, mang lại phong vị quý phái đậm chất hoàng gia.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6 mb-4">
+        <div class="philosophy-card h-100">
+          <div class="card-icon-luxury"><i class="fas fa-cogs"></i></div>
+          <h4 class="pillar-name">Dior</h4>
+          <h6 class="pillar-sub">Công nghệ là Nghệ thuật</h6>
+          <p class="pillar-desc">
+            Không chỉ là kỹ thuật, công nghệ tại HutechStore là hiện thân của nghệ thuật thời trang cao cấp (Haute Couture). Tinh thần tiên phong kết hợp với AI mở ra những giới hạn trải nghiệm độc đáo, khác biệt.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chronological Heritage Timeline -->
+    <div class="row justify-content-center mb-5 pb-5">
+      <div class="col-lg-10">
+        <div class="text-center mb-5">
+          <span class="section-eyebrow">Dòng Chảy Lịch Sử</span>
+          <h2 class="display-title-sm mt-2">Hành Trình Di Sản</h2>
+          <div class="luxury-divider-short mx-auto my-3"></div>
+        </div>
+
+        <div class="luxury-timeline">
+          
+          <div class="timeline-item">
+            <div class="timeline-meta">
+              <span class="timeline-year">2021</span>
+              <span class="timeline-location">Savile Row, London</span>
+            </div>
+            <div class="timeline-body">
+              <h5 class="timeline-title">Phòng Thiết Kế Bespoke Đầu Tiên</h5>
+              <p class="timeline-text">
+                Khởi nguồn là một xưởng chế tác bao da và phủ mạ kim loại quý cho các thiết bị di động hàng hiệu tại Anh Quốc. Những sản phẩm đầu tiên của chúng tôi được đặt may thủ công riêng cho các khách hàng thượng lưu tại khu phố Mayfair.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-meta">
+              <span class="timeline-year">2022</span>
+              <span class="timeline-location">London × Saigon</span>
+            </div>
+            <div class="timeline-body">
+              <h5 class="timeline-title">Tích Hợp Di Sản & Số Hóa</h5>
+              <p class="timeline-text">
+                Chúng tôi chuyển dịch mô hình sang cung cấp trọn gói các thiết bị công nghệ nguyên bản chuẩn luxury, đồng thời tích hợp các giải pháp trí tuệ nhân tạo để nâng tầm trải nghiệm cá nhân hóa trực tuyến cho khách hàng từ xa.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-meta">
+              <span class="timeline-year">2023</span>
+              <span class="timeline-location">TP. Hồ Chí Minh</span>
+            </div>
+            <div class="timeline-body">
+              <h5 class="timeline-title">Khai Trương Smart Boutique Store</h5>
+              <p class="timeline-text">
+                HutechStore chính thức gia nhập thị trường Việt Nam với showroom Boutique đầu tiên tại trung tâm Sài Gòn. Cửa hàng được thiết kế theo phong cách giao thoa cổ điển - hiện đại, đón nhận sự chào đón nồng nhiệt của giới sành công nghệ.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-meta">
+              <span class="timeline-year">2024</span>
+              <span class="timeline-location">Hệ Sinh Thái Toàn Cầu</span>
+            </div>
+            <div class="timeline-body">
+              <h5 class="timeline-title">Đột Phá AI Concierge & Bản Đồ Live-Tracking</h5>
+              <p class="timeline-text">
+                Tiên phong phát triển trợ lý ảo **Gemini AI Concierge** thế hệ mới và tính năng bản đồ giao hàng trực tuyến thông minh tránh kẹt xe. HutechStore tái định nghĩa thế nào là phục vụ tận tâm toàn diện từ trực tuyến đến lúc sản phẩm chạm tay Quý khách.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="row g-4 mb-5 justify-content-center">
+      <div class="col-lg-10">
+        <div class="row text-center g-3">
+          
+          <div class="col-md-3 col-6">
+            <div class="stat-counter-box">
+              <div class="stat-num">24/7</div>
+              <div class="stat-label">AI CONCIERGE</div>
+            </div>
+          </div>
+
+          <div class="col-md-3 col-6">
+            <div class="stat-counter-box">
+              <div class="stat-num">100%</div>
+              <div class="stat-label">BẢN SẮC CHÍNH HÃNG</div>
+            </div>
+          </div>
+
+          <div class="col-md-3 col-6">
+            <div class="stat-counter-box">
+              <div class="stat-num">48+</div>
+              <div class="stat-label">BƯỚC KIỂM TRA</div>
+            </div>
+          </div>
+
+          <div class="col-md-3 col-6">
+            <div class="stat-counter-box">
+              <div class="stat-num">12T</div>
+              <div class="stat-label">BẢO HÀNH ĐẶC QUYỀN</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="row justify-content-center text-center mt-5">
+      <div class="col-lg-8">
+        <div class="cta-luxury p-5">
+          <h3 class="cta-title">Khám Phá Bộ Sưu Tập Tuyển Chọn</h3>
+          <p class="cta-desc mt-2">Trải nghiệm những kiệt tác công nghệ tinh tuyển nhất được phân phối chính ngạch bởi HutechStore.</p>
+          <a asp-controller="Product" asp-action="Index" class="btn btn-luxury-primary mt-3">Tiếp Tục Mua Sắm</a>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
 @section Styles {
 <style>
-  .about-stat { padding:1.5rem; background: var(--ivory-pure); border-radius:12px; border:1px solid rgba(194, 178, 128, 0.15); }
-  .about-stat-num { font-size:2.5rem; font-weight:900; color:var(--navy); line-height:1; }
-  .about-card { background: var(--ivory-pure); border-radius:12px; border:1px solid rgba(194, 178, 128, 0.15); padding:2rem; text-align:center; height:100%; transition:box-shadow .2s; }
-  .about-card:hover { box-shadow:0 6px 24px rgba(0,0,0,.1); }
-  .about-icon { width:64px; height:64px; border-radius:50%; background:var(--ivory-warm); color:var(--navy); display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin:0 auto 1rem; }
-  .section-title.text-center::after { left:50%; transform:translateX(-50%); }
+  .about-luxury-page {
+    background-color: var(--ivory);
+    color: var(--text-primary);
+  }
+  
+  .display-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--navy);
+  }
+
+  .display-subtitle {
+    font-family: var(--font-serif);
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-weight: 400;
+    color: var(--camel-dark);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .lead-narrative {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    max-width: 800px;
+    font-style: italic;
+  }
+
+  .luxury-divider {
+    width: 60px;
+    height: 1px;
+    background: var(--camel);
+    margin: 0 auto;
+  }
+
+  .luxury-divider-short {
+    width: 40px;
+    height: 1px;
+    background: var(--camel);
+  }
+
+  .text-accent-gold {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--camel-dark);
+  }
+
+  .narrative-title {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--navy);
+  }
+
+  .narrative-text {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    text-align: justify;
+  }
+
+  /* Image styling */
+  .about-image-wrapper {
+    position: relative;
+    padding: 10px;
+    border: 1px solid rgba(194, 178, 128, 0.25);
+    background: var(--ivory-pure);
+    box-shadow: var(--shadow-sm);
+  }
+  .rounded-luxury {
+    border-radius: 0px; /* Editorial box look */
+  }
+  .shadow-luxury {
+    box-shadow: 0 10px 30px rgba(15, 42, 68, 0.05);
+  }
+  .image-caption {
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--text-tertiary);
+    text-align: center;
+    margin-top: 10px;
+    letter-spacing: 0.02em;
+  }
+
+  /* Philosophy section */
+  .display-title-sm {
+    font-family: var(--font-serif);
+    font-size: 2.2rem;
+    font-weight: 500;
+    color: var(--navy);
+  }
+
+  .philosophy-card {
+    background: var(--ivory-pure);
+    border: 1px solid rgba(194, 178, 128, 0.15);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    transition: all 0.5s var(--ease-luxury);
+  }
+  .philosophy-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--camel);
+    box-shadow: 0 15px 40px rgba(15, 42, 68, 0.06);
+  }
+  .card-icon-luxury {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--ivory-warm);
+    color: var(--camel-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 1.5rem;
+    border: 1px solid rgba(194, 178, 128, 0.2);
+    transition: all 0.5s var(--ease-luxury);
+  }
+  .philosophy-card:hover .card-icon-luxury {
+    background: var(--navy);
+    color: var(--ivory-pure);
+    border-color: var(--navy);
+  }
+  .pillar-name {
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--navy);
+    margin-bottom: 0.25rem;
+  }
+  .pillar-sub {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--camel-dark);
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+  }
+  .pillar-desc {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  /* Timeline */
+  .luxury-timeline {
+    position: relative;
+    padding: 2rem 0;
+  }
+  .luxury-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 15%;
+    width: 1px;
+    background: rgba(194, 178, 128, 0.3);
+  }
+  .timeline-item {
+    display: flex;
+    margin-bottom: 3.5rem;
+    position: relative;
+  }
+  .timeline-meta {
+    width: 15%;
+    padding-right: 2rem;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .timeline-year {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .timeline-location {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--camel-dark);
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .timeline-body {
+    width: 85%;
+    padding-left: 3rem;
+    position: relative;
+  }
+  .timeline-body::before {
+    content: '';
+    position: absolute;
+    left: -6.5px;
+    top: 8px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--ivory);
+    border: 2px solid var(--camel);
+    z-index: 2;
+    transition: all 0.3s;
+  }
+  .timeline-item:hover .timeline-body::before {
+    background: var(--navy);
+    border-color: var(--navy);
+    transform: scale(1.3);
+  }
+  .timeline-title {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--navy);
+    margin-bottom: 0.5rem;
+  }
+  .timeline-text {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    max-width: 680px;
+  }
+
+  /* Stats */
+  .stat-counter-box {
+    background: var(--ivory-pure);
+    border: 1px solid rgba(194, 178, 128, 0.15);
+    padding: 2rem 1rem;
+  }
+  .stat-num {
+    font-family: var(--font-serif);
+    font-size: 2.25rem;
+    font-weight: 500;
+    color: var(--navy);
+  }
+  .stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    margin-top: 5px;
+  }
+
+  /* Call to action */
+  .cta-luxury {
+    background: var(--navy-deep);
+    border: 1px solid rgba(194, 178, 128, 0.15);
+  }
+  .cta-title {
+    font-family: var(--font-serif);
+    color: var(--ivory-pure);
+    font-size: 1.8rem;
+    font-weight: 400;
+  }
+  .cta-desc {
+    font-size: 0.9rem;
+    color: var(--ivory);
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  /* Keyframe Animations */
+  .animate-fade-in {
+    animation: fadeIn 1s var(--ease-luxury) forwards;
+  }
+  .animate-slide-in-left {
+    animation: slideInLeft 1s var(--ease-luxury) forwards;
+  }
+  .animate-slide-in-right {
+    animation: slideInRight 1s var(--ease-luxury) forwards;
+  }
+
+  @@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Responsive Adjustments */
+  @@media (max-width: 768px) {
+    .luxury-timeline::before { left: 4%; }
+    .timeline-meta { width: 100%; text-align: left; align-items: flex-start; padding-left: 2rem; margin-bottom: 0.5rem; }
+    .timeline-body { width: 100%; padding-left: 2rem; }
+    .timeline-body::before { left: -22px; }
+    .timeline-item { flex-direction: column; }
+  }
 </style>
 }

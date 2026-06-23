@@ -84,6 +84,7 @@ h4, h5, h6 {
   backdrop-filter: none !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: none !important;
+  z-index: 1040 !important;
   transition: background 0.4s var(--ease-luxury), backdrop-filter 0.4s var(--ease-luxury), border-color 0.4s var(--ease-luxury), box-shadow 0.4s var(--ease-luxury) !important;
 }
 
@@ -235,26 +236,26 @@ h4, h5, h6 {
 
 /* Glassmorphic Multi-Level Dropdowns */
 .navbar-custom .dropdown-menu {
-  background: rgba(15, 42, 68, 0.9) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  backdrop-filter: blur(20px) !important;
+  background: rgba(250, 249, 245, 0.96) !important; /* Ivory Pure base */
+  -webkit-backdrop-filter: blur(25px) !important;
+  backdrop-filter: blur(25px) !important;
   border: 1px solid rgba(194, 178, 128, 0.15) !important;
-  border-radius: 14px !important;
-  box-shadow: 0 20px 40px rgba(10, 30, 51, 0.2) !important;
-  padding: 8px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 50px rgba(15, 42, 68, 0.08) !important;
+  padding: 12px !important;
 }
 
 .navbar-custom .dropdown-item {
   border-radius: 8px !important;
   padding: 8px 14px !important;
   font-weight: 500 !important;
-  color: var(--ivory) !important;
+  color: var(--text-primary) !important; /* Dark charcoal text */
   transition: background-color 0.25s ease, color 0.25s ease !important;
 }
 
 .navbar-custom .dropdown-item:hover {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  color: var(--camel) !important;
+  background-color: rgba(15, 42, 68, 0.04) !important; /* Subtle dark overlay */
+  color: var(--camel-dark) !important;
 }
 
 /* User Identity Alignment */
@@ -275,18 +276,115 @@ h4, h5, h6 {
   color: var(--ivory) !important;
   padding: 8px 0 !important;
   letter-spacing: 0.04em !important;
-  max-height: 40px;
-  opacity: 1;
-  overflow: hidden;
-  transition: max-height 0.4s var(--ease-luxury), padding 0.4s var(--ease-luxury), opacity 0.4s var(--ease-luxury), border-color 0.4s var(--ease-luxury) !important;
 }
 
-.site-header.scrolled .promo-bar {
-  max-height: 0 !important;
+/* Quiet Luxury Dropdown Styles */
+.dropdown-menu-product {
+  padding: 2.5rem 2rem !important;
+}
+
+.mega-menu-col {
+  border-right: 1px solid rgba(15, 42, 68, 0.06);
+  padding-right: 2rem !important;
+  padding-left: 2rem !important;
+}
+
+.mega-menu-col:last-child {
+  border-right: none;
+}
+
+.mega-menu-brand-header {
+  margin-bottom: 0.25rem !important;
+}
+
+.mega-menu-header-title {
+  font-family: var(--font-serif) !important;
+  font-size: 1.05rem !important;
+  font-weight: 500 !important;
+  color: var(--camel) !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  display: block;
+  margin-bottom: 0.4rem !important;
+  border-bottom: 1px solid rgba(194, 178, 128, 0.25);
+  padding-bottom: 0.5rem;
+}
+
+.mega-menu-list {
+  margin: 0 !important;
   padding: 0 !important;
-  opacity: 0 !important;
-  border-bottom-color: transparent !important;
-  pointer-events: none !important;
+}
+
+.mega-menu-list li {
+  margin-bottom: 0.35rem !important;
+}
+
+.mega-menu-list li:last-child {
+  margin-bottom: 0 !important;
+}
+
+.mega-menu-list .dropdown-divider {
+  margin: 0.4rem 0 !important;
+}
+
+.mega-menu-item {
+  font-family: var(--font-sans) !important;
+  font-size: 0.85rem !important;
+  font-weight: 400 !important;
+  color: var(--camel-light) !important;
+  text-decoration: none !important;
+  display: inline-block;
+  position: relative;
+  transition: all 0.3s var(--ease-luxury) !important;
+  padding: 2px 0;
+}
+
+.mega-menu-item:hover {
+  color: var(--ivory-pure) !important;
+  background: transparent !important;
+  padding-left: 4px !important;
+}
+
+.mega-menu-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--ivory-pure);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.4s var(--ease-luxury);
+}
+
+.mega-menu-item:hover::after {
+  transform: scaleX(1);
+}
+
+.mega-menu-all-link {
+  font-family: var(--font-sans) !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  color: var(--camel) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.12em !important;
+  text-decoration: none !important;
+  display: inline-block;
+  position: relative;
+  transition: color 0.3s var(--ease-luxury) !important;
+  margin-top: 0.25rem !important;
+  border-bottom: 1px solid var(--camel);
+  padding-bottom: 2px;
+}
+
+.mega-menu-all-link:hover {
+  color: var(--ivory-pure) !important;
+  border-color: var(--ivory-pure) !important;
+}
+
+.mega-menu-all-link::after {
+  display: none;
 }
 
 /* Premium Cart Badge Style */
@@ -2431,25 +2529,95 @@ h4, h5, h6 {
   transform: translateY(-2px);
   text-decoration: none;
 }
-.btn-luxury-outline {
-  display: inline-block;
-  padding: 14px 28px;
-  background: transparent;
-  color: var(--ivory-pure);
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  transition: all 0.4s var(--ease-luxury);
-  text-decoration: none;
+.btn-luxury-outline,
+.btn.btn-luxury-outline {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 12px 28px !important;
+  background: transparent !important;
+  color: var(--navy) !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  border-radius: 8px !important;
+  border: 1.5px solid var(--navy) !important;
+  transition: all 0.4s var(--ease-luxury) !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
 }
-.btn-luxury-outline:hover {
-  border-color: var(--camel);
-  color: var(--camel);
-  transform: translateY(-2px);
-  text-decoration: none;
+.btn-luxury-outline:hover,
+.btn.btn-luxury-outline:hover {
+  background: var(--navy) !important;
+  color: var(--ivory-pure) !important;
+  border-color: var(--navy) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(15, 42, 68, 0.15) !important;
+  text-decoration: none !important;
+}
+
+/* Dark-context override: inside hero banners and dark story sections */
+.hero-banner-luxury .btn-luxury-outline,
+.hero-video-banner .btn-luxury-outline,
+.story-section.dark .btn-luxury-outline,
+.hero-banner-luxury .btn.btn-luxury-outline,
+.hero-video-banner .btn.btn-luxury-outline,
+.story-section.dark .btn.btn-luxury-outline {
+  color: var(--ivory-pure) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  background: transparent !important;
+}
+.hero-banner-luxury .btn-luxury-outline:hover,
+.hero-video-banner .btn-luxury-outline:hover,
+.story-section.dark .btn-luxury-outline:hover,
+.hero-banner-luxury .btn.btn-luxury-outline:hover,
+.hero-video-banner .btn.btn-luxury-outline:hover,
+.story-section.dark .btn.btn-luxury-outline:hover {
+  border-color: var(--camel) !important;
+  color: var(--camel) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* ── PRIMARY LUXURY BUTTON ── */
+.btn-luxury-primary,
+.btn.btn-luxury-primary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 12px 28px !important;
+  background: var(--navy) !important;
+  color: var(--ivory-pure) !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  border-radius: 8px !important;
+  border: 1.5px solid var(--navy) !important;
+  transition: all 0.4s var(--ease-luxury) !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+}
+.btn-luxury-primary:hover,
+.btn.btn-luxury-primary:hover {
+  background: var(--navy-soft, #1b365d) !important;
+  color: var(--camel) !important;
+  border-color: var(--navy-soft, #1b365d) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(15, 42, 68, 0.2) !important;
+  text-decoration: none !important;
+}
+
+/* Size modifications */
+.btn-luxury-outline.btn-sm,
+.btn-luxury-primary.btn-sm,
+.btn.btn-luxury-outline.btn-sm,
+.btn.btn-luxury-primary.btn-sm {
+  padding: 8px 20px !important;
+  font-size: 0.75rem !important;
 }
 .hero-banner-luxury {
   min-height: 80vh;
@@ -3596,14 +3764,13 @@ h4, h5, h6 {
     left: 0 !important;
     right: 0 !important;
     transform: none !important;
-    background: rgba(10, 30, 51, 0.95) !important;
-    -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
-    backdrop-filter: blur(25px) saturate(180%) !important;
+    background: var(--navy-deep) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    backdrop-filter: blur(25px) !important;
     border: none !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px solid rgba(194, 178, 128, 0.15) !important;
     border-radius: 0 0 20px 20px !important;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25) !important;
     margin-top: 0 !important;
     padding: 2.5rem 0 !important;
     display: none;
@@ -3643,20 +3810,8 @@ h4, h5, h6 {
   pointer-events: auto !important;
 }
 .mega-menu-brand-header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(15, 42, 68, 0.06);
   padding-bottom: 0.5rem;
-}
-.mega-menu-item {
-  display: block;
-  padding: 0.4rem 0;
-  color: rgba(255, 255, 255, 0.7) !important;
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.3s ease, transform 0.3s ease;
-}
-.mega-menu-item:hover {
-  color: #c2b280 !important;
-  transform: translateX(4px);
 }
 .text-gradient-gold {
   background: linear-gradient(135deg, #fce0ad 0%, #c2b280 100%);
@@ -3715,4 +3870,249 @@ h4, h5, h6 {
 }
 .dropdown-menu-user .user-info-header .fw-bold {
   color: var(--ivory-pure) !important;
+}
+
+
+/* Floating Shipper Chat Widget */
+.shipper-chat-widget {
+  position: fixed !important;
+  bottom: 7.5rem !important;
+  right: 2rem !important;
+  z-index: 1050 !important;
+}
+
+.shipper-chat-toggle-btn {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--navy) !important;
+  color: var(--camel) !important;
+  box-shadow: 0 8px 32px rgba(15, 42, 68, 0.2) !important;
+  border: 1px solid rgba(194, 178, 128, 0.25) !important;
+  cursor: pointer !important;
+  transition: transform 0.4s var(--ease-luxury), background 0.4s var(--ease-luxury) !important;
+  position: relative !important;
+}
+
+.shipper-chat-toggle-btn:hover {
+  transform: scale(1.06) translateY(-2px) !important;
+  background: var(--navy-soft) !important;
+}
+
+.shipper-chat-badge-dot {
+  position: absolute !important;
+  top: 2px !important;
+  right: 2px !important;
+  width: 12px !important;
+  height: 12px !important;
+  background-color: var(--camel) !important;
+  border: 2px solid var(--navy) !important;
+  border-radius: 50% !important;
+  animation: pulse-dot-shipper 1.5s infinite !important;
+}
+
+@keyframes pulse-dot-shipper {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.9; }
+}
+
+.shipper-chat-window {
+  position: absolute !important;
+  bottom: 75px !important;
+  right: 0 !important;
+  width: 330px !important;
+  max-width: calc(100vw - 2rem) !important;
+  height: 440px !important;
+  display: none !important;
+  flex-direction: column !important;
+  background: var(--ivory-pure) !important;
+  border: 1px solid rgba(15, 42, 68, 0.12) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 16px 48px rgba(15, 42, 68, 0.15) !important;
+  overflow: hidden !important;
+  z-index: 1051 !important;
+  animation: luxuryConsoleReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+.shipper-chat-window.show-chat {
+  display: flex !important;
+}
+
+/* Button Mua Ngay khi so sánh sản phẩm */
+.btn-compare-buy {
+  display: block;
+  width: 100%;
+  padding: 10px 20px;
+  background-color: transparent !important;
+  color: var(--navy) !important;
+  border: 1px solid var(--camel) !important;
+  border-radius: 20px !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  transition: all 0.3s var(--ease-luxury) !important;
+}
+
+.btn-compare-buy:hover {
+  background-color: var(--camel) !important;
+  color: var(--navy-deep) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(194, 178, 128, 0.25);
+}
+
+/* ── LUXURY USER DROPDOWN MENU ── */
+.dropdown-menu-user {
+  background: rgba(10, 30, 51, 0.98) !important;
+  border: 1px solid rgba(194, 178, 128, 0.25) !important;
+  border-radius: 12px !important;
+  padding: 1rem 0 !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35) !important;
+  min-width: 240px !important;
+  margin-top: 12px !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  backdrop-filter: blur(20px) !important;
+  transform: translateY(10px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.35s var(--ease-luxury) !important;
+  display: block !important;
+}
+
+.nav-item.dropdown:hover .dropdown-menu-user,
+.dropdown-menu-user.show {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.user-info-header {
+  padding: 0.75rem 1.5rem 1rem !important;
+}
+.user-info-header .fw-bold {
+  font-family: var(--font-serif) !important;
+  color: var(--ivory-pure) !important;
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+}
+.user-info-header .text-muted {
+  color: rgba(250, 249, 245, 0.6) !important;
+  font-size: 0.78rem !important;
+  margin-top: 3px !important;
+}
+
+.dropdown-menu-user .dropdown-divider {
+  border-color: rgba(194, 178, 128, 0.15) !important;
+  margin: 0.5rem 0 !important;
+}
+
+.dropdown-menu-user .dropdown-item {
+  color: rgba(250, 249, 245, 0.8) !important;
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+  padding: 0.65rem 1.5rem !important;
+  letter-spacing: 0.03em !important;
+  transition: all 0.25s var(--ease-luxury) !important;
+  background: transparent !important;
+}
+
+.dropdown-menu-user .dropdown-item:hover {
+  color: var(--camel) !important;
+  background: rgba(194, 178, 128, 0.06) !important;
+  padding-left: 1.75rem !important;
+}
+
+.user-avatar-sm {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 1px solid rgba(194, 178, 128, 0.3) !important;
+  transition: border-color 0.3s !important;
+}
+.user-menu-toggle:hover .user-avatar-sm {
+  border-color: var(--camel) !important;
+}
+
+.user-avatar-placeholder {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: var(--camel) !important;
+  color: var(--navy-deep) !important;
+  font-weight: 600 !important;
+  font-size: 0.88rem !important;
+  border: 1px solid rgba(194, 178, 128, 0.3) !important;
+}
+
+.user-menu-toggle {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  color: rgba(250, 249, 245, 0.85) !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  padding: 0.5rem 0.75rem !important;
+  transition: color 0.3s !important;
+}
+.user-menu-toggle:hover,
+.user-menu-toggle:focus {
+  color: var(--camel) !important;
+}
+
+.user-menu-toggle::after {
+  display: none !important;
+}
+
+/* ── address suggestions disabled geofencing ── */
+.address-suggestions .suggestion-item.disabled {
+  cursor: not-allowed !important;
+  background: rgba(0, 0, 0, 0.03) !important;
+  transition: none !important;
+}
+.address-suggestions .suggestion-item.disabled:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ── SUCCESS & HISTORY LUXURY BUTTON FIXES ── */
+.success-card .btn-luxury-outline,
+.order-history-card .btn-luxury-outline,
+.btn-luxury-outline.btn-sm.px-3 {
+  background: transparent !important;
+  color: var(--navy) !important;
+  border: 1.5px solid var(--navy) !important;
+  opacity: 1 !important;
+}
+.success-card .btn-luxury-outline:hover,
+.order-history-card .btn-luxury-outline:hover,
+.btn-luxury-outline.btn-sm.px-3:hover {
+  background: var(--navy) !important;
+  color: var(--ivory-pure) !important;
+  border-color: var(--navy) !important;
+  box-shadow: 0 4px 15px rgba(15, 42, 68, 0.15) !important;
+}
+
+.success-card .btn-luxury-primary,
+.order-history-card .btn-luxury-primary {
+  background: var(--navy) !important;
+  color: var(--ivory-pure) !important;
+  border: 1.5px solid var(--navy) !important;
+  opacity: 1 !important;
+}
+.success-card .btn-luxury-primary:hover,
+.order-history-card .btn-luxury-primary:hover {
+  background: var(--camel) !important;
+  color: var(--navy-deep) !important;
+  border-color: var(--camel) !important;
+  box-shadow: 0 4px 15px rgba(194, 178, 128, 0.25) !important;
 }

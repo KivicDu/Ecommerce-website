@@ -134,12 +134,12 @@
           <h5 class="fw-bold mb-1 text-navy">@prod.Name</h5>
           <p class="text-muted small mb-2">@prod.Brand</p>
           <div class="fw-bold text-navy fs-5 mb-3">@priceStr</div>
-          <form asp-controller="Cart" asp-action="Add" method="post">
-            <input type="hidden" name="productId" value="@prod.Id"/>
-            <button type="submit" class="btn btn-primary w-100" style="border-radius: 20px;">
-              MUA NGAY
-            </button>
-          </form>
+          @{
+            var slug = string.IsNullOrEmpty(prod.Slug) ? prod.Id.ToString() : prod.Slug;
+          }
+          <a href="/Product/Detail/@slug" class="btn-compare-buy">
+            MUA NGAY
+          </a>
         </div>
       </div>
     }
